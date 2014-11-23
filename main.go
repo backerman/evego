@@ -15,7 +15,8 @@ limitations under the License.
 
 */
 
-// Package main is just a test driver - currently pointless.
+// evego is a library for your Internet spreadsheets, when spreadsheets no
+// longer cut it.
 package main
 
 import (
