@@ -18,69 +18,17 @@ limitations under the License.
 package industry_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/industry"
 	"github.com/backerman/evego/pkg/types"
 
+	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 var testDbPath = "../../testdb.sqlite"
-
-// component is an output of reprocessing.
-// When reprocessed, an item returns one or more MaterialOutputs.
-// We could use InventoryLine here, but the tests are much easier
-// to write this way.
-type component struct {
-	Name     string
-	Quantity int
-}
-
-func (c component) String() string {
-	return fmt.Sprintf("[%vx %v]", c.Quantity, c.Name)
-}
-
-func shouldHaveComposition(actual interface{}, expected ...interface{}) string {
-	actualComps, ok := actual.(*[]types.InventoryLine)
-	if !ok {
-		return "Failed to cast actual to inventory line array"
-	}
-	expectedComps, ok := expected[0].([]component)
-	if !ok {
-		return "Failed to cast expected to component array"
-	}
-	var messages []string
-	if len(*actualComps) != len(expectedComps) {
-		return fmt.Sprintf("Wrong number of components returned. Expected: %v; actual: %v", expectedComps, *actualComps)
-	}
-	for _, comp := range *actualComps {
-		// this is hacky; fix
-		myname := comp.Item.Name
-		found := false
-		for _, exp := range expectedComps {
-			if exp.Name == myname {
-				found = true
-				if exp.Quantity != comp.Quantity {
-					messages = append(messages,
-						fmt.Sprintf("Expected %d %s; actually got %d", exp.Quantity, myname, comp.Quantity))
-				}
-			}
-		}
-		if !found {
-			messages = append(messages, fmt.Sprintf("Spurious output %v", myname))
-			break
-		}
-	}
-
-	if len(messages) > 0 {
-		return strings.Join(messages, "; ")
-	}
-	return ""
-}
 
 func TestReprocessingModules(t *testing.T) {
 	Convey("Set up mock database", t, func() {
@@ -102,7 +50,7 @@ func TestReprocessingModules(t *testing.T) {
 
 				Convey("It should return the correct minerals", func() {
 					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 614},
 						{"Pyerite", 33},
 						{"Mexallon", 38},
@@ -123,7 +71,7 @@ func TestReprocessingModules(t *testing.T) {
 
 				Convey("It should return the correct minerals", func() {
 					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 506},
 						{"Pyerite", 27},
 						{"Mexallon", 31},
@@ -150,7 +98,7 @@ func TestReprocessingModules(t *testing.T) {
 
 				Convey("It should return the correct minerals", func() {
 					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 5498},
 						{"Pyerite", 5217},
 						{"Mexallon", 3762},
@@ -163,7 +111,7 @@ func TestReprocessingModules(t *testing.T) {
 				Convey("Rounding should occur after summing all input units", func() {
 					quantity = 2
 					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 10996},
 						{"Pyerite", 10435},
 						{"Mexallon", 7524},
@@ -193,7 +141,7 @@ func TestReprocessingModules(t *testing.T) {
 
 				Convey("Rounding should occur after summing all input units", func() {
 					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 10225},
 						{"Pyerite", 3132},
 						{"Mexallon", 3180},
@@ -246,7 +194,7 @@ func TestReprocessingOre(t *testing.T) {
 
 				Convey("One ore alone #1", func() {
 					reprocessed := industry.ReprocessItem(cscordite, cscorditeQty, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 294646},
 						{"Pyerite", 147729},
 						{"Condensed Scordite", 25},
@@ -255,7 +203,7 @@ func TestReprocessingOre(t *testing.T) {
 
 				Convey("One ore alone #2", func() {
 					reprocessed := industry.ReprocessItem(kernite, kerniteQty, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 18044},
 						{"Mexallon", 36218},
 						{"Isogen", 18044},
@@ -265,7 +213,7 @@ func TestReprocessingOre(t *testing.T) {
 
 				Convey("One ore alone #3", func() {
 					reprocessed := industry.ReprocessItem(scordite, scorditeQty, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 83951},
 						{"Pyerite", 41976},
 						{"Scordite", 41},
@@ -274,7 +222,7 @@ func TestReprocessingOre(t *testing.T) {
 
 				Convey("Three different ores.", func() {
 					reprocessed := industry.ReprocessItems(items, reproRate, standing, skills)
-					So(reprocessed, shouldHaveComposition, []component{
+					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 396641},
 						{"Pyerite", 189705},
 						{"Mexallon", 36218},

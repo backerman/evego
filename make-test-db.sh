@@ -46,7 +46,18 @@ ITEMS=$(cat<<EOF
 "Megacyte",
 "Condensed Scordite",
 "Scordite",
-"Luminous Kernite"
+"Luminous Kernite",
+"Medium Automated Structural Restoration",
+"Large Asymmetric Remote Capacitor Transmitter",
+"Tripped Power Circuit",
+"Multifrequency S",
+"Armor Plates",
+"Small Supplemental Barrier Emitter I",
+"Beta Hull Mod Reinforced Bulkheads",
+"Limited Kinetic Plating I",
+"Small I-ax Remote Armor Repairer",
+"Shielded Radar Backup Cluster I"
+
 )
 EOF
 )
