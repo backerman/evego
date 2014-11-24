@@ -1,7 +1,7 @@
 # evego
 
 evego is a library for your [Internet spreadsheets][eve] spreadsheets;
-sometimes,a spreadsheet isn't actually sufficient. It does not currently slice,
+sometimes, a spreadsheet isn't actually sufficient. It does not currently slice,
 dice, or make Julienne fries. For that matter, it doesn't even interface with
 the user; it's just a back-end library.
 
