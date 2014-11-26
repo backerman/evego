@@ -51,9 +51,10 @@ func readItemFile(filename string) []string {
 
 func main() {
 	fmt.Println("This is a test.")
-	db := dbaccess.SQLiteDatabase("/Users/bsa3/Downloads/sqlite-latest.sqlite")
+	db := dbaccess.SQLDatabase("sqlite3", "/Users/bsa3/Downloads/sqlite-latest.sqlite")
 	defer db.Close()
 	triBistot, _ := db.ItemForName("Triclinic Bistot")
+	log.Printf("Item struct: %#v", triBistot)
 	catTree, _ := db.MarketGroupForItem(triBistot)
 	log.Printf("%v", catTree)
 	glitter, _ := db.ItemForName("Dark Glitter")

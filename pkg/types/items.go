@@ -34,13 +34,13 @@ const (
 
 // Item is an Eve item.
 type Item struct {
-	Name      string
-	ID        int
+	Name      string `db:"typeName"`
+	ID        int    `db:"typeID"`
 	Type      ItemType
-	Category  string // e.g. Module, Drone, Charge
-	Group     string // e.g. Omber, Logistic Drone, Footwear
+	Category  string `db:"categoryName"` // e.g. Module, Drone, Charge
+	Group     string `db:"groupName"`    // e.g. Omber, Logistic Drone, Footwear
 	Materials []InventoryLine
-	BatchSize int
+	BatchSize int `db:"portionSize"`
 }
 
 // InventoryLine is an item in a material's composition, the player's

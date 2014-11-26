@@ -22,89 +22,100 @@ import (
 	"log"
 
 	"github.com/backerman/evego/pkg/types"
+	"github.com/jmoiron/sqlx"
+
 	// Register SQLite3 driver
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type sqliteDb struct {
-	db                       *sql.DB
-	compStatement            *sql.Stmt
-	itemInfoStatement        *sql.Stmt
-	itemIDInfoStatement      *sql.Stmt
-	catTreeFromItemStatement *sql.Stmt
+type sqlDb struct {
+	db                       *sqlx.DB
+	compStatement            *sqlx.Stmt
+	itemInfoStatement        *sqlx.Stmt
+	itemIDInfoStatement      *sqlx.Stmt
+	catTreeFromItemStatement *sqlx.Stmt
 }
 
-// SQLiteDatabase returns an EveDatabase object that can be used to access a SQLite backend.
-func SQLiteDatabase(path string) EveDatabase {
-	evedb := new(sqliteDb)
-	var err error
-	evedb.db, err = sql.Open("sqlite3", path)
-	if err != nil {
-		log.Fatalf("Unable to open item database: %v", err)
-	}
-
-	// Prepare statements
-	evedb.compStatement, err = evedb.db.Prepare(`
+// Our hand-crafted SQL statements.
+var (
+	materialComposition = `
 	SELECT mt.typeID AS materialID, m.quantity AS quantity
 	FROM invTypes t, invTypes mt, invTypeMaterials m
 	WHERE t.typeID = ?
 	AND t.typeID = m.typeID
 	AND mt.typeID = m.materialTypeID
-	`)
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-	evedb.itemInfoStatement, err = evedb.db.Prepare(`
+	`
+	itemInfo = `
 	SELECT t.typeID, t.typeName, t.portionSize, g.groupName, c.categoryName
 	FROM invTypes t, invCategories c, invGroups g
 	WHERE t.typeName = ? AND t.groupID = g.groupID
 	AND   g.categoryID = c.categoryID
-	`)
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-
-	evedb.itemIDInfoStatement, err = evedb.db.Prepare(`
+	`
+	itemIDInfo = `
 	SELECT t.typeID, t.typeName, t.portionSize, g.groupName, c.categoryName
 	FROM invTypes t, invCategories c, invGroups g
 	WHERE t.typeID = ? AND t.groupID = g.groupID
 	AND   g.categoryID = c.categoryID
-	`)
+	`
+	catTree = `
+	WITH RECURSIVE
+	parents(marketGroupID, parentGroupID) AS
+	(
+		SELECT marketGroupID, parentGroupID FROM invMarketGroups
+		WHERE marketGroupID = (
+			SELECT marketGroupID
+			FROM invTypes i
+			JOIN invMarketGroups m USING(marketGroupID)
+			WHERE i.typeID = ?
+		)
+		UNION ALL
+		SELECT mg.marketGroupID, mg.parentGroupID
+		FROM invMarketGroups mg
+		INNER JOIN parents p ON mg.marketGroupID=p.parentGroupID
+	)
+	SELECT p.marketGroupID, m1.marketGroupName, m1.description, p.parentGroupID, m2.marketGroupName, m2.description
+	FROM parents p
+	JOIN invMarketGroups m1 ON p.marketGroupID = m1.marketGroupID
+	JOIN invMarketGroups m2 ON p.parentGroupID = m2.marketGroupID
+	`
+)
+
+// SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
+func SQLDatabase(driver, dataSource string) EveDatabase {
+	evedb := new(sqlDb)
+	var err error
+	evedb.db, err = sqlx.Connect(driver, dataSource)
+	db := evedb.db // shortcut
+	if err != nil {
+		log.Fatalf("Unable to open item database: %v", err)
+	}
+
+	// Prepare statements
+	evedb.compStatement, err = db.Preparex(db.Rebind(materialComposition))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
+	evedb.itemInfoStatement, err = db.Preparex(db.Rebind(itemInfo))
 	if err != nil {
 		log.Fatalf("Unable to prepare statement: %v", err)
 	}
 
-	evedb.catTreeFromItemStatement, err = evedb.db.Prepare(`
-		WITH RECURSIVE
-			parents(marketGroupID, parentGroupID) AS
-				(
-				SELECT marketGroupID, parentGroupID FROM invMarketGroups
-				WHERE marketGroupID = (
-					SELECT marketGroupID
-					FROM invTypes i
-					JOIN invMarketGroups m USING(marketGroupID)
-					WHERE i.typeID = ?
-					)
-				UNION ALL
-				SELECT mg.marketGroupID, mg.parentGroupID
-				FROM invMarketGroups mg
-				INNER JOIN parents p ON mg.marketGroupID=p.parentGroupID
-				)
-		SELECT p.marketGroupID, m1.marketGroupName, m1.description, p.parentGroupID, m2.marketGroupName, m2.description
-		FROM parents p
-		JOIN invMarketGroups m1 ON p.marketGroupID = m1.marketGroupID
-		JOIN invMarketGroups m2 ON p.parentGroupID = m2.marketGroupID
-		`)
+	evedb.itemIDInfoStatement, err = db.Preparex(db.Rebind(itemIDInfo))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
+
+	evedb.catTreeFromItemStatement, err = db.Preparex(db.Rebind(catTree))
 
 	return evedb
 }
 
 // ItemForName returns a populated Item object for a given item title.
-func (db *sqliteDb) ItemForName(itemName string) (*types.Item, error) {
+func (db *sqlDb) ItemForName(itemName string) (*types.Item, error) {
 	var err error
 	object := types.Item{}
-	row := db.itemInfoStatement.QueryRow(itemName)
-	err = row.Scan(&object.ID, &object.Name, &object.BatchSize, &object.Group, &object.Category)
+	row := db.itemInfoStatement.QueryRowx(itemName)
+	err = row.StructScan(&object)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}
@@ -113,11 +124,11 @@ func (db *sqliteDb) ItemForName(itemName string) (*types.Item, error) {
 	return &object, err
 }
 
-func (db *sqliteDb) ItemForID(itemID int) (*types.Item, error) {
+func (db *sqlDb) ItemForID(itemID int) (*types.Item, error) {
 	var err error
 	object := types.Item{}
-	row := db.itemIDInfoStatement.QueryRow(itemID)
-	err = row.Scan(&object.ID, &object.Name, &object.BatchSize, &object.Group, &object.Category)
+	row := db.itemIDInfoStatement.QueryRowx(itemID)
+	err = row.StructScan(&object)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}
@@ -128,7 +139,7 @@ func (db *sqliteDb) ItemForID(itemID int) (*types.Item, error) {
 }
 
 // itemComposition returns the composition of a named Eve item.
-func (db *sqliteDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
+func (db *sqlDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
 	rows, err := db.compStatement.Query(itemID)
 	if err != nil {
 		log.Fatalf("Unable to execute composition query for item %d: %v", itemID, err)
@@ -154,7 +165,7 @@ func (db *sqliteDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
 }
 
 // MarketGroupForItem returns the parent groups of the market item.
-func (db *sqliteDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error) {
+func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error) {
 	rows, err := db.catTreeFromItemStatement.Query(item.ID)
 	if err == sql.ErrNoRows {
 		return nil, err
@@ -209,7 +220,7 @@ func (db *sqliteDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, er
 
 // itemType returns the type of this item, as required for reprocessing yield
 // calculation. It's either ore, ice, or other.
-func (db *sqliteDb) itemType(item *types.Item) types.ItemType {
+func (db *sqlDb) itemType(item *types.Item) types.ItemType {
 	catTree, err := db.MarketGroupForItem(item)
 	if err != nil {
 		log.Fatalf("Unable to get item type of item %v: %v", *item, err)
@@ -226,6 +237,6 @@ func (db *sqliteDb) itemType(item *types.Item) types.ItemType {
 	return types.Other
 }
 
-func (db *sqliteDb) Close() error {
+func (db *sqlDb) Close() error {
 	return db.db.Close()
 }

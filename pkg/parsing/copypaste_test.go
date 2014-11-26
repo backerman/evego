@@ -36,7 +36,7 @@ func TestInventoryCopyPaste(t *testing.T) {
 		inventoryStr := string(inventory)
 		So(err, ShouldBeNil)
 
-		db := dbaccess.SQLiteDatabase(testDbPath)
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
 		Convey("It is correctly parsed.", func() {
 			parsed := parsing.ParseInventory(inventoryStr, db)
 			So(parsed, ShouldHaveComposition, []Component{
