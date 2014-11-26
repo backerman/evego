@@ -74,7 +74,7 @@ func reprocessItem(item *types.Item, quantity int, stationYield float64, standin
 		// When the quantity of an item is not an integer multiple of its
 		// batch size, pass through the fractional batch unprocessed.
 		reprocessed = append(reprocessed,
-			types.InventoryLine{Quantity: remainder, Item: *item})
+			types.InventoryLine{Quantity: remainder, Item: item})
 	}
 
 	// Add yielded items
@@ -99,13 +99,13 @@ func ReprocessItems(items *[]types.InventoryLine, stationYield float64, standing
 
 	reproed := []types.InventoryLine{}
 	for _, item := range *items {
-		outItems := reprocessItem(&item.Item, item.Quantity, stationYield, standing, skills)
+		outItems := reprocessItem(item.Item, item.Quantity, stationYield, standing, skills)
 		reproed = append(reproed, *outItems...)
 	}
 
 	// Deduplicate items
 	quantities := make(map[int]int)
-	outItems := make(map[int]types.Item)
+	outItems := make(map[int]*types.Item)
 	for _, line := range reproed {
 		quantities[line.Item.ID] += line.Quantity
 		outItems[line.Item.ID] = line.Item
@@ -122,7 +122,7 @@ func ReprocessItems(items *[]types.InventoryLine, stationYield float64, standing
 // ReprocessItem is a convenience function for reprocessing a single item.
 func ReprocessItem(item *types.Item, quantity int, stationYield float64, standing float64, skills ReproSkills) *[]types.InventoryLine {
 	items := &[]types.InventoryLine{
-		{Item: *item, Quantity: quantity},
+		{Item: item, Quantity: quantity},
 	}
 
 	return ReprocessItems(items, stationYield, standing, skills)

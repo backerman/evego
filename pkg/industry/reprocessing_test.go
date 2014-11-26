@@ -174,9 +174,9 @@ func TestReprocessingOre(t *testing.T) {
 			scorditeQty := 38841
 
 			items := &[]types.InventoryLine{
-				{Item: *cscordite, Quantity: cscorditeQty},
-				{Item: *kernite, Quantity: kerniteQty},
-				{Item: *scordite, Quantity: scorditeQty},
+				{Item: cscordite, Quantity: cscorditeQty},
+				{Item: kernite, Quantity: kerniteQty},
+				{Item: scordite, Quantity: scorditeQty},
 			}
 
 			Convey("In an NPC station with no standings", func() {

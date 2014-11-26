@@ -148,7 +148,7 @@ func (db *sqliteDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
 		if err != nil {
 			log.Fatalf("Unable to execute query for item %d component %d: %v", itemID, id, err)
 		}
-		results = append(results, types.InventoryLine{Quantity: quantity, Item: *item})
+		results = append(results, types.InventoryLine{Quantity: quantity, Item: item})
 	}
 	return results, nil
 }

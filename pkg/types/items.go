@@ -47,7 +47,7 @@ type Item struct {
 // inventory, or whatever.
 type InventoryLine struct {
 	Quantity int
-	Item     Item
+	Item     *Item
 }
 
 func (i InventoryLine) String() string {

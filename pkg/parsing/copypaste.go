@@ -62,7 +62,7 @@ func ParseInventory(pasted string, database dbaccess.EveDatabase) *[]types.Inven
 			// Didn't find a matching item.
 			continue
 		}
-		results = append(results, types.InventoryLine{Item: *item, Quantity: quantity})
+		results = append(results, types.InventoryLine{Item: item, Quantity: quantity})
 	}
 	return &results
 }
