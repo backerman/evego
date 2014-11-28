@@ -28,6 +28,9 @@ sqlite3 $DBLOC > out-schema.sql <<EOF
 .schema invMarketGroups
 .schema invCategories
 .schema invGroups
+.schema mapSolarSystems
+.schema mapConstellations
+.schema mapRegions
 .quit
 EOF
 
@@ -58,6 +61,17 @@ ITEMS=$(cat<<EOF
 "Small I-ax Remote Armor Repairer",
 "Shielded Radar Backup Cluster I"
 
+)
+EOF
+)
+
+# System names that we use in our tests.
+SYSTEMS=$(cat<<EOF
+(
+"Poitot",
+"Dodixie",
+"RF-GGF",
+"J100015"
 )
 EOF
 )
@@ -115,6 +129,27 @@ SELECT p.marketGroupID AS groupId FROM parents p
 UNION
 SELECT p.parentGroupID AS groupId FROM parents p
 );
+
+.mode insert mapSolarSystems
+SELECT * FROM mapSolarSystems
+WHERE solarSystemName IN $SYSTEMS;
+
+.mode insert mapConstellations
+SELECT * FROM mapConstellations
+WHERE constellationID IN (
+  SELECT DISTINCT constellationID
+  FROM mapSolarSystems
+  WHERE solarSystemName IN $SYSTEMS
+);
+
+.mode insert mapRegions
+SELECT * FROM mapRegions
+WHERE regionID IN (
+  SELECT DISTINCT regionID
+  FROM mapSolarSystems
+  WHERE solarSystemName IN $SYSTEMS
+);
+
 
 EOF
 

@@ -34,6 +34,7 @@ type sqlDb struct {
 	itemInfoStatement        *sqlx.Stmt
 	itemIDInfoStatement      *sqlx.Stmt
 	catTreeFromItemStatement *sqlx.Stmt
+	systemInfoStatement      *sqlx.Stmt
 }
 
 // Our hand-crafted SQL statements.
@@ -78,6 +79,14 @@ var (
 	JOIN invMarketGroups m1 ON p.marketGroupID = m1.marketGroupID
 	JOIN invMarketGroups m2 ON p.parentGroupID = m2.marketGroupID
 	`
+	systemInfo = `
+	SELECT s.solarSystemName, s.solarSystemID, s.security,
+	       c.constellationName, c.constellationID, r.regionName, r.regionID
+	FROM   mapSolarSystems s
+	JOIN   mapConstellations c USING(constellationID)
+	JOIN   mapRegions r USING(regionID)
+	WHERE  s.solarSystemName = ?
+	`
 )
 
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
@@ -106,6 +115,14 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 	}
 
 	evedb.catTreeFromItemStatement, err = db.Preparex(db.Rebind(catTree))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
+
+	evedb.systemInfoStatement, err = db.Preparex(db.Rebind(systemInfo))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
 
 	return evedb
 }
@@ -239,4 +256,11 @@ func (db *sqlDb) itemType(item *types.Item) types.ItemType {
 
 func (db *sqlDb) Close() error {
 	return db.db.Close()
+}
+
+func (db *sqlDb) SolarSystemForName(systemName string) (*types.SolarSystem, error) {
+	row := db.systemInfoStatement.QueryRowx(systemName)
+	system := &types.SolarSystem{}
+	err := row.StructScan(system)
+	return system, err
 }

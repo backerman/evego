@@ -15,26 +15,15 @@ limitations under the License.
 
 */
 
-// Package dbaccess is the public interface for accessing the
-// EVE static data export.
-package dbaccess
+package types
 
-import (
-	"io"
-
-	"github.com/backerman/evego/pkg/types"
-)
-
-// EveDatabase is an object that returns information about items in EVE.
-type EveDatabase interface {
-	io.Closer
-
-	// Items
-
-	ItemForName(itemName string) (*types.Item, error)
-	MarketGroupForItem(item *types.Item) (*types.MarketGroup, error)
-
-	// Universe locations
-
-	SolarSystemForName(systemName string) (*types.SolarSystem, error)
+// SolarSystem is a solar system within the EVE universe.
+type SolarSystem struct {
+	Name            string `db:"solarSystemName"`
+	ID              int    `db:"solarSystemID"`
+	Constellation   string `db:"constellationName"`
+	ConstellationID int    `db:"constellationID"`
+	Region          string `db:"regionName"`
+	RegionID        int    `db:"regionID"`
+	Security        float64
 }
