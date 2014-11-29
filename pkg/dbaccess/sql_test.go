@@ -18,6 +18,7 @@ limitations under the License.
 package dbaccess_test
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/backerman/evego/pkg/dbaccess"
@@ -63,6 +64,15 @@ func TestItems(t *testing.T) {
 					{"Morphite", 5},
 					{"Sustained Shield Emitter", 6},
 				})
+			})
+		})
+
+		Convey("With an invalid item", func() {
+			itemName := "W76 Thermonuclear Device"
+
+			Convey("An appropriate error is returned.", func() {
+				_, err := db.ItemForName(itemName)
+				So(err, ShouldEqual, sql.ErrNoRows)
 			})
 		})
 	})
