@@ -23,10 +23,50 @@ import (
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/types"
 
+	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 var testDbPath = "../../testdb.sqlite"
+
+func TestItems(t *testing.T) {
+	Convey("Open a database connection", t, func() {
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		defer db.Close()
+
+		Convey("With a valid item name", func() {
+			itemName := "Medium Shield Extender II"
+			expected := types.Item{
+				Name:      itemName,
+				ID:        3831,
+				Type:      types.Other,
+				Category:  "Module",
+				Group:     "Shield Extender",
+				BatchSize: 1,
+			}
+
+			Convey("The correct information is returned.", func() {
+				actual, err := db.ItemForName(itemName)
+				So(err, ShouldBeNil)
+				So(actual.Name, ShouldEqual, expected.Name)
+				So(actual.ID, ShouldEqual, expected.ID)
+				So(actual.Type, ShouldEqual, expected.Type)
+				So(actual.Category, ShouldEqual, expected.Category)
+				So(actual.Group, ShouldEqual, expected.Group)
+				So(actual.BatchSize, ShouldEqual, expected.BatchSize)
+				So(&actual.Materials, ShouldHaveComposition, []Component{
+					{"Tritanium", 1890},
+					{"Pyerite", 456},
+					{"Mexallon", 179},
+					{"Isogen", 6},
+					{"Hydrogen Batteries", 6},
+					{"Morphite", 5},
+					{"Sustained Shield Emitter", 6},
+				})
+			})
+		})
+	})
+}
 
 func TestSolarSystems(t *testing.T) {
 

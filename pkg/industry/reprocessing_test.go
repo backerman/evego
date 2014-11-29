@@ -33,6 +33,7 @@ var testDbPath = "../../testdb.sqlite"
 func TestReprocessingModules(t *testing.T) {
 	Convey("Set up mock database", t, func() {
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		defer db.Close()
 
 		Convey("Given a module", func() {
 			gun, err := db.ItemForName("150mm Prototype Gauss Gun")
@@ -159,6 +160,7 @@ func TestReprocessingOre(t *testing.T) {
 
 	Convey("Set up mock database", t, func() {
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		defer db.Close()
 
 		Convey("Given some ore", func() {
 			cscordite, err := db.ItemForName("Condensed Scordite")

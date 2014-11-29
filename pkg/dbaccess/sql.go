@@ -138,6 +138,7 @@ func (db *sqlDb) ItemForName(itemName string) (*types.Item, error) {
 	}
 	object.Type = db.itemType(&object)
 	object.Materials, err = db.itemComposition(object.ID)
+
 	return &object, err
 }
 
@@ -162,6 +163,7 @@ func (db *sqlDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
 		log.Fatalf("Unable to execute composition query for item %d: %v", itemID, err)
 	}
 	defer rows.Close()
+
 	var results []types.InventoryLine
 	for rows.Next() {
 		var (
@@ -184,9 +186,8 @@ func (db *sqlDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
 // MarketGroupForItem returns the parent groups of the market item.
 func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error) {
 	rows, err := db.catTreeFromItemStatement.Query(item.ID)
-	if err == sql.ErrNoRows {
-		return nil, err
-	}
+	// The query doesn't return ErrNoRows, so we'll check for that case
+	// below.
 	if err != nil {
 		log.Fatalf("Unable to execute query: %v", err)
 	}
@@ -204,7 +205,10 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 		parentName        string
 		parentDescription string
 	)
+	// Set hasRows to false here and true if we get some rows.
+	hasRows := false
 	for rows.Next() {
+		hasRows = true
 		rows.Scan(&groupID, &groupName, &description, &parentID, &parentName, &parentDescription)
 		nextLevel := &types.MarketGroup{
 			ID:          groupID,
@@ -222,6 +226,10 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 			curLevel.Parent = nextLevel
 		}
 		curLevel = nextLevel
+	}
+	if !hasRows {
+		// No rows when expected, so return an error.
+		return nil, sql.ErrNoRows
 	}
 	// The last row's parentID and parentName are the first-level market category;
 	// add them as the final parent.

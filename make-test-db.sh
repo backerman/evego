@@ -59,8 +59,8 @@ ITEMS=$(cat<<EOF
 "Beta Hull Mod Reinforced Bulkheads",
 "Limited Kinetic Plating I",
 "Small I-ax Remote Armor Repairer",
-"Shielded Radar Backup Cluster I"
-
+"Shielded Radar Backup Cluster I",
+"Medium Shield Extender II"
 )
 EOF
 )
@@ -81,30 +81,48 @@ sqlite3 $DBLOC <<EOF
 .mode insert invTypes
 .output out-data.sql
 SELECT * FROM invTypes
-WHERE typeName IN ${ITEMS};
+WHERE typeName IN ${ITEMS}
+OR    typeID IN (
+  SELECT m.materialTypeID
+  FROM invTypes t, invTypeMaterials m
+  WHERE t.typeName IN ${ITEMS}
+  AND t.typeID = m.typeID
+);
 
 .mode insert invTypeMaterials
 SELECT * FROM invTypeMaterials
 WHERE typeID IN (
-SELECT typeID from invTypes
-WHERE typeName IN ${ITEMS}
+  SELECT typeID from invTypes
+  WHERE typeName IN ${ITEMS}
 );
 
 .mode insert invGroups
 SELECT * FROM invGroups
 WHERE groupID IN (
-SELECT groupID from invTypes
-WHERE typeName IN ${ITEMS}
+  SELECT groupID from invTypes
+  WHERE typeName IN ${ITEMS}
+  OR    typeID IN (
+    SELECT m.materialTypeID
+    FROM invTypes t, invTypeMaterials m
+    WHERE t.typeName IN ${ITEMS}
+    AND t.typeID = m.typeID
+  )
 );
 
 .mode insert invCategories
 SELECT * FROM invCategories
 WHERE categoryID IN (
-SELECT categoryID from invGroups
-WHERE groupID IN (
-SELECT groupID from invTypes
-WHERE typeName IN ${ITEMS}
-)
+  SELECT categoryID from invGroups
+  WHERE groupID IN (
+    SELECT groupID from invTypes
+    WHERE typeName IN ${ITEMS}
+    OR    typeID IN (
+      SELECT m.materialTypeID AS typeID
+      FROM invTypes t, invTypeMaterials m
+      WHERE t.typeName IN ${ITEMS}
+      AND t.typeID = m.typeID
+    )
+  )
 );
 
 .mode insert invMarketGroups
@@ -119,12 +137,18 @@ WITH RECURSIVE
       FROM invTypes i
       JOIN invMarketGroups m USING(marketGroupID)
       WHERE i.typeName IN $ITEMS
+      OR    i.typeID IN (
+        SELECT m.materialTypeID AS typeID
+        FROM invTypes t, invTypeMaterials m
+        WHERE t.typeName IN ${ITEMS}
+        AND t.typeID = m.typeID
       )
+    )
     UNION ALL
     SELECT mg.marketGroupID, mg.parentGroupID
     FROM invMarketGroups mg
     INNER JOIN parents p ON mg.marketGroupID=p.parentGroupID
-    )
+  )
 SELECT p.marketGroupID AS groupId FROM parents p
 UNION
 SELECT p.parentGroupID AS groupId FROM parents p
@@ -155,6 +179,8 @@ EOF
 
 rm -f ${TESTDB}
 sqlite3 ${TESTDB} <<EOF
+BEGIN TRANSACTION;
 .read out-schema.sql
 .read out-data.sql
+COMMIT;
 EOF
