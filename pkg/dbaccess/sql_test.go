@@ -120,3 +120,64 @@ func TestSolarSystems(t *testing.T) {
 	})
 
 }
+
+func TestStations(t *testing.T) {
+
+	Convey("Open a database connection", t, func() {
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+
+		Convey("With a valid station ID", func() {
+			stationID := 60010312
+
+			Convey("We get correct information.", nil)
+			expected := &types.Station{
+				Name:            "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
+				ID:              60010312,
+				SystemID:        30003016,
+				ConstellationID: 20000441,
+				RegionID:        10000037,
+			}
+			actual, err := db.StationForID(stationID)
+			So(err, ShouldBeNil)
+			So(actual, ShouldResemble, expected)
+		})
+
+		Convey("With an invalid station ID", func() {
+			stationID := 42
+
+			Convey("An error is returned.", func() {
+				_, err := db.StationForID(stationID)
+				So(err, ShouldNotBeNil)
+			})
+		})
+	})
+}
+
+func TestRegions(t *testing.T) {
+
+	Convey("Open a database connection", t, func() {
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+
+		Convey("With a valid region name", func() {
+			regionName := "Outer Ring"
+
+			Convey("We get correct information.", nil)
+			expected := &types.Region{
+				Name: "Outer Ring",
+				ID:   10000057,
+			}
+			actual, err := db.RegionForName(regionName)
+			So(err, ShouldBeNil)
+			So(actual, ShouldResemble, expected)
+		})
+
+		Convey("With an invalid region name", func() {
+			regionName := "sudo make me a sandwich"
+
+			Convey("An error is returned.", func() {
+				_, err := db.RegionForName(regionName)
+				So(err, ShouldNotBeNil)
+			})
+		})
+	})
+}

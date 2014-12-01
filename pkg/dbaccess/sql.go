@@ -35,6 +35,8 @@ type sqlDb struct {
 	itemIDInfoStatement      *sqlx.Stmt
 	catTreeFromItemStatement *sqlx.Stmt
 	systemInfoStatement      *sqlx.Stmt
+	regionInfoStatement      *sqlx.Stmt
+	stationIDInfoStatement   *sqlx.Stmt
 }
 
 // Our hand-crafted SQL statements.
@@ -87,6 +89,18 @@ var (
 	JOIN   mapRegions r USING(regionID)
 	WHERE  s.solarSystemName = ?
 	`
+
+	regionInfo = `
+	SELECT regionid, regionname
+	FROM   mapregions
+	WHERE  regionName = ?
+	`
+
+	stationIDInfo = `
+	SELECT stationName, stationID, solarSystemID, constellationID, regionID
+	FROM   staStations
+	WHERE  stationID = ?
+	`
 )
 
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
@@ -120,6 +134,16 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 	}
 
 	evedb.systemInfoStatement, err = db.Preparex(db.Rebind(systemInfo))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
+
+	evedb.regionInfoStatement, err = db.Preparex(db.Rebind(regionInfo))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
+
+	evedb.stationIDInfoStatement, err = db.Preparex(db.Rebind(stationIDInfo))
 	if err != nil {
 		log.Fatalf("Unable to prepare statement: %v", err)
 	}
@@ -271,4 +295,18 @@ func (db *sqlDb) SolarSystemForName(systemName string) (*types.SolarSystem, erro
 	system := &types.SolarSystem{}
 	err := row.StructScan(system)
 	return system, err
+}
+
+func (db *sqlDb) RegionForName(regionName string) (*types.Region, error) {
+	row := db.regionInfoStatement.QueryRowx(regionName)
+	region := &types.Region{}
+	err := row.StructScan(region)
+	return region, err
+}
+
+func (db *sqlDb) StationForID(stationID int) (*types.Station, error) {
+	row := db.stationIDInfoStatement.QueryRowx(stationID)
+	station := &types.Station{}
+	err := row.StructScan(station)
+	return station, err
 }

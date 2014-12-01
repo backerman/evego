@@ -31,6 +31,7 @@ sqlite3 $DBLOC > out-schema.sql <<EOF
 .schema mapSolarSystems
 .schema mapConstellations
 .schema mapRegions
+.schema staStations
 .quit
 EOF
 
@@ -75,6 +76,28 @@ SYSTEMS=$(cat<<EOF
 )
 EOF
 )
+
+# Stations that we use in our tests.
+STATIONS=$(cat<<EOF
+(
+"Alentene VII - Moon 5 - Astral Mining Inc. Refinery",
+"Cistuvaert V - Moon 12 - Center for Advanced Studies School",
+"Gisleres V - Moon 8 - Chemal Tech Factory",
+"Junsoraert XI - Moon 9 - Roden Shipyards Factory",
+"Ouelletta V - Moon 5 - Federal Navy Academy"
+)
+EOF
+)
+
+# Regions that we use in our tests.
+REGIONS=$(cat<<EOF
+(
+"Outer Ring",
+"Verge Vendor"
+)
+EOF
+)
+
 
 # Dump item data we need
 sqlite3 $DBLOC <<EOF
@@ -172,8 +195,12 @@ WHERE regionID IN (
   SELECT DISTINCT regionID
   FROM mapSolarSystems
   WHERE solarSystemName IN $SYSTEMS
-);
+) OR regionName IN $REGIONS;
 
+.mode insert staStations
+SELECT *
+FROM   staStations
+WHERE  stationName IN $STATIONS;
 
 EOF
 

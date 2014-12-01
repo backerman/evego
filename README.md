@@ -7,11 +7,32 @@ the user; it's just a back-end library.
 
 [eve]: http://www.eveonline.com/
 
+## Current status
+
+This library should be considered a prototype. The exported API is absolutely
+subject to change for the near future, and suggestions for changes are
+encouraged if something could be implemented better. (On a related note, if you
+use evego in your own code, please let me know.)
+
+## To-do list
+
+- Industry
+ - Reprocessing calculations
+ - Mining planner
+ - Production scheduling
+ - What is this item used for?
+- Planetary interaction
+ - Required PI infrastructure for a given blueprint
+- Market
+ - Inventory management
+ - Suggest which blueprints to build based on market activity
+
 ## Development
 
 We like test cases. Unit tests are written using [GoConvey][convey], and there
-should be as close to 100% coverage as possible. Higher-level tests would also
-be a good idea.
+should be as close to 100% coverage as possible. While unit tests should ideally
+be included with pull requests, don't let that stop you from submitting one if
+you're not sure how to test it. Higher-level tests would also be a good idea.
 
 [convey]: http://goconvey.co/
 

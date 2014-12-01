@@ -15,9 +15,9 @@ limitations under the License.
 
 */
 
-// Package dbaccess is the public interface for accessing the
-// EVE static data export.
-package dbaccess
+// Package market is the public interface for accessing
+// EVE market data.
+package market
 
 import (
 	"io"
@@ -25,18 +25,12 @@ import (
 	"github.com/backerman/evego/pkg/types"
 )
 
-// EveDatabase is an object that returns information about items in EVE.
-type EveDatabase interface {
+// EveMarket returns information about market orders.
+type EveMarket interface {
 	io.Closer
 
-	// Items
-
-	ItemForName(itemName string) (*types.Item, error)
-	MarketGroupForItem(item *types.Item) (*types.MarketGroup, error)
-
-	// Universe locations
-
-	SolarSystemForName(systemName string) (*types.SolarSystem, error)
-	RegionForName(regionName string) (*types.Region, error)
-	StationForID(stationID int) (*types.Station, error)
+	// OrdersForItem returns the market orders for a given item.
+	// location is the name of either a system or a region.
+	// type can be Buy, Sell, or All.
+	OrdersForItem(itemID *types.Item, location string, orderType types.OrderType) (*[]types.Order, error)
 }

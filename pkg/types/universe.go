@@ -27,3 +27,18 @@ type SolarSystem struct {
 	RegionID        int    `db:"regionID"`
 	Security        float64
 }
+
+// Region is one of the regions in the EVE universe.
+type Region struct {
+	Name string `db:"regionName"`
+	ID   int    `db:"regionID"`
+}
+
+// Station is either an NPC station or a conquerable outpost.
+type Station struct {
+	Name            string `db:"stationName"`
+	ID              int    `db:"stationID"`
+	SystemID        int    `db:"solarSystemID"`
+	ConstellationID int    `db:"constellationID"`
+	RegionID        int    `db:"regionID"`
+}
