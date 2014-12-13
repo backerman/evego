@@ -15,9 +15,9 @@ limitations under the License.
 
 */
 
-// Package dbaccess is the public interface for accessing the
-// EVE static data export.
-package dbaccess
+// Package eveapi is the public interface for accessing the
+// EVE APIs (XML, CREST, or whatever.)
+package eveapi
 
 import (
 	"io"
@@ -25,19 +25,10 @@ import (
 	"github.com/backerman/evego/pkg/types"
 )
 
-// EveDatabase is an object that returns information about items in EVE.
-type EveDatabase interface {
+// EveAPI is an interface to the EVE API.
+type EveAPI interface {
 	io.Closer
 
-	// Items
-
-	ItemForName(itemName string) (*types.Item, error)
-	MarketGroupForItem(item *types.Item) (*types.MarketGroup, error)
-
-	// Universe locations
-
-	SolarSystemForID(systemID int) (*types.SolarSystem, error)
-	SolarSystemForName(systemName string) (*types.SolarSystem, error)
-	RegionForName(regionName string) (*types.Region, error)
-	StationForID(stationID int) (*types.Station, error)
+	// OutpostForID returns a conquerable station with the provided ID.
+	OutpostForID(id int) (*types.Station, error)
 }

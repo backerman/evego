@@ -108,11 +108,45 @@ func TestSolarSystems(t *testing.T) {
 			So(actual.RegionID, ShouldEqual, expected.RegionID)
 		})
 
+		Convey("With a valid system ID", func() {
+			systemID := 30003333
+
+			Convey("We get correct information.", func() {
+				expected := types.SolarSystem{
+					Name:            "RF-GGF",
+					ID:              30003333,
+					Security:        -0.246618,
+					Constellation:   "49A-BZ",
+					ConstellationID: 20000485,
+					Region:          "Syndicate",
+					RegionID:        10000041,
+				}
+				actual, err := db.SolarSystemForID(systemID)
+				So(err, ShouldBeNil)
+				So(actual.Name, ShouldEqual, expected.Name)
+				So(actual.ID, ShouldEqual, expected.ID)
+				So(actual.Security, ShouldAlmostEqual, expected.Security)
+				So(actual.Constellation, ShouldEqual, expected.Constellation)
+				So(actual.ConstellationID, ShouldEqual, expected.ConstellationID)
+				So(actual.Region, ShouldEqual, expected.Region)
+				So(actual.RegionID, ShouldEqual, expected.RegionID)
+			})
+		})
+
 		Convey("With an invalid system name", func() {
 			systemName := "Oniboshi"
 
 			Convey("An error is returned.", func() {
 				_, err := db.SolarSystemForName(systemName)
+				So(err, ShouldNotBeNil)
+			})
+		})
+
+		Convey("With an invalid system ID", func() {
+			systemID := 12345
+
+			Convey("An error is returned.", func() {
+				_, err := db.SolarSystemForID(systemID)
 				So(err, ShouldNotBeNil)
 			})
 		})

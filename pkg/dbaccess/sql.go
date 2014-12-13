@@ -35,6 +35,7 @@ type sqlDb struct {
 	itemIDInfoStatement      *sqlx.Stmt
 	catTreeFromItemStatement *sqlx.Stmt
 	systemInfoStatement      *sqlx.Stmt
+	systemIDInfoStatement    *sqlx.Stmt
 	regionInfoStatement      *sqlx.Stmt
 	stationIDInfoStatement   *sqlx.Stmt
 }
@@ -81,6 +82,7 @@ var (
 	JOIN invMarketGroups m1 ON p.marketGroupID = m1.marketGroupID
 	JOIN invMarketGroups m2 ON p.parentGroupID = m2.marketGroupID
 	`
+
 	systemInfo = `
 	SELECT s.solarSystemName, s.solarSystemID, s.security,
 	       c.constellationName, c.constellationID, r.regionName, r.regionID
@@ -88,6 +90,15 @@ var (
 	JOIN   mapConstellations c USING(constellationID)
 	JOIN   mapRegions r USING(regionID)
 	WHERE  s.solarSystemName = ?
+	`
+
+	systemIDInfo = `
+	SELECT s.solarSystemName, s.solarSystemID, s.security,
+	       c.constellationName, c.constellationID, r.regionName, r.regionID
+	FROM   mapSolarSystems s
+	JOIN   mapConstellations c USING(constellationID)
+	JOIN   mapRegions r USING(regionID)
+	WHERE  s.solarSystemID = ?
 	`
 
 	regionInfo = `
@@ -134,6 +145,11 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 	}
 
 	evedb.systemInfoStatement, err = db.Preparex(db.Rebind(systemInfo))
+	if err != nil {
+		log.Fatalf("Unable to prepare statement: %v", err)
+	}
+
+	evedb.systemIDInfoStatement, err = db.Preparex(db.Rebind(systemIDInfo))
 	if err != nil {
 		log.Fatalf("Unable to prepare statement: %v", err)
 	}
@@ -292,6 +308,13 @@ func (db *sqlDb) Close() error {
 
 func (db *sqlDb) SolarSystemForName(systemName string) (*types.SolarSystem, error) {
 	row := db.systemInfoStatement.QueryRowx(systemName)
+	system := &types.SolarSystem{}
+	err := row.StructScan(system)
+	return system, err
+}
+
+func (db *sqlDb) SolarSystemForID(systemID int) (*types.SolarSystem, error) {
+	row := db.systemIDInfoStatement.QueryRowx(systemID)
 	system := &types.SolarSystem{}
 	err := row.StructScan(system)
 	return system, err

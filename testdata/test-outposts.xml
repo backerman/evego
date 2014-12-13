@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2014-12-08 22:07:24</currentTime>
+  <result>
+    <rowset name="outposts" key="stationID" columns="stationID,stationName,stationTypeID,solarSystemID,corporationID,corporationName">
+      <row stationID="61000854" stationName="4-EP12 VIII - 4-EP12 Inches for Mittens" stationTypeID="21645" solarSystemID="30004553" corporationID="667531913" corporationName="GoonWaffe" />
+      <row stationID="61000950" stationName="C-OK0R III - RIP Vile Rat" stationTypeID="21642" solarSystemID="30003692" corporationID="98006554" corporationName="Internet Terrorists" />
+      <row stationID="61000961" stationName="V-SEE6 VIII - Raumkommandos Drugstore" stationTypeID="21644" solarSystemID="30001787" corporationID="98310961" corporationName="RaumKommando" />
+      <row stationID="61000189" stationName="8WA-Z6 VIII - CAT IN STATION" stationTypeID="21642" solarSystemID="30004760" corporationID="98008728" corporationName="Northern Associates Holdings" />
+    </rowset>
+  </result>
+  <cachedUntil>2014-12-08 23:01:31</cachedUntil>
+</eveapi>
