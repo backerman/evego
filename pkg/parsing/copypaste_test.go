@@ -54,7 +54,30 @@ func TestInventoryCopyPaste(t *testing.T) {
 				{"Shielded Radar Backup Cluster I", 1},
 			})
 		})
-
 	})
+}
 
+func TestIndustryCopyPaste(t *testing.T) {
+
+	Convey("Given a copy-and-pasted industry material list", t, func() {
+		inventory, err := ioutil.ReadFile("../../testdata/test-industrytab.txt")
+		inventoryStr := string(inventory)
+		So(err, ShouldBeNil)
+
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		defer db.Close()
+
+		Convey("It is correctly parsed.", func() {
+			parsed := parsing.ParseInventory(inventoryStr, db)
+			So(parsed, ShouldHaveComposition, []Component{
+				{"Tritanium", 1367093},
+				{"Pyerite", 630827},
+				{"Mexallon", 60890},
+				{"Isogen", 9475},
+				{"Nocxium", 2387},
+				{"Zydrine", 1426},
+				{"Megacyte", 359},
+			})
+		})
+	})
 }
