@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/backerman/evego/pkg/dbaccess"
+	"github.com/backerman/evego/pkg/eveapi"
 	"github.com/backerman/evego/pkg/market"
 	"github.com/backerman/evego/pkg/types"
 	. "github.com/smartystreets/goconvey/convey"
@@ -38,6 +39,8 @@ import (
 var testDbPath = "../../testdb.sqlite"
 
 var testMarketOrdersXML = "../../testdata/test-marketorders.xml"
+var testOutpostOrdersXML = "../../testdata/test-outpostorders.xml"
+var testOutpostsXML = "../../testdata/test-outposts.xml"
 
 type testElement struct {
 	match string
@@ -54,7 +57,7 @@ func shouldMatchOrders(actual interface{}, expected ...interface{}) string {
 		return "Failed to cast actual to order array"
 	}
 	if len(*actualOrders) != len(*expectedOrders) {
-		return fmt.Sprintf("Expected %d orders; only received %d",
+		return fmt.Sprintf("Expected %d orders; received %d",
 			len(*expectedOrders), len(*actualOrders))
 	}
 	var messages []string // errors found
@@ -67,6 +70,7 @@ func shouldMatchOrders(actual interface{}, expected ...interface{}) string {
 			{ShouldEqual(a.Item.ID, e.Item.ID), "Item"},
 			{ShouldAlmostEqual(a.Price, e.Price), "Price"},
 			{ShouldEqual(a.Station.ID, e.Station.ID), "Station"},
+			{ShouldEqual(a.Station.Name, e.Station.Name), "Station name"},
 			{ShouldBeTrue(a.Expiration.Equal(e.Expiration)), "Expiration date"},
 		}
 		if e.Type == types.Buy {
@@ -113,7 +117,9 @@ func TestMarketOrders(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		ec := market.EveCentral(db, ts.URL)
+		// We don't need outpost information here, so we don't pass in a reference
+		// to the EVE XML API.
+		ec := market.EveCentral(db, nil, ts.URL)
 
 		Convey("Given a valid region and item", func() {
 			regionName := "Verge Vendor"
@@ -163,6 +169,71 @@ func TestMarketOrders(t *testing.T) {
 				expectedURL := "/?" + urlParms.Encode()
 
 				actual, err := ec.OrdersForItem(item, regionName, orderType)
+				So(err, ShouldBeNil)
+				So(actualURL, ShouldEqual, expectedURL)
+				So(actual, shouldMatchOrders, expected)
+			})
+
+		})
+
+	})
+
+}
+
+func TestOutpostOrders(t *testing.T) {
+	Convey("Set up test data.", t, func(c C) {
+		var actualURL string
+		ts := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				actualURL = r.URL.String()
+				respFile, err := os.Open(testOutpostOrdersXML)
+				c.So(err, ShouldBeNil)
+				responseBytes, err := ioutil.ReadAll(respFile)
+				c.So(err, ShouldBeNil)
+				responseBuf := bytes.NewBuffer(responseBytes)
+				responseBuf.WriteTo(w)
+			}))
+		defer ts.Close()
+
+		tsXMLAPI := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				respFile, err := os.Open(testOutpostsXML)
+				c.So(err, ShouldBeNil)
+				responseBytes, err := ioutil.ReadAll(respFile)
+				c.So(err, ShouldBeNil)
+				responseBuf := bytes.NewBuffer(responseBytes)
+				responseBuf.WriteTo(w)
+			}))
+		defer tsXMLAPI.Close()
+
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		xmlAPI := eveapi.XMLAPI(tsXMLAPI.URL, db)
+		ec := market.EveCentral(db, xmlAPI, ts.URL)
+
+		Convey("Given a valid location and item", func() {
+			systemName := "4-EP12"
+			system, err := db.SolarSystemForName(systemName)
+			So(err, ShouldBeNil)
+			orderType := types.AllOrders
+			item, err := db.ItemForName("EMP M")
+			So(err, ShouldBeNil)
+
+			Convey("Results should be successfully processed.", func() {
+				ifm, err := xmlAPI.OutpostForID(61000854) // 4-EP12 Inches for Mittens
+				So(err, ShouldBeNil)
+				expected := &[]types.Order{
+					{Type: types.Sell, Item: item, Quantity: 35847, Price: 84.87, Station: ifm,
+						Expiration: time.Date(2015, time.March, 14, 0, 0, 0, 0, time.UTC)},
+					{Type: types.Sell, Item: item, Quantity: 16543, Price: 83.87, Station: ifm,
+						Expiration: time.Date(2015, time.March, 14, 0, 0, 0, 0, time.UTC)},
+				}
+
+				urlParms := url.Values{}
+				urlParms.Set("typeid", fmt.Sprintf("%d", item.ID))
+				urlParms.Set("usesystem", fmt.Sprintf("%d", system.ID))
+				expectedURL := "/?" + urlParms.Encode()
+
+				actual, err := ec.OrdersForItem(item, systemName, orderType)
 				So(err, ShouldBeNil)
 				So(actualURL, ShouldEqual, expectedURL)
 				So(actual, shouldMatchOrders, expected)

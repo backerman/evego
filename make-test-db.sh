@@ -61,7 +61,8 @@ ITEMS=$(cat<<EOF
 "Limited Kinetic Plating I",
 "Small I-ax Remote Armor Repairer",
 "Shielded Radar Backup Cluster I",
-"Medium Shield Extender II"
+"Medium Shield Extender II",
+"EMP M"
 )
 EOF
 )

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<evec_api version="2.0" method="quicklook">
+          <quicklook>
+            <item>193</item>
+            <itemname>EMP M</itemname>
+            <regions></regions>
+            <hours>360</hours>
+            <minqty>1</minqty>
+            <sell_orders><order id="3821441071">
+            <region>10000058</region>
+            <station>61000854</station>
+            <station_name>4-EP12 VIII - 4-EP12 Inches for Mittens</station_name>
+            <security>0.0</security>
+            <range>65535</range>
+            <price>84.87</price>
+            <vol_remain>35847</vol_remain>
+            <min_volume>1</min_volume>
+            <expires>2015-03-14</expires>
+            <reported_time>12-14 20:54:08</reported_time>
+          </order><order id="3737435603">
+            <region>10000058</region>
+            <station>61000854</station>
+            <station_name>4-EP12 VIII - 4-EP12 Inches for Mittens</station_name>
+            <security>0.0</security>
+            <range>65535</range>
+            <price>83.87</price>
+            <vol_remain>16543</vol_remain>
+            <min_volume>1</min_volume>
+            <expires>2015-03-14</expires>
+            <reported_time>12-14 20:54:08</reported_time>
+          </order></sell_orders>
+            <buy_orders></buy_orders>
+          </quicklook>
+        </evec_api>

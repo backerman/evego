@@ -27,11 +27,13 @@ import (
 	"time"
 
 	"github.com/backerman/evego/pkg/dbaccess"
+	"github.com/backerman/evego/pkg/eveapi"
 	"github.com/backerman/evego/pkg/types"
 )
 
 type eveCentral struct {
 	db       dbaccess.EveDatabase
+	xmlAPI   eveapi.EveAPI
 	endpoint *url.URL
 	http     http.Client
 }
@@ -40,12 +42,12 @@ type eveCentral struct {
 // It takes as input an EveDatabase object and an HTTP endpoint;
 // the latter should be http://api.eve-central.com/api/quicklook
 // for the production EVE-Central instance.
-func EveCentral(db dbaccess.EveDatabase, endpoint string) EveMarket {
+func EveCentral(db dbaccess.EveDatabase, xmlAPI eveapi.EveAPI, endpoint string) EveMarket {
 	epURL, err := url.Parse(endpoint)
 	if err != nil {
 		log.Fatalf("Invalid URL %v passed for Eve-Central endpoint: %v", endpoint, err)
 	}
-	ec := eveCentral{db: db, endpoint: epURL}
+	ec := eveCentral{db: db, endpoint: epURL, xmlAPI: xmlAPI}
 	return &ec
 }
 
@@ -96,11 +98,15 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 		if stationCache[o.StationID] == nil {
 			sta, err := e.db.StationForID(o.StationID)
 			if err != nil {
-				// Make a dummy station, since we haven't implemented
-				// outposts yet.
-				sta = &types.Station{
-					Name: fmt.Sprintf("Unknown Station (ID %d)", o.StationID),
-					ID:   o.StationID,
+				// If it's not in the static databse, it's an outpost.
+				// FIXME Need to expire outposts.
+				sta, err = e.xmlAPI.OutpostForID(o.StationID)
+				if err != nil {
+					// Make a dummy station.
+					sta = &types.Station{
+						Name: fmt.Sprintf("Unknown Station (ID %d)", o.StationID),
+						ID:   o.StationID,
+					}
 				}
 			}
 			stationCache[o.StationID] = sta
