@@ -99,7 +99,6 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 			sta, err := e.db.StationForID(o.StationID)
 			if err != nil {
 				// If it's not in the static databse, it's an outpost.
-				// FIXME Need to expire outposts.
 				sta, err = e.xmlAPI.OutpostForID(o.StationID)
 				if err != nil {
 					// Make a dummy station.
