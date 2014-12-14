@@ -40,80 +40,6 @@ type sqlDb struct {
 	stationIDInfoStatement   *sqlx.Stmt
 }
 
-// Our hand-crafted SQL statements.
-var (
-	materialComposition = `
-	SELECT mt.typeID AS materialID, m.quantity AS quantity
-	FROM invTypes t, invTypes mt, invTypeMaterials m
-	WHERE t.typeID = ?
-	AND t.typeID = m.typeID
-	AND mt.typeID = m.materialTypeID
-	`
-	itemInfo = `
-	SELECT t.typeID, t.typeName, t.portionSize, g.groupName, c.categoryName
-	FROM invTypes t, invCategories c, invGroups g
-	WHERE t.typeName = ? AND t.groupID = g.groupID
-	AND   g.categoryID = c.categoryID
-	`
-	itemIDInfo = `
-	SELECT t.typeID, t.typeName, t.portionSize, g.groupName, c.categoryName
-	FROM invTypes t, invCategories c, invGroups g
-	WHERE t.typeID = ? AND t.groupID = g.groupID
-	AND   g.categoryID = c.categoryID
-	`
-	catTree = `
-	WITH RECURSIVE
-	parents(marketGroupID, parentGroupID) AS
-	(
-		SELECT marketGroupID, parentGroupID FROM invMarketGroups
-		WHERE marketGroupID = (
-			SELECT marketGroupID
-			FROM invTypes i
-			JOIN invMarketGroups m USING(marketGroupID)
-			WHERE i.typeID = ?
-		)
-		UNION ALL
-		SELECT mg.marketGroupID, mg.parentGroupID
-		FROM invMarketGroups mg
-		INNER JOIN parents p ON mg.marketGroupID=p.parentGroupID
-	)
-	SELECT p.marketGroupID, m1.marketGroupName, m1.description, p.parentGroupID, m2.marketGroupName, m2.description
-	FROM parents p
-	JOIN invMarketGroups m1 ON p.marketGroupID = m1.marketGroupID
-	JOIN invMarketGroups m2 ON p.parentGroupID = m2.marketGroupID
-	`
-
-	systemInfo = `
-	SELECT s.solarSystemName, s.solarSystemID, s.security,
-	       c.constellationName, c.constellationID, r.regionName, r.regionID
-	FROM   mapSolarSystems s
-	JOIN   mapConstellations c USING(constellationID)
-	JOIN   mapRegions r USING(regionID)
-	WHERE  s.solarSystemName = ?
-	`
-
-	systemIDInfo = `
-	SELECT s.solarSystemName, s.solarSystemID, s.security,
-	       c.constellationName, c.constellationID, r.regionName, r.regionID
-	FROM   mapSolarSystems s
-	JOIN   mapConstellations c USING(constellationID)
-	JOIN   mapRegions r USING(regionID)
-	WHERE  s.solarSystemID = ?
-	`
-
-	regionInfo = `
-	SELECT regionid, regionname
-	FROM   mapregions
-	WHERE  regionName = ?
-	`
-
-	stationIDInfo = `
-	SELECT stationName, stationID, solarSystemID, constellationID, regionID
-	FROM   staStations
-	WHERE  stationID = ?
-	`
-)
-
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
 func SQLDatabase(driver, dataSource string) EveDatabase {
 	evedb := new(sqlDb)
@@ -125,43 +51,29 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 	}
 
 	// Prepare statements
-	evedb.compStatement, err = db.Preparex(db.Rebind(materialComposition))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-	evedb.itemInfoStatement, err = db.Preparex(db.Rebind(itemInfo))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-
-	evedb.itemIDInfoStatement, err = db.Preparex(db.Rebind(itemIDInfo))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-
-	evedb.catTreeFromItemStatement, err = db.Preparex(db.Rebind(catTree))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
+	stmts := []struct {
+		preparedStatement **sqlx.Stmt
+		statementText     string
+	}{
+		// Pointer magic, stage 1: Pass the address of the pointer.
+		{&evedb.compStatement, materialComposition},
+		{&evedb.itemInfoStatement, itemInfo},
+		{&evedb.itemIDInfoStatement, itemIDInfo},
+		{&evedb.catTreeFromItemStatement, catTree},
+		{&evedb.systemInfoStatement, systemInfo},
+		{&evedb.systemIDInfoStatement, systemIDInfo},
+		{&evedb.regionInfoStatement, regionInfo},
+		{&evedb.stationIDInfoStatement, stationIDInfo},
 	}
 
-	evedb.systemInfoStatement, err = db.Preparex(db.Rebind(systemInfo))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-
-	evedb.systemIDInfoStatement, err = db.Preparex(db.Rebind(systemIDInfo))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-
-	evedb.regionInfoStatement, err = db.Preparex(db.Rebind(regionInfo))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
-	}
-
-	evedb.stationIDInfoStatement, err = db.Preparex(db.Rebind(stationIDInfo))
-	if err != nil {
-		log.Fatalf("Unable to prepare statement: %v", err)
+	for _, s := range stmts {
+		prepared, err := db.Preparex(db.Rebind(s.statementText))
+		if err != nil {
+			log.Fatalf("Unable to prepare statement: %v", err)
+		}
+		// Pointer magic, stage 2: Dereference the pointer to the pointer
+		// and set it to point to the statement we just prepared.
+		*s.preparedStatement = prepared
 	}
 
 	return evedb
