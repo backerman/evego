@@ -86,26 +86,27 @@ func TestSolarSystems(t *testing.T) {
 		Convey("With a valid system name", func() {
 			systemName := "Poitot"
 
-			Convey("We get correct information.", nil)
-			expected := types.SolarSystem{
-				Name:            "Poitot",
-				ID:              30003271,
-				Security:        -0.019552,
-				Constellation:   "Z-6NQ6",
-				ConstellationID: 20000478,
-				Region:          "Syndicate",
-				RegionID:        10000041,
-			}
-			actual, err := db.SolarSystemForName(systemName)
-			// Can't use ShouldResemble because of the float.
-			So(err, ShouldBeNil)
-			So(actual.Name, ShouldEqual, expected.Name)
-			So(actual.ID, ShouldEqual, expected.ID)
-			So(actual.Security, ShouldAlmostEqual, expected.Security)
-			So(actual.Constellation, ShouldEqual, expected.Constellation)
-			So(actual.ConstellationID, ShouldEqual, expected.ConstellationID)
-			So(actual.Region, ShouldEqual, expected.Region)
-			So(actual.RegionID, ShouldEqual, expected.RegionID)
+			Convey("We get correct information.", func() {
+				expected := types.SolarSystem{
+					Name:            "Poitot",
+					ID:              30003271,
+					Security:        -0.019552,
+					Constellation:   "Z-6NQ6",
+					ConstellationID: 20000478,
+					Region:          "Syndicate",
+					RegionID:        10000041,
+				}
+				actual, err := db.SolarSystemForName(systemName)
+				// Can't use ShouldResemble because of the float.
+				So(err, ShouldBeNil)
+				So(actual.Name, ShouldEqual, expected.Name)
+				So(actual.ID, ShouldEqual, expected.ID)
+				So(actual.Security, ShouldAlmostEqual, expected.Security)
+				So(actual.Constellation, ShouldEqual, expected.Constellation)
+				So(actual.ConstellationID, ShouldEqual, expected.ConstellationID)
+				So(actual.Region, ShouldEqual, expected.Region)
+				So(actual.RegionID, ShouldEqual, expected.RegionID)
+			})
 		})
 
 		Convey("With a valid system ID", func() {
@@ -163,17 +164,18 @@ func TestStations(t *testing.T) {
 		Convey("With a valid station ID", func() {
 			stationID := 60010312
 
-			Convey("We get correct information.", nil)
-			expected := &types.Station{
-				Name:            "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
-				ID:              60010312,
-				SystemID:        30003016,
-				ConstellationID: 20000441,
-				RegionID:        10000037,
-			}
-			actual, err := db.StationForID(stationID)
-			So(err, ShouldBeNil)
-			So(actual, ShouldResemble, expected)
+			Convey("We get correct information.", func() {
+				expected := &types.Station{
+					Name:            "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
+					ID:              60010312,
+					SystemID:        30003016,
+					ConstellationID: 20000441,
+					RegionID:        10000037,
+				}
+				actual, err := db.StationForID(stationID)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, expected)
+			})
 		})
 
 		Convey("With an invalid station ID", func() {
@@ -195,14 +197,16 @@ func TestRegions(t *testing.T) {
 		Convey("With a valid region name", func() {
 			regionName := "Outer Ring"
 
-			Convey("We get correct information.", nil)
-			expected := &types.Region{
-				Name: "Outer Ring",
-				ID:   10000057,
-			}
-			actual, err := db.RegionForName(regionName)
-			So(err, ShouldBeNil)
-			So(actual, ShouldResemble, expected)
+			Convey("We get correct information.", func() {
+				expected := &types.Region{
+					Name: "Outer Ring",
+					ID:   10000057,
+				}
+				actual, err := db.RegionForName(regionName)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, expected)
+
+			})
 		})
 
 		Convey("With an invalid region name", func() {
