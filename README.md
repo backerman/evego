@@ -1,5 +1,8 @@
 # evego
 
+[![Build Status](https://travis-ci.org/backerman/evego.svg?branch=master)](https://travis-ci.org/backerman/evego)
+[![GoDoc](https://godoc.org/github.com/backerman/evego?status.svg)](https://godoc.org/github.com/backerman/evego)
+
 evego is a library for your [Internet spreadsheets][eve] spreadsheets;
 sometimes, a spreadsheet isn't actually sufficient. It does not currently slice,
 dice, or make Julienne fries. For that matter, it doesn't even interface with
