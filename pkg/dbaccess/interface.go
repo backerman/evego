@@ -40,4 +40,25 @@ type EveDatabase interface {
 	SolarSystemForName(systemName string) (*types.SolarSystem, error)
 	RegionForName(regionName string) (*types.Region, error)
 	StationForID(stationID int) (*types.Station, error)
+
+	// Blueprints, invention, and manufacturing
+
+	// BlueprintOutputs returns the items and quantity of each that can be output
+	// by performing industrial actions on a blueprint given that blueprint's name
+	// (typeName) as a string. The type name may include the percent (%) character
+	// as a wildcard.
+	BlueprintOutputs(typeName string) (*[]types.IndustryActivity, error)
+
+	// BlueprintForProduct returns the blueprints that can produce a given output.
+	BlueprintForProduct(typeName string) (*[]types.IndustryActivity, error)
+
+	// BlueprintsUsingMaterial returns the blueprints that use the given input material
+	// in an industrial process (manufacturing, invention, etc.)
+	BlueprintsUsingMaterial(typeName string) (*[]types.IndustryActivity, error)
+
+	// BlueprintProductionInputs returns the required materials for one run
+	// of production on an unresearched (ME 0% / TE 0%) blueprint. It takes as
+	// parameters the blueprint to be used and the selected output product.
+	BlueprintProductionInputs(
+		typeName string, outputTypeName string) (*[]types.InventoryLine, error)
 }

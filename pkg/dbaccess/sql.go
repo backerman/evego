@@ -19,6 +19,7 @@ package dbaccess
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/backerman/evego/pkg/types"
@@ -29,15 +30,19 @@ import (
 )
 
 type sqlDb struct {
-	db                       *sqlx.DB
-	compStatement            *sqlx.Stmt
-	itemInfoStatement        *sqlx.Stmt
-	itemIDInfoStatement      *sqlx.Stmt
-	catTreeFromItemStatement *sqlx.Stmt
-	systemInfoStatement      *sqlx.Stmt
-	systemIDInfoStatement    *sqlx.Stmt
-	regionInfoStatement      *sqlx.Stmt
-	stationIDInfoStatement   *sqlx.Stmt
+	db                            *sqlx.DB
+	compStatement                 *sqlx.Stmt
+	itemInfoStatement             *sqlx.Stmt
+	itemIDInfoStatement           *sqlx.Stmt
+	catTreeFromItemStatement      *sqlx.Stmt
+	systemInfoStatement           *sqlx.Stmt
+	systemIDInfoStatement         *sqlx.Stmt
+	regionInfoStatement           *sqlx.Stmt
+	stationIDInfoStatement        *sqlx.Stmt
+	blueprintProducesStmt         *sqlx.Stmt
+	inputMaterialsToBlueprintStmt *sqlx.Stmt
+	blueprintProducedByStmt       *sqlx.Stmt
+	matsForBPProductionStmt       *sqlx.Stmt
 }
 
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
@@ -64,6 +69,10 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 		{&evedb.systemIDInfoStatement, systemIDInfo},
 		{&evedb.regionInfoStatement, regionInfo},
 		{&evedb.stationIDInfoStatement, stationIDInfo},
+		{&evedb.blueprintProducesStmt, blueprintProduces},
+		{&evedb.inputMaterialsToBlueprintStmt, inputMaterialsToBlueprint},
+		{&evedb.blueprintProducedByStmt, blueprintProducedBy},
+		{&evedb.matsForBPProductionStmt, materialsForBlueprintProduction},
 	}
 
 	for _, s := range stmts {
@@ -244,4 +253,118 @@ func (db *sqlDb) StationForID(stationID int) (*types.Station, error) {
 	station := &types.Station{}
 	err := row.StructScan(station)
 	return station, err
+}
+
+func activityToTypeCode(activityStr string) types.ActivityType {
+	switch activityStr {
+	case "Manufacturing":
+		return types.Manufacturing
+	case "Researching Technology":
+		return types.ResearchingTechnology
+	case "Researching Time Efficiency":
+		return types.ResearchingTE
+	case "Researching Material Efficiency":
+		return types.ResearchingME
+	case "Copying":
+		return types.Copying
+	case "Duplicating":
+		return types.Duplicating
+	case "Reverse Engineering":
+		return types.ReverseEngineering
+	case "Invention":
+		return types.Invention
+	}
+	// Unknown
+	return types.None
+}
+
+func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) (*[]types.IndustryActivity, error) {
+	rows, err := stmt.Queryx(query)
+	if err != nil {
+		log.Fatalf("Unable to execute query: %v", err)
+	}
+	defer rows.Close()
+	var results []types.IndustryActivity
+	for rows.Next() {
+		row := struct {
+			InputItem        string `db:"inputItem"`
+			ActivityName     string `db:"activityName"`
+			OutputProduct    string `db:"outputProduct"`
+			OutputProductQty int    `db:"outputProductQty"`
+		}{}
+		err = rows.StructScan(&row)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing returned industry query: %v", err)
+		}
+		input, err := db.ItemForName(row.InputItem)
+		if err != nil {
+			// This would indicate some major error in the database, but we like
+			// checking for such errors even if it puts a dent in our unit-test
+			// coverage numbers.
+			return nil, fmt.Errorf("Couldn't find item %v with row: %#v (%d results so far)",
+				row.InputItem, row, len(results))
+		}
+		output, err := db.ItemForName(row.OutputProduct)
+		if err != nil {
+			return nil, err
+		}
+		rowActivity := types.IndustryActivity{
+			InputItem:      input,
+			OutputItem:     output,
+			OutputQuantity: row.OutputProductQty,
+		}
+		rowActivity.ActivityType = activityToTypeCode(row.ActivityName)
+		results = append(results, rowActivity)
+	}
+
+	return &results, nil
+}
+
+func (db *sqlDb) BlueprintOutputs(typeName string) (*[]types.IndustryActivity, error) {
+	return db.blueprintQuery(db.blueprintProducesStmt, typeName)
+}
+
+func (db *sqlDb) BlueprintForProduct(typeName string) (*[]types.IndustryActivity, error) {
+	return db.blueprintQuery(db.blueprintProducedByStmt, typeName)
+}
+
+func (db *sqlDb) BlueprintsUsingMaterial(typeName string) (*[]types.IndustryActivity, error) {
+
+	return db.blueprintQuery(db.inputMaterialsToBlueprintStmt, typeName)
+}
+
+func (db *sqlDb) BlueprintProductionInputs(
+	typeName string, outputTypeName string) (*[]types.InventoryLine, error) {
+	rows, err := db.matsForBPProductionStmt.Queryx(typeName, outputTypeName)
+	if err != nil {
+		log.Fatalf("Unable to execute query: %v", err)
+	}
+	defer rows.Close()
+	var results []types.InventoryLine
+	for rows.Next() {
+		row := struct {
+			InputItem        string `db:"inputItem"`
+			ActivityName     string `db:"activityName"`
+			InputMaterial    string `db:"inputMaterial"`
+			OutputProduct    string `db:"outputProduct"`
+			InputMaterialQty int    `db:"inputMaterialQty"`
+			OutputProductQty int    `db:"outputProductQty"`
+			Consume          bool   `db:"consume"`
+		}{}
+		rows.StructScan(&row)
+
+		// Process into an InventoryLine.
+		inputMat, err := db.ItemForName(row.InputMaterial)
+		if err != nil {
+			log.Fatalf("Database inconsistency error: item %#v not available; %v",
+				row.InputItem, err)
+		}
+		result := types.InventoryLine{
+			Quantity: row.InputMaterialQty,
+			Item:     inputMat,
+		}
+		results = append(results, result)
+	}
+
+	return &results, nil
 }

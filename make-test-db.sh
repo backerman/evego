@@ -23,6 +23,8 @@ TESTDB=./testdb.sqlite
 
 # Dump schema for tables we use
 sqlite3 $DBLOC > out-schema.sql <<EOF
+.schema industryActivityMaterials
+.schema industryActivityProducts
 .schema invTypes
 .schema invTypeMaterials
 .schema invMarketGroups
@@ -31,6 +33,7 @@ sqlite3 $DBLOC > out-schema.sql <<EOF
 .schema mapSolarSystems
 .schema mapConstellations
 .schema mapRegions
+.schema ramActivities
 .schema staStations
 .quit
 EOF
@@ -62,10 +65,25 @@ ITEMS=$(cat<<EOF
 "Small I-ax Remote Armor Repairer",
 "Shielded Radar Backup Cluster I",
 "Medium Shield Extender II",
-"EMP M"
+"EMP M",
+"Vexor Blueprint",
+"Vexor",
+"Ishtar Blueprint",
+"Datacore - Gallentean Starship Engineering",
+"Datacore - Mechanical Engineering",
+"Datacore - Amarrian Starship Engineering"
 )
 EOF
 )
+
+# Items that we use as input to blueprints.
+ITEMS_BPINPUT=$(cat<<EOF
+(
+"Station Construction Parts"
+)
+EOF
+)
+
 
 # System names that we use in our tests.
 SYSTEMS=$(cat<<EOF
@@ -100,57 +118,86 @@ REGIONS=$(cat<<EOF
 EOF
 )
 
+# Yeah, this is crazy complex.
+BPMATWITH=$(cat<<EOF
+WITH matTypes AS (
+-- Stuff our test types are composed of
+SELECT m.materialTypeID
+FROM invTypes t, invTypeMaterials m
+WHERE t.typeName IN ${ITEMS}
+AND t.typeID = m.typeID
+), bpInOut AS (
+-- Stuff that uses or is produced using blueprint input
+SELECT ti.typeName inputBP, tyo.typeName outputProduct
+FROM   industryActivityProducts iap
+JOIN   invTypes ti USING(typeID)
+JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
+JOIN   industryActivityMaterials iam
+ON     iam.typeID = ti.typeID
+JOIN   invTypes tm
+ON     iam.materialTypeID = tm.typeID
+WHERE  tm.typeName IN ${ITEMS_BPINPUT}
+), bpTypes AS (
+SELECT t.typeID
+FROM invTypes t, bpInOut
+-- test input materials
+WHERE t.typeName IN ${ITEMS_BPINPUT}
+-- what BPs require them
+OR    t.typeName = bpInOut.inputBP
+-- what they produce
+OR    t.typeName = bpInOut.outputProduct
+)
+EOF
+)
 
 # Dump item data we need
 sqlite3 $DBLOC <<EOF
 .mode insert invTypes
 .output out-data.sql
+${BPMATWITH}
 SELECT * FROM invTypes
 WHERE typeName IN ${ITEMS}
-OR    typeID IN (
-  SELECT m.materialTypeID
-  FROM invTypes t, invTypeMaterials m
-  WHERE t.typeName IN ${ITEMS}
-  AND t.typeID = m.typeID
-);
+OR    typeID IN matTypes
+OR    typeID IN bpTypes;
 
 .mode insert invTypeMaterials
-SELECT * FROM invTypeMaterials
-WHERE typeID IN (
+WITH bpMats AS (
   SELECT typeID from invTypes
-  WHERE typeName IN ${ITEMS}
-);
+  WHERE  typeName IN ${ITEMS_BPINPUT}
+),   items  AS (
+  SELECT typeID from invTypes
+  WHERE  typeName IN ${ITEMS}
+)
+SELECT * FROM invTypeMaterials
+WHERE typeID IN bpMats
+OR    typeID IN items
+OR    materialTypeID IN bpMats;
 
 .mode insert invGroups
+${BPMATWITH}
 SELECT * FROM invGroups
 WHERE groupID IN (
   SELECT groupID from invTypes
   WHERE typeName IN ${ITEMS}
-  OR    typeID IN (
-    SELECT m.materialTypeID
-    FROM invTypes t, invTypeMaterials m
-    WHERE t.typeName IN ${ITEMS}
-    AND t.typeID = m.typeID
-  )
+  OR    typeID IN matTypes
+  OR    typeID IN bpTypes
 );
 
 .mode insert invCategories
+${BPMATWITH}
 SELECT * FROM invCategories
 WHERE categoryID IN (
   SELECT categoryID from invGroups
   WHERE groupID IN (
     SELECT groupID from invTypes
     WHERE typeName IN ${ITEMS}
-    OR    typeID IN (
-      SELECT m.materialTypeID AS typeID
-      FROM invTypes t, invTypeMaterials m
-      WHERE t.typeName IN ${ITEMS}
-      AND t.typeID = m.typeID
+    OR    typeID IN matTypes
+    OR    typeID IN bpTypes
     )
-  )
 );
 
 .mode insert invMarketGroups
+${BPMATWITH}
 SELECT * FROM invMarketGroups
 WHERE marketGroupID IN (
 WITH RECURSIVE
@@ -162,12 +209,8 @@ WITH RECURSIVE
       FROM invTypes i
       JOIN invMarketGroups m USING(marketGroupID)
       WHERE i.typeName IN $ITEMS
-      OR    i.typeID IN (
-        SELECT m.materialTypeID AS typeID
-        FROM invTypes t, invTypeMaterials m
-        WHERE t.typeName IN ${ITEMS}
-        AND t.typeID = m.typeID
-      )
+      OR    i.typeID IN matTypes
+      OR    i.typeID IN bpTypes
     )
     UNION ALL
     SELECT mg.marketGroupID, mg.parentGroupID
@@ -204,6 +247,33 @@ SELECT *
 FROM   staStations
 WHERE  stationName IN $STATIONS;
 
+-- Industry tables
+.mode insert ramActivities
+SELECT *
+FROM   ramActivities;
+
+.mode insert industryActivityMaterials
+${BPMATWITH}
+, types AS (
+  SELECT typeID from invTypes
+  WHERE typeName IN ${ITEMS}
+)
+SELECT *
+FROM   industryActivityMaterials
+WHERE  typeID IN types
+OR     typeID IN bpTypes
+OR     materialTypeID IN types;
+
+.mode insert industryActivityProducts
+${BPMATWITH}
+, types AS (
+SELECT typeID from invTypes
+WHERE typeName IN ${ITEMS}
+)
+SELECT *
+FROM   industryActivityProducts
+WHERE  typeID IN types OR productTypeID IN types
+OR     typeID IN bpTypes;
 EOF
 
 rm -f ${TESTDB}

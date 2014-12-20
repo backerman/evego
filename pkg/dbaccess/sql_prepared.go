@@ -17,6 +17,8 @@ limitations under the License.
 
 package dbaccess
 
+import "strings"
+
 // Our hand-crafted SQL statements.
 var (
 	materialComposition = `
@@ -89,4 +91,47 @@ var (
       FROM   staStations
       WHERE  stationID = ?
       `
+
+	blueprintBase = `
+		SELECT ti.typeName inputItem, ram.activityName, tyo.typeName outputProduct,
+		       iap.quantity outputProductQty
+		FROM   industryActivityProducts iap
+		JOIN   invTypes ti USING(typeID)
+		JOIN   ramActivities ram USING(activityID)
+		JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
+		WHERE  QUERYCOLUMN LIKE ?
+		`
+
+	// What items can I produce with a blueprint?
+	blueprintProduces = strings.Replace(blueprintBase, "QUERYCOLUMN", "inputItem", 1)
+
+	// How can I produce a blueprint?
+	blueprintProducedBy = strings.Replace(blueprintBase, "QUERYCOLUMN", "outputProduct", 1)
+
+	// Extra stanzas for WHERE when querying on input materials
+	inputMatsWhere = `
+		JOIN   industryActivityMaterials iam
+		ON     iam.typeID = ti.typeID
+		JOIN   invTypes tm
+		ON     iam.materialTypeID = tm.typeID
+	`
+	inputMaterialsToBlueprint = strings.Replace(
+		strings.Replace(blueprintBase, "WHERE", inputMatsWhere+" WHERE ", 1),
+		"QUERYCOLUMN", "tm.typeName", 1)
+
+	// Given a blueprint, what items do I need to manufacture/invent with it?
+	materialsForBlueprintProduction = `
+		SELECT ti.typeName inputItem, activityName, tm.typeName inputMaterial,
+					 iam.quantity inputMaterialQty, consume, tyo.typeName outputProduct,
+					 iap.quantity outputProductQty
+		FROM   industryActivityMaterials iam
+		JOIN   invTypes ti USING(typeID)
+		JOIN   invTypes tm
+		ON     iam.materialTypeID = tm.typeID
+		JOIN   ramActivities USING(activityID)
+		JOIN   industryActivityProducts iap
+		ON     iap.typeID = ti.typeID AND iap.activityID=iam.activityID
+		JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
+		WHERE  inputItem = ? AND outputProduct = ?
+		`
 )

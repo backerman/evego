@@ -19,6 +19,9 @@ package dbaccess_test
 
 import (
 	"database/sql"
+	"fmt"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/backerman/evego/pkg/dbaccess"
@@ -217,5 +220,138 @@ func TestRegions(t *testing.T) {
 				So(err, ShouldNotBeNil)
 			})
 		})
+	})
+}
+
+func shouldMatchActivities(actual interface{}, expected ...interface{}) string {
+	actualIA, ok := actual.(*[]types.IndustryActivity)
+	if !ok {
+		return "Failed to cast actual to *[]types.IndustryActivity"
+	}
+	expectedIA, ok := expected[0].(*[]types.IndustryActivity)
+	if !ok {
+		return "Failed to cast expected to *[]types.IndustryActivity"
+	}
+
+	if len(*actualIA) != len(*expectedIA) {
+		return fmt.Sprintf("Lenth mismatch: expected %d activities; received %d",
+			len(*expectedIA), len(*actualIA))
+	}
+
+	// We know that actual and expected are the same length. Verify that
+	// they have equivalent items (in any order).
+	var sActual, sExpected, msgs []string
+	for i := range *actualIA {
+		sActual = append(sActual, (*actualIA)[i].String())
+		sExpected = append(sExpected, (*expectedIA)[i].String())
+	}
+	sort.Sort(sort.StringSlice(sActual))
+	sort.Sort(sort.StringSlice(sExpected))
+	for i := range sActual {
+		if sActual[i] != sExpected[i] {
+			msgs = append(msgs, fmt.Sprintf("Expected %v, got %v", sExpected[i], sActual[i]))
+		}
+	}
+
+	return strings.Join(msgs, "; ")
+}
+
+func TestBlueprints(t *testing.T) {
+
+	Convey("Open a database connection", t, func() {
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+
+		Convey("With a valid input blueprint", func() {
+			typeName := "Vexor Blueprint"
+			inputType, err := db.ItemForName(typeName)
+			So(err, ShouldBeNil)
+
+			Convey("We get correct products.", func() {
+				vexor, err := db.ItemForName("Vexor")
+				So(err, ShouldBeNil)
+				ishtarBlueprint, err := db.ItemForName("Ishtar Blueprint")
+				So(err, ShouldBeNil)
+				expected := &[]types.IndustryActivity{
+					{InputItem: inputType,
+						ActivityType:   types.Manufacturing,
+						OutputItem:     vexor,
+						OutputQuantity: 1,
+					},
+					{InputItem: inputType,
+						ActivityType:   types.Invention,
+						OutputItem:     ishtarBlueprint,
+						OutputQuantity: 1,
+					},
+				}
+				actual, err := db.BlueprintOutputs(typeName)
+				So(err, ShouldBeNil)
+				So(actual, shouldMatchActivities, expected)
+			})
+		})
+
+		Convey("With a valid input material", func() {
+			typeName := "Station Construction Parts"
+
+			Convey("We get correct blueprints.", func() {
+				expectedNames := []string{
+					"Amarr Factory Outpost Platform",
+					"Caldari Research Outpost Platform",
+					"Gallente Administrative Outpost Platform",
+					"Minmatar Service Outpost Platform",
+				}
+				var expected []types.IndustryActivity
+				for _, platform := range expectedNames {
+					inBP, err := db.ItemForName(platform + " Blueprint")
+					So(err, ShouldBeNil)
+					outPlatform, err := db.ItemForName(platform)
+					So(err, ShouldBeNil)
+					expected = append(expected, types.IndustryActivity{
+						InputItem:      inBP,
+						ActivityType:   types.Manufacturing,
+						OutputQuantity: 1,
+						OutputItem:     outPlatform,
+					})
+				}
+				actual, err := db.BlueprintsUsingMaterial(typeName)
+				So(err, ShouldBeNil)
+				So(actual, shouldMatchActivities, &expected)
+			})
+		})
+
+		Convey("With a valid blueprint and output", func() {
+			inBP := "Vexor Blueprint"
+			outBP := "Ishtar Blueprint"
+			Convey("We get correct material requirements.", func() {
+				expected := []Component{
+					{Quantity: 8, Name: "Datacore - Gallentean Starship Engineering"},
+					{Quantity: 8, Name: "Datacore - Mechanical Engineering"},
+				}
+				actual, err := db.BlueprintProductionInputs(inBP, outBP)
+				So(err, ShouldBeNil)
+				So(actual, ShouldHaveComposition, expected)
+			})
+		})
+
+		Convey("With a valid output", func() {
+			desiredOutput := "Ishtar Blueprint"
+			Convey("We get the blueprint required to product it.", func() {
+				inBP, err := db.ItemForName("Vexor Blueprint")
+				So(err, ShouldBeNil)
+				outBP, err := db.ItemForName(desiredOutput)
+				So(err, ShouldBeNil)
+				expected := &[]types.IndustryActivity{
+					{
+						InputItem:      inBP,
+						ActivityType:   types.Invention,
+						OutputItem:     outBP,
+						OutputQuantity: 1,
+					},
+				}
+				actual, err := db.BlueprintForProduct(desiredOutput)
+				So(err, ShouldBeNil)
+				So(actual, shouldMatchActivities, expected)
+			})
+		})
+
 	})
 }

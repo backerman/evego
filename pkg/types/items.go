@@ -43,6 +43,10 @@ type Item struct {
 	BatchSize int `db:"portionSize"`
 }
 
+func (i Item) String() string {
+	return fmt.Sprintf("Item: %s (%d)", i.Name, i.ID)
+}
+
 // InventoryLine is an item in a material's composition, the player's
 // inventory, or whatever.
 type InventoryLine struct {
