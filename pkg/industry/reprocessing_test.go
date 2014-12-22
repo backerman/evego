@@ -38,10 +38,10 @@ func TestReprocessingModules(t *testing.T) {
 		Convey("Given a module", func() {
 			gun, err := db.ItemForName("150mm Prototype Gauss Gun")
 			So(err, ShouldBeNil)
-			Convey("With reprocessing rate of 50% in sovnull and no scrapmetal skills", func() {
+			Convey("With reprocessing rate of 50% in sovnull, no tax, and no scrapmetal skills", func() {
 				reproRate := 0.50
 				quantity := 1
-				standing := 10.0 // no tax
+				taxRate := 0.00
 				skills := industry.ReproSkills{
 					Reprocessing:           5000,
 					ReprocessingEfficiency: 5000000,
@@ -50,7 +50,7 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("It should return the correct minerals", func() {
-					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 614},
 						{"Pyerite", 33},
@@ -62,7 +62,7 @@ func TestReprocessingModules(t *testing.T) {
 			Convey("With reprocessing rate of 37.5% and level V scrapmetal skills", func() {
 				reproRate := 0.375
 				quantity := 1
-				standing := 10.0 // no tax
+				taxRate := 0.00
 				skills := industry.ReproSkills{
 					Reprocessing:           5000,
 					ReprocessingEfficiency: 424,
@@ -71,7 +71,7 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("It should return the correct minerals", func() {
-					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 506},
 						{"Pyerite", 27},
@@ -89,7 +89,7 @@ func TestReprocessingModules(t *testing.T) {
 			Convey("With reprocessing rate of 50% and no scrapmetal skills", func() {
 				reproRate := 0.50
 				quantity := 1
-				standing := 10.0 // no tax
+				taxRate := 0.00
 				skills := industry.ReproSkills{
 					Reprocessing:           5000,
 					ReprocessingEfficiency: 5000000,
@@ -98,7 +98,7 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("It should return the correct minerals", func() {
-					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 5498},
 						{"Pyerite", 5217},
@@ -111,7 +111,7 @@ func TestReprocessingModules(t *testing.T) {
 
 				Convey("Rounding should occur after summing all input units", func() {
 					quantity = 2
-					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 10996},
 						{"Pyerite", 10435},
@@ -132,7 +132,7 @@ func TestReprocessingModules(t *testing.T) {
 			Convey("With reprocessing rate of 50% and no scrapmetal skills", func() {
 				reproRate := 0.50
 				quantity := 5
-				standing := 10.0
+				taxRate := 0.00
 				skills := industry.ReproSkills{
 					Reprocessing:           5000,
 					ReprocessingEfficiency: 5000000,
@@ -141,7 +141,7 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("Rounding should occur after summing all input units", func() {
-					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 10225},
 						{"Pyerite", 3132},
@@ -183,7 +183,7 @@ func TestReprocessingOre(t *testing.T) {
 
 			Convey("In an NPC station with no standings", func() {
 				reproRate := 0.5
-				standing := 0.0
+				taxRate := 0.05 // 5% tax rate
 				skills := industry.ReproSkills{
 					Reprocessing:           5,
 					ReprocessingEfficiency: 3,
@@ -195,7 +195,7 @@ func TestReprocessingOre(t *testing.T) {
 				}
 
 				Convey("One ore alone #1", func() {
-					reprocessed := industry.ReprocessItem(cscordite, cscorditeQty, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(cscordite, cscorditeQty, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 294646},
 						{"Pyerite", 147729},
@@ -204,7 +204,7 @@ func TestReprocessingOre(t *testing.T) {
 				})
 
 				Convey("One ore alone #2", func() {
-					reprocessed := industry.ReprocessItem(kernite, kerniteQty, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(kernite, kerniteQty, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 18044},
 						{"Mexallon", 36218},
@@ -214,7 +214,7 @@ func TestReprocessingOre(t *testing.T) {
 				})
 
 				Convey("One ore alone #3", func() {
-					reprocessed := industry.ReprocessItem(scordite, scorditeQty, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItem(scordite, scorditeQty, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 83951},
 						{"Pyerite", 41976},
@@ -223,7 +223,7 @@ func TestReprocessingOre(t *testing.T) {
 				})
 
 				Convey("Three different ores.", func() {
-					reprocessed := industry.ReprocessItems(items, reproRate, standing, skills)
+					reprocessed := industry.ReprocessItems(items, reproRate, taxRate, skills)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 396641},
 						{"Pyerite", 189705},

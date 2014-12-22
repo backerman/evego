@@ -34,7 +34,7 @@ type ReproSkills struct {
 	OreProcessing          map[string]int
 }
 
-// StationTax returns the tax rate for a station based on the character's
+// StationTax returns the tax rate for an NPC station based on the character's
 // standing.
 func StationTax(standing float64) float64 {
 	taxRate := math.Max(0.0, 0.05-0.0075*standing)
@@ -53,7 +53,7 @@ func round(in float64) float64 {
 
 // ReprocessItem returns the result of reprocessing a given item and the number
 // of input items that were reprocessed.
-func reprocessItem(item *types.Item, quantity int, stationYield float64, standing float64, skills ReproSkills) *[]types.InventoryLine {
+func reprocessItem(item *types.Item, quantity int, stationYield float64, taxRate float64, skills ReproSkills) *[]types.InventoryLine {
 	yield := stationYield
 	switch item.Type {
 	case types.Ice, types.Ore:
@@ -81,7 +81,7 @@ func reprocessItem(item *types.Item, quantity int, stationYield float64, standin
 	for _, el := range item.Materials {
 		// Take station tax based on the truncated number of units produced.
 		newQuantity := math.Floor(float64(quantity*el.Quantity) * yield)
-		stationCut := round(newQuantity * StationTax(standing))
+		stationCut := round(newQuantity * taxRate)
 		newQuantity = newQuantity - stationCut
 		quantInt := int(newQuantity)
 		if quantInt > 0 {
@@ -94,12 +94,13 @@ func reprocessItem(item *types.Item, quantity int, stationYield float64, standin
 }
 
 // ReprocessItems reprocesses a number of items, consolidating stacks of each
-// output item.
-func ReprocessItems(items *[]types.InventoryLine, stationYield float64, standing float64, skills ReproSkills) *[]types.InventoryLine {
+// output item. The input station yield and tax rate are expressed as a number
+// in 0..1 (e.g. 0.05 for 5%).
+func ReprocessItems(items *[]types.InventoryLine, stationYield float64, taxRate float64, skills ReproSkills) *[]types.InventoryLine {
 
 	reproed := []types.InventoryLine{}
 	for _, item := range *items {
-		outItems := reprocessItem(item.Item, item.Quantity, stationYield, standing, skills)
+		outItems := reprocessItem(item.Item, item.Quantity, stationYield, taxRate, skills)
 		reproed = append(reproed, *outItems...)
 	}
 
@@ -120,10 +121,10 @@ func ReprocessItems(items *[]types.InventoryLine, stationYield float64, standing
 }
 
 // ReprocessItem is a convenience function for reprocessing a single item.
-func ReprocessItem(item *types.Item, quantity int, stationYield float64, standing float64, skills ReproSkills) *[]types.InventoryLine {
+func ReprocessItem(item *types.Item, quantity int, stationYield float64, taxRate float64, skills ReproSkills) *[]types.InventoryLine {
 	items := &[]types.InventoryLine{
 		{Item: item, Quantity: quantity},
 	}
 
-	return ReprocessItems(items, stationYield, standing, skills)
+	return ReprocessItems(items, stationYield, taxRate, skills)
 }
