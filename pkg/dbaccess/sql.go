@@ -24,9 +24,6 @@ import (
 
 	"github.com/backerman/evego/pkg/types"
 	"github.com/jmoiron/sqlx"
-
-	// Register SQLite3 driver
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type sqlDb struct {

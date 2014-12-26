@@ -25,6 +25,9 @@ import (
 	"github.com/backerman/evego/pkg/parsing"
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
+
+	// Register SQLite3 driver for static database export
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var testDbPath = "../../testdb.sqlite"
