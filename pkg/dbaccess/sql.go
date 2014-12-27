@@ -231,6 +231,24 @@ func (db *sqlDb) SolarSystemForName(systemName string) (*types.SolarSystem, erro
 	return system, err
 }
 
+func (db *sqlDb) SolarSystemsForPattern(systemName string) (*[]types.SolarSystem, error) {
+	rows, err := db.systemInfoStatement.Queryx(systemName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var systems []types.SolarSystem
+	for rows.Next() {
+		system := types.SolarSystem{}
+		rows.StructScan(&system)
+		systems = append(systems, system)
+	}
+	if len(systems) == 0 {
+		err = sql.ErrNoRows
+	}
+	return &systems, err
+}
+
 func (db *sqlDb) SolarSystemForID(systemID int) (*types.SolarSystem, error) {
 	row := db.systemIDInfoStatement.QueryRowx(systemID)
 	system := &types.SolarSystem{}

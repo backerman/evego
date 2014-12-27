@@ -63,17 +63,18 @@ var (
       `
 
 	systemInfo = `
-      SELECT s.solarSystemName, s.solarSystemID, s.security,
-      c.constellationName, c.constellationID, r.regionName, r.regionID
-      FROM   mapSolarSystems s
-      JOIN   mapConstellations c USING(constellationID)
-      JOIN   mapRegions r USING(regionID)
-      WHERE  s.solarSystemName = ?
+      SELECT   s.solarSystemName, s.solarSystemID, s.security,
+               c.constellationName, c.constellationID, r.regionName, r.regionID
+      FROM     mapSolarSystems s
+      JOIN     mapConstellations c USING(constellationID)
+      JOIN     mapRegions r USING(regionID)
+      WHERE    s.solarSystemName LIKE ?
+			ORDER BY s.solarSystemName
       `
 
 	systemIDInfo = `
       SELECT s.solarSystemName, s.solarSystemID, s.security,
-      c.constellationName, c.constellationID, r.regionName, r.regionID
+             c.constellationName, c.constellationID, r.regionName, r.regionID
       FROM   mapSolarSystems s
       JOIN   mapConstellations c USING(constellationID)
       JOIN   mapRegions r USING(regionID)

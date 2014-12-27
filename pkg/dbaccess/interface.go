@@ -38,6 +38,8 @@ type EveDatabase interface {
 
 	SolarSystemForID(systemID int) (*types.SolarSystem, error)
 	SolarSystemForName(systemName string) (*types.SolarSystem, error)
+	SolarSystemsForPattern(systemName string) (*[]types.SolarSystem, error)
+
 	RegionForName(regionName string) (*types.Region, error)
 	StationForID(stationID int) (*types.Station, error)
 

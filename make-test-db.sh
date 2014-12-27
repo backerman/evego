@@ -92,7 +92,10 @@ SYSTEMS=$(cat<<EOF
 "Dodixie",
 "RF-GGF",
 "J100015",
-"4-EP12"
+"4-EP12",
+"Polaris",
+"Polfaly",
+"Polstodur"
 )
 EOF
 )

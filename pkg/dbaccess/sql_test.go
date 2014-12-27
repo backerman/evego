@@ -36,6 +36,68 @@ import (
 
 var testDbPath = "../../testdb.sqlite"
 
+type testElement struct {
+	match string
+	name  string
+}
+
+// shouldMatchSystems is a custom matcher for *[]types.Solarsystem;
+// we can't use ShouldResemble because of the float in that struct.
+func shouldMatchSystems(actual interface{}, expected ...interface{}) string {
+	actualSystems, ok := actual.(*[]types.SolarSystem)
+	if !ok {
+		return "Failed to cast actual to *[]types.SolarSystem"
+	}
+	expectedSystems, ok := expected[0].(*[]types.SolarSystem)
+	if !ok {
+		return "Failed to cast expected to *[]types.SolarSystem"
+	}
+	if len(*actualSystems) != len(*expectedSystems) {
+		return fmt.Sprintf("Expected %d systems; received %d",
+			len(*expectedSystems), len(*actualSystems))
+	}
+	var messages []string // errors found
+
+	for i := range *expectedSystems {
+		e, a := (*expectedSystems)[i], (*actualSystems)[i]
+		tests := []testElement{
+			{ShouldEqual(a.Name, e.Name), "Name"},
+			{ShouldEqual(a.ID, e.ID), "ID"},
+			{ShouldEqual(a.Constellation, e.Constellation), "Constellation"},
+			{ShouldEqual(a.ConstellationID, e.ConstellationID), "Constellation ID"},
+			{ShouldEqual(a.Region, e.Region), "Region"},
+			{ShouldEqual(a.RegionID, e.RegionID), "Region ID"},
+			{ShouldAlmostEqual(a.Security, e.Security), "Security level"},
+		}
+		for _, t := range tests {
+			if t.match != "" {
+				messages = append(messages, fmt.Sprintf("%s of system #%d doesn't match: %s",
+					t.name, i, t.match))
+			}
+		}
+	}
+
+	if len(messages) > 0 {
+		return strings.Join(messages, "; ")
+	}
+	return ""
+}
+
+// shouldMatchSystem is a convenience method for shouldMatchSystems, and takes
+// a *types.SolarSystem instead of a *[]types.SolarSystem.
+func shouldMatchSystem(actual interface{}, expected ...interface{}) string {
+	actualSystem, ok := actual.(*types.SolarSystem)
+	if !ok {
+		return "Failed to cast actual to *types.SolarSystem"
+	}
+	expectedSystem, ok := expected[0].(*types.SolarSystem)
+	if !ok {
+		return "Failed to cast expected to *types.SolarSystem"
+	}
+	return shouldMatchSystems(&[]types.SolarSystem{*actualSystem},
+		&[]types.SolarSystem{*expectedSystem})
+}
+
 func TestItems(t *testing.T) {
 	Convey("Open a database connection", t, func() {
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
@@ -93,7 +155,7 @@ func TestSolarSystems(t *testing.T) {
 			systemName := "Poitot"
 
 			Convey("We get correct information.", func() {
-				expected := types.SolarSystem{
+				expected := &types.SolarSystem{
 					Name:            "Poitot",
 					ID:              30003271,
 					Security:        -0.019552,
@@ -103,15 +165,8 @@ func TestSolarSystems(t *testing.T) {
 					RegionID:        10000041,
 				}
 				actual, err := db.SolarSystemForName(systemName)
-				// Can't use ShouldResemble because of the float.
 				So(err, ShouldBeNil)
-				So(actual.Name, ShouldEqual, expected.Name)
-				So(actual.ID, ShouldEqual, expected.ID)
-				So(actual.Security, ShouldAlmostEqual, expected.Security)
-				So(actual.Constellation, ShouldEqual, expected.Constellation)
-				So(actual.ConstellationID, ShouldEqual, expected.ConstellationID)
-				So(actual.Region, ShouldEqual, expected.Region)
-				So(actual.RegionID, ShouldEqual, expected.RegionID)
+				So(actual, shouldMatchSystem, expected)
 			})
 		})
 
@@ -119,7 +174,7 @@ func TestSolarSystems(t *testing.T) {
 			systemID := 30003333
 
 			Convey("We get correct information.", func() {
-				expected := types.SolarSystem{
+				expected := &types.SolarSystem{
 					Name:            "RF-GGF",
 					ID:              30003333,
 					Security:        -0.246618,
@@ -130,13 +185,46 @@ func TestSolarSystems(t *testing.T) {
 				}
 				actual, err := db.SolarSystemForID(systemID)
 				So(err, ShouldBeNil)
-				So(actual.Name, ShouldEqual, expected.Name)
-				So(actual.ID, ShouldEqual, expected.ID)
-				So(actual.Security, ShouldAlmostEqual, expected.Security)
-				So(actual.Constellation, ShouldEqual, expected.Constellation)
-				So(actual.ConstellationID, ShouldEqual, expected.ConstellationID)
-				So(actual.Region, ShouldEqual, expected.Region)
-				So(actual.RegionID, ShouldEqual, expected.RegionID)
+				So(actual, shouldMatchSystem, expected)
+			})
+		})
+
+		Convey("With a valid system name pattern", func() {
+			systemName := "Pol%"
+
+			Convey("We get correct information.", func() {
+				expected := &[]types.SolarSystem{
+					{
+						Name:            "Polaris",
+						ID:              30000380,
+						Security:        -0.000633,
+						Constellation:   "9RW5-Z",
+						ConstellationID: 20000054,
+						Region:          "UUA-F4",
+						RegionID:        10000004,
+					},
+					{
+						Name:            "Polfaly",
+						ID:              30005048,
+						Security:        0.830126,
+						Constellation:   "Nimedaz",
+						ConstellationID: 20000738,
+						Region:          "Kor-Azor",
+						RegionID:        10000065,
+					},
+					{
+						Name:            "Polstodur",
+						ID:              30003434,
+						Security:        0.836097,
+						Constellation:   "Frar",
+						ConstellationID: 20000501,
+						Region:          "Metropolis",
+						RegionID:        10000042,
+					},
+				}
+				actual, err := db.SolarSystemsForPattern(systemName)
+				So(err, ShouldBeNil)
+				So(actual, shouldMatchSystems, expected)
 			})
 		})
 
@@ -154,6 +242,15 @@ func TestSolarSystems(t *testing.T) {
 
 			Convey("An error is returned.", func() {
 				_, err := db.SolarSystemForID(systemID)
+				So(err, ShouldNotBeNil)
+			})
+		})
+
+		Convey("With an invalid system pattern", func() {
+			systemName := "Onibo%"
+
+			Convey("An error is returned.", func() {
+				_, err := db.SolarSystemsForPattern(systemName)
 				So(err, ShouldNotBeNil)
 			})
 		})
