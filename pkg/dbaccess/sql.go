@@ -36,6 +36,7 @@ type sqlDb struct {
 	systemIDInfoStatement         *sqlx.Stmt
 	regionInfoStatement           *sqlx.Stmt
 	stationIDInfoStatement        *sqlx.Stmt
+	stationNameInfoStatement      *sqlx.Stmt
 	blueprintProducesStmt         *sqlx.Stmt
 	inputMaterialsToBlueprintStmt *sqlx.Stmt
 	blueprintProducedByStmt       *sqlx.Stmt
@@ -66,6 +67,7 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 		{&evedb.systemIDInfoStatement, systemIDInfo},
 		{&evedb.regionInfoStatement, regionInfo},
 		{&evedb.stationIDInfoStatement, stationIDInfo},
+		{&evedb.stationNameInfoStatement, stationNameInfo},
 		{&evedb.blueprintProducesStmt, blueprintProduces},
 		{&evedb.inputMaterialsToBlueprintStmt, inputMaterialsToBlueprint},
 		{&evedb.blueprintProducedByStmt, blueprintProducedBy},
@@ -268,6 +270,24 @@ func (db *sqlDb) StationForID(stationID int) (*types.Station, error) {
 	station := &types.Station{}
 	err := row.StructScan(station)
 	return station, err
+}
+
+func (db *sqlDb) StationsForName(stationName string) (*[]types.Station, error) {
+	rows, err := db.stationNameInfoStatement.Queryx(stationName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var stations []types.Station
+	for rows.Next() {
+		station := types.Station{}
+		rows.StructScan(&station)
+		stations = append(stations, station)
+	}
+	if len(stations) == 0 {
+		err = sql.ErrNoRows
+	}
+	return &stations, err
 }
 
 func activityToTypeCode(activityStr string) types.ActivityType {

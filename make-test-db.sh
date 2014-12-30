@@ -107,7 +107,8 @@ STATIONS=$(cat<<EOF
 "Cistuvaert V - Moon 12 - Center for Advanced Studies School",
 "Gisleres V - Moon 8 - Chemal Tech Factory",
 "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
-"Ouelletta V - Moon 5 - Federal Navy Academy"
+"Ouelletta V - Moon 5 - Federal Navy Academy",
+"Quier IV - Moon 27 - Sisters of EVE Treasury"
 )
 EOF
 )

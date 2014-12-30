@@ -68,7 +68,7 @@ var (
       FROM     mapSolarSystems s
       JOIN     mapConstellations c USING(constellationID)
       JOIN     mapRegions r USING(regionID)
-      WHERE    s.solarSystemName LIKE ?
+      WHERE    LOWER(s.solarSystemName) LIKE LOWER(?)
 			ORDER BY s.solarSystemName
       `
 
@@ -92,6 +92,12 @@ var (
       FROM   staStations
       WHERE  stationID = ?
       `
+	stationNameInfo = `
+		SELECT stationName, stationID, solarSystemID, constellationID, regionID
+		FROM   staStations
+		WHERE  LOWER(stationName) LIKE LOWER(?)
+		ORDER BY stationName
+		`
 
 	blueprintBase = `
 		SELECT ti.typeName inputItem, ram.activityName, tyo.typeName outputProduct,

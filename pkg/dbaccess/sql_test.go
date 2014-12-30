@@ -289,6 +289,33 @@ func TestStations(t *testing.T) {
 				So(err, ShouldNotBeNil)
 			})
 		})
+
+		Convey("With a valid station name pattern", func() {
+			stationName := "%sisters%treas%"
+
+			Convey("We get correct information.", func() {
+				expected := &[]types.Station{{
+					Name:            "Quier IV - Moon 27 - Sisters of EVE Treasury",
+					ID:              60012655,
+					SystemID:        30003037,
+					ConstellationID: 20000444,
+					RegionID:        10000037,
+				}}
+				actual, err := db.StationsForName(stationName)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, expected)
+			})
+		})
+
+		Convey("With an invalid station name", func() {
+			stationName := "Space Station Three"
+
+			Convey("An error is returned.", func() {
+				_, err := db.StationsForName(stationName)
+				So(err, ShouldNotBeNil)
+			})
+		})
+
 	})
 }
 

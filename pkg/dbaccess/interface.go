@@ -42,6 +42,7 @@ type EveDatabase interface {
 
 	RegionForName(regionName string) (*types.Region, error)
 	StationForID(stationID int) (*types.Station, error)
+	StationsForName(stationName string) (*[]types.Station, error)
 
 	// Blueprints, invention, and manufacturing
 
