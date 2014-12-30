@@ -20,12 +20,14 @@ limitations under the License.
 package eveapi
 
 import (
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -125,7 +127,8 @@ func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 	return body, err
 }
 
-func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
+// Check the cache expiry time and update it if necessary.
+func (x *xmlAPI) checkCache() error {
 	if time.Now().After(cacheExpiry) {
 		// The cache has expired or has not yet been populated.
 		// FIXME Only one goroutine should update cache. Mutex? Channel?
@@ -133,7 +136,7 @@ func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
 		xmlBytes, err := x.get(conqerableStations)
 		if err != nil {
 			// FIXME some sort of throttling required
-			return nil, err
+			return err
 		}
 		var response apiResponse
 		xml.Unmarshal(xmlBytes, &response)
@@ -150,6 +153,15 @@ func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
 		}
 		outposts = newOutposts
 	}
+
+	return nil
+}
+
+func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
+	err := x.checkCache()
+	if err != nil {
+		return nil, err
+	}
 	stn, exists := outposts[id]
 	if !exists {
 		return nil, fmt.Errorf("Station ID %d not found.", id)
@@ -163,6 +175,35 @@ func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
 		stn.RegionID = system.RegionID
 	}
 	return stn, nil
+}
+
+func (x *xmlAPI) OutpostsForName(name string) (*[]types.Station, error) {
+	// This is a horribly inefficient implementation. Switch to SQLite
+	// in-memory DB rather than keeping everything as Golang structs?
+	err := x.checkCache()
+	if err != nil {
+		return nil, err
+	}
+	var stations []types.Station
+	namePattern := "^(?i:" + strings.Replace(name, "%", ".*", -1) + ")$"
+	nameRE, err := regexp.Compile(namePattern)
+	if err != nil {
+		return nil, err
+	}
+	for id, stn := range outposts {
+		if nameRE.MatchString(stn.Name) {
+			matchStn, err := x.OutpostForID(id)
+			if err != nil {
+				return nil, err
+			}
+			stations = append(stations, *matchStn)
+		}
+	}
+
+	if len(stations) == 0 {
+		return &stations, sql.ErrNoRows
+	}
+	return &stations, nil
 }
 
 func (x *xmlAPI) Close() error {

@@ -95,7 +95,8 @@ SYSTEMS=$(cat<<EOF
 "4-EP12",
 "Polaris",
 "Polfaly",
-"Polstodur"
+"Polstodur",
+"8WA-Z6"
 )
 EOF
 )

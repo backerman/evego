@@ -39,7 +39,6 @@ var testDbPath = "../../testdb.sqlite"
 var testOutpostsXML = "../../testdata/test-outposts.xml"
 
 func TestOutpostID(t *testing.T) {
-
 	Convey("Set up API interface", t, func(c C) {
 		var actualURL string
 		ts := httptest.NewServer(
@@ -71,9 +70,7 @@ func TestOutpostID(t *testing.T) {
 				actual, err := x.OutpostForID(outpostID)
 				So(err, ShouldBeNil)
 				So(actual, ShouldResemble, expected)
-
 			})
-
 		})
 
 		Convey("Given an invalid outpost ID", func() {
@@ -83,9 +80,54 @@ func TestOutpostID(t *testing.T) {
 				_, err := x.OutpostForID(outpostID)
 				So(err, ShouldNotBeNil)
 			})
+		})
+	})
+}
 
+func TestOutpostName(t *testing.T) {
+	Convey("Set up API interface", t, func(c C) {
+		var actualURL string
+		ts := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				actualURL = r.URL.String()
+				respFile, err := os.Open(testOutpostsXML)
+				c.So(err, ShouldBeNil)
+				responseBytes, err := ioutil.ReadAll(respFile)
+				c.So(err, ShouldBeNil)
+				responseBuf := bytes.NewBuffer(responseBytes)
+				responseBuf.WriteTo(w)
+			}))
+
+		defer ts.Close()
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		x := eveapi.XMLAPI(ts.URL, db)
+
+		Convey("Given a valid outpost name pattern", func() {
+			outpostName := "%CAT%station"
+
+			Convey("Matching outposts are returned.", func() {
+				expected := &[]types.Station{
+					{
+						Name:            "8WA-Z6 VIII - CAT IN STATION",
+						ID:              61000189,
+						SystemID:        30004760,
+						ConstellationID: 20000696,
+						RegionID:        10000060,
+					},
+				}
+				actual, err := x.OutpostsForName(outpostName)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, expected)
+			})
 		})
 
-	})
+		Convey("Given an invalid outpost name", func() {
+			outpostName := "Forty-two"
 
+			Convey("An error is returned.", func() {
+				_, err := x.OutpostsForName(outpostName)
+				So(err, ShouldNotBeNil)
+			})
+		})
+	})
 }

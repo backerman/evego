@@ -31,4 +31,8 @@ type EveAPI interface {
 
 	// OutpostForID returns a conquerable station with the provided ID.
 	OutpostForID(id int) (*types.Station, error)
+
+	// OutpostsForName returns the stations matching the provided name pattern.
+	// The percent character (%) may be used as a wildcard.
+	OutpostsForName(name string) (*[]types.Station, error)
 }
