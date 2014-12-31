@@ -168,7 +168,7 @@ func TestMarketOrders(t *testing.T) {
 				// are passed to Set.
 				urlParms := url.Values{}
 				urlParms.Set("typeid", fmt.Sprintf("%d", item.ID))
-				urlParms.Set("regionLimit", fmt.Sprintf("%d", region.ID))
+				urlParms.Set("regionlimit", fmt.Sprintf("%d", region.ID))
 				expectedURL := "/?" + urlParms.Encode()
 
 				actual, err := ec.OrdersForItem(item, regionName, orderType)

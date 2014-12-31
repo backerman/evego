@@ -156,7 +156,7 @@ func (e *eveCentral) OrdersForItem(item *types.Item, location string, orderType 
 	}
 	query := url.Values{}
 	if region != nil {
-		query.Set("regionLimit", fmt.Sprintf("%d", region.ID))
+		query.Set("regionlimit", fmt.Sprintf("%d", region.ID))
 	} else {
 		query.Set("usesystem", fmt.Sprintf("%d", system.ID))
 	}
