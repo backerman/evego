@@ -105,9 +105,10 @@ func TestItems(t *testing.T) {
 
 		Convey("With a valid item name", func() {
 			itemName := "Medium Shield Extender II"
+			itemID := 3831
 			expected := types.Item{
 				Name:      itemName,
-				ID:        3831,
+				ID:        itemID,
 				Type:      types.Other,
 				Category:  "Module",
 				Group:     "Shield Extender",
@@ -117,13 +118,15 @@ func TestItems(t *testing.T) {
 			Convey("The correct information is returned.", func() {
 				actual, err := db.ItemForName(itemName)
 				So(err, ShouldBeNil)
+				mats, err := db.ItemComposition(itemID)
+				So(err, ShouldBeNil)
 				So(actual.Name, ShouldEqual, expected.Name)
 				So(actual.ID, ShouldEqual, expected.ID)
 				So(actual.Type, ShouldEqual, expected.Type)
 				So(actual.Category, ShouldEqual, expected.Category)
 				So(actual.Group, ShouldEqual, expected.Group)
 				So(actual.BatchSize, ShouldEqual, expected.BatchSize)
-				So(&actual.Materials, ShouldHaveComposition, []Component{
+				So(mats, ShouldHaveComposition, []Component{
 					{"Tritanium", 1890},
 					{"Pyerite", 456},
 					{"Mexallon", 179},

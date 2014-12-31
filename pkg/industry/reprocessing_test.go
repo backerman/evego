@@ -53,7 +53,8 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("It should return the correct minerals", func() {
-					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, gun, quantity, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 614},
 						{"Pyerite", 33},
@@ -74,7 +75,8 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("It should return the correct minerals", func() {
-					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, gun, quantity, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 506},
 						{"Pyerite", 27},
@@ -101,7 +103,8 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("It should return the correct minerals", func() {
-					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, plate, quantity, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 5498},
 						{"Pyerite", 5217},
@@ -114,7 +117,8 @@ func TestReprocessingModules(t *testing.T) {
 
 				Convey("Rounding should occur after summing all input units", func() {
 					quantity = 2
-					reprocessed := industry.ReprocessItem(plate, quantity, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, plate, quantity, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 10996},
 						{"Pyerite", 10435},
@@ -144,7 +148,8 @@ func TestReprocessingModules(t *testing.T) {
 				}
 
 				Convey("Rounding should occur after summing all input units", func() {
-					reprocessed := industry.ReprocessItem(gun, quantity, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, gun, quantity, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 10225},
 						{"Pyerite", 3132},
@@ -198,7 +203,8 @@ func TestReprocessingOre(t *testing.T) {
 				}
 
 				Convey("One ore alone #1", func() {
-					reprocessed := industry.ReprocessItem(cscordite, cscorditeQty, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, cscordite, cscorditeQty, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 294646},
 						{"Pyerite", 147729},
@@ -207,7 +213,8 @@ func TestReprocessingOre(t *testing.T) {
 				})
 
 				Convey("One ore alone #2", func() {
-					reprocessed := industry.ReprocessItem(kernite, kerniteQty, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, kernite, kerniteQty, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 18044},
 						{"Mexallon", 36218},
@@ -217,7 +224,8 @@ func TestReprocessingOre(t *testing.T) {
 				})
 
 				Convey("One ore alone #3", func() {
-					reprocessed := industry.ReprocessItem(scordite, scorditeQty, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItem(db, scordite, scorditeQty, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 83951},
 						{"Pyerite", 41976},
@@ -226,7 +234,8 @@ func TestReprocessingOre(t *testing.T) {
 				})
 
 				Convey("Three different ores.", func() {
-					reprocessed := industry.ReprocessItems(items, reproRate, taxRate, skills)
+					reprocessed, err := industry.ReprocessItems(db, items, reproRate, taxRate, skills)
+					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
 						{"Tritanium", 396641},
 						{"Pyerite", 189705},

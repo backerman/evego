@@ -40,8 +40,7 @@ type Item struct {
 	Type      ItemType
 	Category  string `db:"categoryName"` // e.g. Module, Drone, Charge
 	Group     string `db:"groupName"`    // e.g. Omber, Logistic Drone, Footwear
-	Materials []InventoryLine
-	BatchSize int `db:"portionSize"`
+	BatchSize int    `db:"portionSize"`
 }
 
 func (i Item) String() string {

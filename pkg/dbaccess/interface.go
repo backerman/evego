@@ -32,6 +32,7 @@ type EveDatabase interface {
 	// Items
 
 	ItemForName(itemName string) (*types.Item, error)
+	ItemComposition(itemID int) (*[]types.InventoryLine, error)
 	MarketGroupForItem(item *types.Item) (*types.MarketGroup, error)
 
 	// Universe locations

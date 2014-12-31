@@ -97,7 +97,6 @@ func (db *sqlDb) ItemForName(itemName string) (*types.Item, error) {
 		return nil, err
 	}
 	object.Type = db.itemType(&object)
-	object.Materials, err = db.itemComposition(object.ID)
 
 	return &object, err
 }
@@ -111,13 +110,12 @@ func (db *sqlDb) ItemForID(itemID int) (*types.Item, error) {
 		return nil, err
 	}
 
-	object.Materials, err = db.itemComposition(object.ID)
 	object.Type = db.itemType(&object)
 	return &object, err
 }
 
 // itemComposition returns the composition of a named Eve item.
-func (db *sqlDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
+func (db *sqlDb) ItemComposition(itemID int) (*[]types.InventoryLine, error) {
 	rows, err := db.compStatement.Query(itemID)
 	if err != nil {
 		log.Fatalf("Unable to execute composition query for item %d: %v", itemID, err)
@@ -140,7 +138,7 @@ func (db *sqlDb) itemComposition(itemID int) ([]types.InventoryLine, error) {
 		}
 		results = append(results, types.InventoryLine{Quantity: quantity, Item: item})
 	}
-	return results, nil
+	return &results, nil
 }
 
 // MarketGroupForItem returns the parent groups of the market item.
