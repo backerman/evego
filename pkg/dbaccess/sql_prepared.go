@@ -107,6 +107,7 @@ var (
 		JOIN   ramActivities ram USING(activityID)
 		JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
 		WHERE  QUERYCOLUMN LIKE ?
+		ORDER BY inputItem, outputProduct
 		`
 
 	// What items can I produce with a blueprint?
@@ -140,5 +141,6 @@ var (
 		ON     iap.typeID = ti.typeID AND iap.activityID=iam.activityID
 		JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
 		WHERE  inputItem = ? AND outputProduct = ?
+		ORDER BY inputItem, outputProduct, inputMaterial
 		`
 )
