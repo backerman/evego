@@ -144,9 +144,11 @@ func (x *xmlAPI) checkCache() error {
 		for i := range response.Outposts {
 			o := response.Outposts[i]
 			stn := types.Station{
-				Name:     o.Name,
-				ID:       o.ID,
-				SystemID: o.SolarSystemID,
+				Name:          o.Name,
+				ID:            o.ID,
+				SystemID:      o.SolarSystemID,
+				Corporation:   o.CorporationName,
+				CorporationID: o.CorporationID,
 				// Delay constellation/region lookup until queried.
 			}
 			newOutposts[o.ID] = &stn

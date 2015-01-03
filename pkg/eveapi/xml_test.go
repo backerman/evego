@@ -66,6 +66,8 @@ func TestOutpostID(t *testing.T) {
 					SystemID:        30004553,
 					ConstellationID: 20000665,
 					RegionID:        10000058,
+					Corporation:     "GoonWaffe",
+					CorporationID:   667531913,
 				}
 				actual, err := x.OutpostForID(outpostID)
 				So(err, ShouldBeNil)
@@ -113,6 +115,8 @@ func TestOutpostName(t *testing.T) {
 						SystemID:        30004760,
 						ConstellationID: 20000696,
 						RegionID:        10000060,
+						Corporation:     "Northern Associates Holdings",
+						CorporationID:   98008728,
 					},
 				}
 				actual, err := x.OutpostsForName(outpostName)
