@@ -88,13 +88,17 @@ var (
       `
 
 	stationIDInfo = `
-      SELECT stationName, stationID, solarSystemID, constellationID, regionID
-      FROM   staStations
+      SELECT stationName, stationID, solarSystemID, constellationID, regionID,
+						 corporationID, itemName corporationName
+      FROM   staStations s
+			JOIN   invNames n ON n.itemID = s.corporationID
       WHERE  stationID = ?
       `
 	stationNameInfo = `
-		SELECT stationName, stationID, solarSystemID, constellationID, regionID
-		FROM   staStations
+		SELECT stationName, stationID, solarSystemID, constellationID, regionID,
+					 corporationID, itemName corporationName
+		FROM   staStations s
+		JOIN   invNames n ON n.itemID = s.corporationID
 		WHERE  LOWER(stationName) LIKE LOWER(?)
 		ORDER BY stationName
 		`

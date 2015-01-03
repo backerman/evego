@@ -30,6 +30,7 @@ sqlite3 $DBLOC > out-schema.sql <<EOF
 .schema invMarketGroups
 .schema invCategories
 .schema invGroups
+.schema invNames
 .schema mapSolarSystems
 .schema mapConstellations
 .schema mapRegions
@@ -251,6 +252,15 @@ WHERE regionID IN (
 SELECT *
 FROM   staStations
 WHERE  stationName IN $STATIONS;
+
+.mode insert invNames
+SELECT *
+FROM   invNames
+WHERE  itemID IN (
+  SELECT DISTINCT corporationID
+  FROM   staStations
+  WHERE  stationName IN $STATIONS
+);
 
 -- Industry tables
 .mode insert ramActivities

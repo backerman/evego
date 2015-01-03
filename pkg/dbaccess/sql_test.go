@@ -277,6 +277,8 @@ func TestStations(t *testing.T) {
 					SystemID:        30003016,
 					ConstellationID: 20000441,
 					RegionID:        10000037,
+					Corporation:     "Roden Shipyards",
+					CorporationID:   1000102,
 				}
 				actual, err := db.StationForID(stationID)
 				So(err, ShouldBeNil)
@@ -303,6 +305,8 @@ func TestStations(t *testing.T) {
 					SystemID:        30003037,
 					ConstellationID: 20000444,
 					RegionID:        10000037,
+					Corporation:     "Sisters of EVE",
+					CorporationID:   1000130,
 				}}
 				actual, err := db.StationsForName(stationName)
 				So(err, ShouldBeNil)

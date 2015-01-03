@@ -41,4 +41,6 @@ type Station struct {
 	SystemID        int    `db:"solarSystemID"`
 	ConstellationID int    `db:"constellationID"`
 	RegionID        int    `db:"regionID"`
+	CorporationID   int    `db:"corporationID"`
+	Corporation     string `db:"corporationName"`
 }
