@@ -84,3 +84,16 @@ func TestIndustryCopyPaste(t *testing.T) {
 		})
 	})
 }
+
+func TestBadCopyPaste(t *testing.T) {
+	Convey("Given completely malformed input", t, func() {
+		inventoryStr := "fred"
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		defer db.Close()
+
+		Convey("It returns an empty result.", func() {
+			parsed := parsing.ParseInventory(inventoryStr, db)
+			So(parsed, ShouldBeEmpty)
+		})
+	})
+}

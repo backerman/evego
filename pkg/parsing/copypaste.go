@@ -71,6 +71,9 @@ func ParseInventory(pasted string, database dbaccess.EveDatabase) *[]types.Inven
 		if len(line) == 1 {
 			// "123,456,789x Something"
 			matches := industryLine.FindStringSubmatch(line[0])
+			if matches == nil {
+				continue
+			}
 			var err error
 			_, err = fmt.Sscanf(removeNonNumeric(matches[1]), "%d", &quantity)
 			if err != nil {
