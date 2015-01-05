@@ -60,18 +60,14 @@ func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 			switch currentElement {
 			case "rowset":
 				for _, a := range tok.Attr {
-					log.Printf("Checking attr %#v", a)
 					if a.Name.Local == "name" {
-						log.Printf("Found match %#v", a.Value)
 						rowsetName = a.Value
 						break
 					}
 				}
 			case "row":
-				log.Printf("Decoding row for rowset named %#v", rowsetName)
 				switch rowsetName {
 				case "skills":
-					log.Printf("Decoding skills")
 					skillRow := types.Skill{}
 					d.DecodeElement(&skillRow, &tok)
 					cs.Skills = append(cs.Skills, skillRow)
