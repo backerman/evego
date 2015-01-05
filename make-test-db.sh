@@ -72,7 +72,17 @@ ITEMS=$(cat<<EOF
 "Ishtar Blueprint",
 "Datacore - Gallentean Starship Engineering",
 "Datacore - Mechanical Engineering",
-"Datacore - Amarrian Starship Engineering"
+"Datacore - Amarrian Starship Engineering",
+"Gunnery",
+"Small Hybrid Turret",
+"Spaceship Command",
+"Gallente Frigate",
+"Mining",
+"Mechanics",
+"Science",
+"Astrometrics",
+"Power Grid Management",
+"Hacking"
 )
 EOF
 )

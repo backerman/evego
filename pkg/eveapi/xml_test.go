@@ -24,6 +24,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/eveapi"
@@ -37,6 +38,7 @@ import (
 var testDbPath = "../../testdb.sqlite"
 
 var testOutpostsXML = "../../testdata/test-outposts.xml"
+var testCharSheetXML = "../../testdata/test-charsheet.xml"
 
 func TestOutpostID(t *testing.T) {
 	Convey("Set up API interface", t, func(c C) {
@@ -133,5 +135,59 @@ func TestOutpostName(t *testing.T) {
 				So(err, ShouldNotBeNil)
 			})
 		})
+	})
+}
+
+func TestCharacterSheet(t *testing.T) {
+	Convey("Set up API interface", t, func(c C) {
+		var actualURL string
+		ts := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				actualURL = r.URL.String()
+				respFile, err := os.Open(testCharSheetXML)
+				c.So(err, ShouldBeNil)
+				responseBytes, err := ioutil.ReadAll(respFile)
+				c.So(err, ShouldBeNil)
+				responseBuf := bytes.NewBuffer(responseBytes)
+				responseBuf.WriteTo(w)
+			}))
+
+		defer ts.Close()
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		x := eveapi.XMLAPI(ts.URL, db)
+
+		Convey("Given a character's API key", func() {
+			characterID := 94319654
+			keyID := 12345
+			verificationCode := "abcdef12345"
+
+			Convey("Its information is returned.", func() {
+				expected := &types.CharacterSheet{
+					Name:          "Arjun Kansene",
+					ID:            characterID,
+					Corporation:   "Center for Advanced Studies",
+					CorporationID: 1000169,
+					Skills: []types.Skill{
+						{Name: "Gunnery", TypeID: 3300, NumSkillpoints: 256000, Level: 5, Published: true},
+						{Name: "Small Hybrid Turret", TypeID: 3301, NumSkillpoints: 256000, Level: 5, Published: true},
+						{Name: "Spaceship Command", TypeID: 3327, NumSkillpoints: 45255, Level: 4, Published: true},
+						{Name: "Gallente Frigate", TypeID: 3328, NumSkillpoints: 512000, Level: 5, Published: true},
+						{Name: "Mining", TypeID: 3386, NumSkillpoints: 256000, Level: 5, Published: true},
+						{Name: "Mechanics", TypeID: 3392, NumSkillpoints: 256000, Level: 5, Published: true},
+						{Name: "Science", TypeID: 3402, NumSkillpoints: 45255, Level: 4, Published: true},
+						{Name: "Astrometrics", TypeID: 3412, NumSkillpoints: 135765, Level: 4, Published: true},
+						{Name: "Power Grid Management", TypeID: 3413, NumSkillpoints: 256000, Level: 5, Published: true},
+						{Name: "Hacking", TypeID: 21718, NumSkillpoints: 135765, Level: 4, Published: true},
+					},
+				}
+				actual, expiration, err := x.CharacterSheet(characterID, keyID, verificationCode)
+				So(err, ShouldBeNil)
+				// expiry time minus "current time" is 57 minutes
+				So(expiration, ShouldHappenWithin, 58*time.Minute, time.Now())
+				So(expiration, ShouldNotHappenWithin, 56*time.Minute, time.Now())
+				So(actual, ShouldResemble, expected)
+			})
+		})
+
 	})
 }

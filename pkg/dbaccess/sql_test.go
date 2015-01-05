@@ -146,6 +146,36 @@ func TestItems(t *testing.T) {
 				So(err, ShouldEqual, sql.ErrNoRows)
 			})
 		})
+
+		Convey("With a valid item type ID", func() {
+			itemID := 3328
+			itemName := "Gallente Frigate"
+			expected := &types.Item{
+				Name:      itemName,
+				ID:        itemID,
+				Type:      types.Other,
+				Group:     "Spaceship Command",
+				Category:  "Skill",
+				BatchSize: 1,
+			}
+			Convey("The correct information is returned.", func() {
+				actual, err := db.ItemForID(itemID)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, expected)
+				mats, err := db.ItemComposition(itemID)
+				So(err, ShouldBeNil)
+				So(mats, ShouldBeEmpty) // skillbooks can't be reprocessed
+			})
+		})
+
+		Convey("With an invalid item type ID", func() {
+			itemID := 1234567890
+
+			Convey("An error is returned.", func() {
+				_, err := db.ItemForID(itemID)
+				So(err, ShouldNotBeNil)
+			})
+		})
 	})
 }
 

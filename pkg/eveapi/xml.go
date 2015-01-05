@@ -24,7 +24,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/backerman/evego/pkg/dbaccess"
@@ -39,6 +38,7 @@ var (
 const (
 	iso8601            = "2006-01-02 15:04:05"
 	conqerableStations = "/eve/ConquerableStationList.xml.aspx"
+	characterSheet     = "/char/CharacterSheet.xml.aspx"
 )
 
 type xmlAPI struct {
@@ -75,6 +75,8 @@ func expirationTime(currentTime, cachedUntil string) time.Time {
 	return time.Now().Add(diff)
 }
 
+// get executes a call to the EVE API given the endpoint path and an optional
+// url.Values containing the parameters to be passed.
 func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 	// Make a copy of our base URL and modify as appropriate for this call.
 	callURL := *x.url
@@ -83,12 +85,10 @@ func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 		req *http.Request
 		err error
 	)
-	if params == nil {
-		req, err = http.NewRequest("GET", callURL.String(), nil)
-	} else {
-		req, err = http.NewRequest("POST", callURL.String(),
-			strings.NewReader(params[0].Encode()))
+	if params != nil {
+		callURL.RawQuery = params[0].Encode()
 	}
+	req, err = http.NewRequest("GET", callURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
