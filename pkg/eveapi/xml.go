@@ -93,10 +93,6 @@ func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Add("User-Agent", "evego (https://github.com/backerman/evego)")
-	if params != nil {
-		// We're doing a POST so need to set the content type.
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	}
 	resp, err := x.http.Do(req)
 	defer resp.Body.Close()
 	if err != nil {
