@@ -24,6 +24,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -99,6 +100,22 @@ func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
 	return stn, nil
 }
 
+// Implementation of sort.Interface
+
+type stationsList []types.Station
+
+func (s stationsList) Len() int {
+	return len(s)
+}
+
+func (s stationsList) Less(i, j int) bool {
+	return s[i].Name < s[j].Name
+}
+
+func (s stationsList) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
 func (x *xmlAPI) OutpostsForName(name string) (*[]types.Station, error) {
 	// This is a horribly inefficient implementation. Switch to SQLite
 	// in-memory DB rather than keeping everything as Golang structs?
@@ -125,5 +142,6 @@ func (x *xmlAPI) OutpostsForName(name string) (*[]types.Station, error) {
 	if len(stations) == 0 {
 		return &stations, sql.ErrNoRows
 	}
+	sort.Sort(stationsList(stations))
 	return &stations, nil
 }
