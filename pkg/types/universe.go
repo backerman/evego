@@ -36,11 +36,12 @@ type Region struct {
 
 // Station is either an NPC station or a conquerable outpost.
 type Station struct {
-	Name            string `db:"stationName"`
-	ID              int    `db:"stationID"`
-	SystemID        int    `db:"solarSystemID"`
-	ConstellationID int    `db:"constellationID"`
-	RegionID        int    `db:"regionID"`
-	CorporationID   int    `db:"corporationID"`
-	Corporation     string `db:"corporationName"`
+	Name                   string  `db:"stationName"`
+	ID                     int     `db:"stationID"`
+	SystemID               int     `db:"solarSystemID"`
+	ConstellationID        int     `db:"constellationID"`
+	RegionID               int     `db:"regionID"`
+	CorporationID          int     `db:"corporationID"`
+	Corporation            string  `db:"corporationName"`
+	ReprocessingEfficiency float64 `db:"reprocessingEfficiency"`
 }

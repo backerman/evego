@@ -302,13 +302,14 @@ func TestStations(t *testing.T) {
 
 			Convey("We get correct information.", func() {
 				expected := &types.Station{
-					Name:            "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
-					ID:              60010312,
-					SystemID:        30003016,
-					ConstellationID: 20000441,
-					RegionID:        10000037,
-					Corporation:     "Roden Shipyards",
-					CorporationID:   1000102,
+					Name:                   "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
+					ID:                     60010312,
+					SystemID:               30003016,
+					ConstellationID:        20000441,
+					RegionID:               10000037,
+					Corporation:            "Roden Shipyards",
+					CorporationID:          1000102,
+					ReprocessingEfficiency: 0.5,
 				}
 				actual, err := db.StationForID(stationID)
 				So(err, ShouldBeNil)
@@ -330,13 +331,14 @@ func TestStations(t *testing.T) {
 
 			Convey("We get correct information.", func() {
 				expected := &[]types.Station{{
-					Name:            "Quier IV - Moon 27 - Sisters of EVE Treasury",
-					ID:              60012655,
-					SystemID:        30003037,
-					ConstellationID: 20000444,
-					RegionID:        10000037,
-					Corporation:     "Sisters of EVE",
-					CorporationID:   1000130,
+					Name:                   "Quier IV - Moon 27 - Sisters of EVE Treasury",
+					ID:                     60012655,
+					SystemID:               30003037,
+					ConstellationID:        20000444,
+					RegionID:               10000037,
+					Corporation:            "Sisters of EVE",
+					CorporationID:          1000130,
+					ReprocessingEfficiency: 0.5,
 				}}
 				actual, err := db.StationsForName(stationName)
 				So(err, ShouldBeNil)
