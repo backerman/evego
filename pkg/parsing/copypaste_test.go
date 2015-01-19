@@ -51,7 +51,7 @@ func TestInventoryCopyPaste(t *testing.T) {
 				{"Multifrequency S", 1},
 				{"Armor Plates", 18},
 				{"Small Supplemental Barrier Emitter I", 1},
-				{"Beta Hull Mod Reinforced Bulkheads", 1},
+				{"Type-D Restrained Expanded Cargo", 1},
 				{"Limited Kinetic Plating I", 1},
 				{"Small I-ax Remote Armor Repairer", 1},
 				{"Shielded Radar Backup Cluster I", 1},
