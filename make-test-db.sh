@@ -32,6 +32,7 @@ sqlite3 $DBLOC > out-schema.sql <<EOF
 .schema invGroups
 .schema invNames
 .schema mapSolarSystems
+.schema mapSolarSystemJumps
 .schema mapConstellations
 .schema mapRegions
 .schema ramActivities
@@ -61,7 +62,7 @@ ITEMS=$(cat<<EOF
 "Multifrequency S",
 "Armor Plates",
 "Small Supplemental Barrier Emitter I",
-"Beta Hull Mod Reinforced Bulkheads",
+"Type-D Restrained Expanded Cargo",
 "Limited Kinetic Plating I",
 "Small I-ax Remote Armor Repairer",
 "Shielded Radar Backup Cluster I",
@@ -107,7 +108,16 @@ SYSTEMS=$(cat<<EOF
 "Polaris",
 "Polfaly",
 "Polstodur",
-"8WA-Z6"
+"8WA-Z6",
+-- Routing....
+"31-MLU",
+"A9D-R0",
+"BMNV-P",
+"BY-S36",
+"X-M2LR",
+"FD-MLJ",
+"PF-346",
+"Orvolle"
 )
 EOF
 )
@@ -241,6 +251,16 @@ SELECT p.parentGroupID AS groupId FROM parents p
 .mode insert mapSolarSystems
 SELECT * FROM mapSolarSystems
 WHERE solarSystemName IN $SYSTEMS;
+
+.mode insert mapSolarSystemJumps
+WITH systemIDs AS (
+  SELECT solarSystemID
+  FROM   mapSolarSystems
+  WHERE  solarSystemName IN $SYSTEMS
+)
+SELECT * FROM mapSolarSystemJumps
+WHERE fromSolarSystemID IN systemIDs
+OR    toSolarSystemID IN systemIDs;
 
 .mode insert mapConstellations
 SELECT * FROM mapConstellations

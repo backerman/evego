@@ -4,7 +4,7 @@ Tripped Power Circuit	42	Salvaged Materials			0.42 m3
 Multifrequency S	1	Frequency Crystal	Small		1 m3
 Armor Plates	18	Salvaged Materials			0.18 m3
 Small Supplemental Barrier Emitter I	1	Shield Extender		Medium	5 m3
-Beta Hull Mod Reinforced Bulkheads	1	Reinforced Bulkhead		Low	5 m3
+Type-D Restrained Expanded Cargo	1	Reinforced Bulkhead		Low	5 m3
 Limited Kinetic Plating I	1	Armor Coating		Low	5 m3
 Small I-ax Remote Armor Repairer	1	Remote Armor Repairer		High	5 m3
 Shielded Radar Backup Cluster I	1	Sensor Backup Array		Low	5 m3
