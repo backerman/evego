@@ -147,4 +147,19 @@ var (
 		WHERE  inputItem = ? AND outputProduct = ?
 		ORDER BY inputItem, outputProduct, inputMaterial
 		`
+
+	// Routing: get the path from point A to point B. All results will have
+	// a header row with ArcRowid null; if the destination is unreachable,
+	// NodeFrom and NodeTo will be null. The remaning rows are each jump in
+	// the path.
+	//
+	// Returns a nonnegative integer: if 0, the destination is not reachable;
+	// otherwise, returns (n+1) where n is the the number of jumps between
+	// the source and destination systems. We assume that NodeFrom and NodeTo
+	// are not the same; if they are, this breaks.
+	countJumpsSQLite = `
+		SELECT COUNT(*)
+		FROM   jump_route
+		WHERE  NodeFrom = ? AND NodeTo = ?
+	`
 )
