@@ -47,7 +47,9 @@ this subset:
 
 * Add the missing items (and tables, if necessary) to `make-test-db.sh`;
 * Rerun that script against [Fuzzysteve][steve]'s SQLite [conversion] of the
-full SDE; and
+full SDE;
+* Run the spatialize.sh script to generate the routing table for jump path
+calculations; and
 * Add the new version of `testdb.sqlite` to your changeset.
 
 [conversion]: https://www.fuzzwork.co.uk/dump/

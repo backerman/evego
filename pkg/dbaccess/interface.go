@@ -46,6 +46,13 @@ type EveDatabase interface {
 	StationForID(stationID int) (*types.Station, error)
 	StationsForName(stationName string) (*[]types.Station, error)
 
+	// Routing
+
+	// NumJumps returns the number of jumps in the shortest path from
+	// fromSystem to toSystem, or -1 if the destination is unreachable
+	// from the start.
+	NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error)
+
 	// Blueprints, invention, and manufacturing
 
 	// BlueprintOutputs returns the items and quantity of each that can be output
