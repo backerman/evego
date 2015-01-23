@@ -25,6 +25,7 @@ sudo apt-get update -qq &&
 sudo apt-get install -y libproj-dev make libxml2-dev zlib1g-dev \
   pkg-config libgeos-c1 libgeos-dev &&
 wget http://www.sqlite.org/2015/sqlite-autoconf-3080801.tar.gz &&
+tar -zxvf sqlite-autoconf-3080801.tar.gz &&
 (cd sqlite-autoconf-3080801 && configure && make && sudo make install) &&
 sudo cp /usr/local/lib/libsqlite3.so.0.8.6 /usr/lib/x86_64-linux-gnu &&
 wget http://www.gaia-gis.it/gaia-sins/libspatialite-4.2.0.tar.gz &&
