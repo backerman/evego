@@ -188,6 +188,42 @@ func (e *eveCentral) OrdersForItem(item *types.Item, location string, orderType 
 	return &results, nil
 }
 
+func (e *eveCentral) BuyInStation(item *types.Item, location *types.Station) (*[]types.Order, error) {
+	system, err := e.db.SolarSystemForID(location.SystemID)
+	if err != nil {
+		return nil, err
+	}
+	regionalOrders, err := e.OrdersForItem(item, system.Region, types.Buy)
+	if err != nil {
+		return nil, err
+	}
+	orders := []types.Order{}
+	for _, o := range *regionalOrders {
+		switch o.JumpRange {
+		case types.BuyRegion:
+			orders = append(orders, o)
+		case types.BuyNumberJumps:
+			numJumps, err := e.db.NumJumpsID(o.Station.SystemID, location.SystemID)
+			if err != nil {
+				return nil, err
+			}
+			if numJumps <= o.NumJumps {
+				orders = append(orders, o)
+			}
+		case types.BuySystem:
+			if o.Station.SystemID == location.SystemID {
+				orders = append(orders, o)
+			}
+		case types.BuyStation:
+			if o.Station.ID == location.ID {
+				orders = append(orders, o)
+			}
+		}
+	}
+
+	return &orders, nil
+}
+
 func (e *eveCentral) Close() error {
 	return nil
 }

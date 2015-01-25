@@ -179,6 +179,29 @@ func TestMarketOrders(t *testing.T) {
 
 		})
 
+		Convey("Given an item and a station", func() {
+			item, err := db.ItemForName("Medium Shield Extender II")
+			So(err, ShouldBeNil)
+			station, err := db.StationForID(60010336) // Gisleres IV-6 Roden Whse
+			Convey("The buy orders valid at that station are identified.", func() {
+				chemalTech, err := db.StationForID(60010840) // Gisleres V-8 Chemal Tech Factory
+				So(err, ShouldBeNil)
+				cas, err := db.StationForID(60014719) // Cistuvaert V-12 CAS
+				So(err, ShouldBeNil)
+				expected := &[]types.Order{
+					{Type: types.Buy, Item: item, Quantity: 57, Price: 277000.00, Station: cas,
+						Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
+						MinQuantity: 1, JumpRange: types.BuyRegion},
+					{Type: types.Buy, Item: item, Quantity: 64, Price: 0.01, Station: chemalTech,
+						Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
+						MinQuantity: 1, JumpRange: types.BuyNumberJumps, NumJumps: 10},
+				}
+				actual, err := ec.BuyInStation(item, station)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, expected)
+			})
+		})
+
 	})
 
 }

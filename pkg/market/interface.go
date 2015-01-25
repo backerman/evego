@@ -33,4 +33,8 @@ type EveMarket interface {
 	// location is the name of either a system or a region.
 	// type can be Buy, Sell, or All.
 	OrdersForItem(itemID *types.Item, location string, orderType types.OrderType) (*[]types.Order, error)
+
+	// BuyInStation returns the buy orders that are in range of the given
+	// station (i.e., can be sold to by a user there).
+	BuyInStation(itemID *types.Item, location *types.Station) (*[]types.Order, error)
 }

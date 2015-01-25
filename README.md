@@ -19,6 +19,18 @@ subject to change for the near future, and suggestions for changes are
 encouraged if something could be implemented better. (On a related note, if you
 use evego in your own code, please let me know.)
 
+## Dependencies
+
+This library depends on [spatialite][spatialite] for routing functionality;
+while ellipsoid 4326 is nowhere to be found in New Eden, we still need
+Dijkstra's algorithm for calculating jump paths. ([PostgreSQL][pgsql] and
+[PostGIS][postgis] will be the other available backend option, but they're not
+supported yet.)
+
+[spatialite]: https://www.gaia-gis.it/fossil/libspatialite/index
+[pgsql]: http://www.postgresql.org
+[postgis]: http://www.postgis.net
+
 ## To-do list
 
 - Industry

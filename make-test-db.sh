@@ -109,6 +109,7 @@ SYSTEMS=$(cat<<EOF
 "Polfaly",
 "Polstodur",
 "8WA-Z6",
+"Gisleres",
 -- Routing....
 "31-MLU",
 "A9D-R0",
@@ -128,6 +129,7 @@ STATIONS=$(cat<<EOF
 "Alentene VII - Moon 5 - Astral Mining Inc. Refinery",
 "Cistuvaert V - Moon 12 - Center for Advanced Studies School",
 "Gisleres V - Moon 8 - Chemal Tech Factory",
+"Gisleres IV - Moon 6 - Roden Shipyards Warehouse",
 "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
 "Ouelletta V - Moon 5 - Federal Navy Academy",
 "Quier IV - Moon 27 - Sisters of EVE Treasury"

@@ -53,6 +53,9 @@ type EveDatabase interface {
 	// from the start.
 	NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error)
 
+	// NumJumpsID is a conviencience method for NumJumps. Or is it the reverse?
+	NumJumpsID(fromSystemID, toSystemID int) (int, error)
+
 	// Blueprints, invention, and manufacturing
 
 	// BlueprintOutputs returns the items and quantity of each that can be output
