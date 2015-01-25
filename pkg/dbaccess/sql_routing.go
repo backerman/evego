@@ -23,17 +23,17 @@ import (
 	"github.com/backerman/evego/pkg/types"
 )
 
-func (db *sqlDb) NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error) {
+func (db *sqlDb) NumJumpsID(fromSystemID, toSystemID int) (int, error) {
 	// This function will be implemented differently depending on the
 	// backend database.
-	if fromSystem.ID == toSystem.ID {
+	if fromSystemID == toSystemID {
 		// These are the same system.
 		return 0, nil
 	}
 	switch db.dbType {
 	case SQLite:
 		var numRows int
-		err := db.countJumpsStmt.Get(&numRows, fromSystem.ID, toSystem.ID)
+		err := db.countJumpsStmt.Get(&numRows, fromSystemID, toSystemID)
 		if err != nil {
 			return 0, err
 		}
@@ -49,4 +49,9 @@ func (db *sqlDb) NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error) 
 	default:
 		return -1, fmt.Errorf("Routing is not supported for this database type.")
 	}
+
+}
+
+func (db *sqlDb) NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error) {
+	return db.NumJumpsID(fromSystem.ID, toSystem.ID)
 }
