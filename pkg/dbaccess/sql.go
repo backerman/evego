@@ -63,7 +63,8 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 	evedb.db, err = sqlx.Connect(driver, dataSource)
 	db := evedb.db // shortcut
 	if err != nil {
-		log.Fatalf("Unable to open item database: %v", err)
+		log.Fatalf("Unable to open item database (driver: %s, datasource: %s): %v",
+			driver, dataSource, err)
 	}
 
 	// Prepare statements
