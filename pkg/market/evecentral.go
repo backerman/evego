@@ -33,10 +33,11 @@ import (
 )
 
 type eveCentral struct {
-	db       dbaccess.EveDatabase
-	xmlAPI   eveapi.EveAPI
-	endpoint *url.URL
-	http     http.Client
+	db        dbaccess.EveDatabase
+	xmlAPI    eveapi.EveAPI
+	endpoint  *url.URL
+	http      http.Client
+	respCache cache.Cache
 }
 
 // EveCentralCached returns an interface to the EVE-Central API.
@@ -49,7 +50,7 @@ func EveCentralCached(db dbaccess.EveDatabase, xmlAPI eveapi.EveAPI, endpoint st
 	if err != nil {
 		log.Fatalf("Invalid URL %v passed for Eve-Central endpoint: %v", endpoint, err)
 	}
-	ec := eveCentral{db: db, endpoint: epURL, xmlAPI: xmlAPI}
+	ec := eveCentral{db: db, endpoint: epURL, xmlAPI: xmlAPI, respCache: aCache}
 	return &ec
 }
 
@@ -171,9 +172,16 @@ func (e *eveCentral) OrdersForItem(item *types.Item, location string, orderType 
 	}
 	query.Set("typeid", fmt.Sprintf("%d", item.ID))
 	e.endpoint.RawQuery = query.Encode()
-	orderXML, err := e.getURL(e.endpoint.String())
-	if err != nil {
-		return nil, err
+	orderXML, found := e.respCache.Get(query.Encode())
+	if !found {
+		var err error
+		orderXML, err = e.getURL(e.endpoint.String())
+		if err != nil {
+			return nil, err
+		}
+		// EVE-Central doesn't specify a caching time to use, so we're picking
+		// five minutes at random.
+		e.respCache.Put(query.Encode(), orderXML, time.Now().Add(5*time.Minute))
 	}
 	orders := &quicklook{}
 

@@ -28,13 +28,12 @@ type Cache interface {
 	io.Closer
 
 	// Get returns the cached value of the key, if it is available and unexpired.
-	// It also returns the item's expiration time and a boolean flag that is true
-	// if there was a hit, and false if the item was not in the cache or it was
-	// expired.
-	Get(key string) (*[]byte, time.Time, bool)
+	// It also returns a boolean flag that is true if there was a hit, and false
+	// if the item was not in the cache or it was expired.
+	Get(key string) ([]byte, bool)
 
 	// Put takes a key and blob to persist in the cache, and the item's expiry
 	// time. It returns an error if something has gone wrong with the cache,
 	// or nil otherwise.
-	Put(key string, val *[]byte, expires time.Time) error
+	Put(key string, val []byte, expires time.Time) error
 }

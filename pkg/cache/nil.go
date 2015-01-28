@@ -33,10 +33,10 @@ func (c *nilCache) Close() error {
 	return nil
 }
 
-func (c *nilCache) Get(key string) (*[]byte, time.Time, bool) {
-	return nil, time.Time{}, false
+func (c *nilCache) Get(key string) ([]byte, bool) {
+	return nil, false
 }
 
-func (c *nilCache) Put(key string, val *[]byte, expires time.Time) error {
+func (c *nilCache) Put(key string, val []byte, expires time.Time) error {
 	return nil
 }
