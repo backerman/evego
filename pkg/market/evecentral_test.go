@@ -19,6 +19,7 @@ package market_test
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -26,17 +27,20 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/eveapi"
 	"github.com/backerman/evego/pkg/market"
+	"github.com/backerman/evego/pkg/routing"
+	. "github.com/backerman/evego/pkg/test"
 	"github.com/backerman/evego/pkg/types"
 	. "github.com/smartystreets/goconvey/convey"
 
 	// Register SQLite3 driver for static database export
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/mattn/go-sqlite3"
 )
 
 var testDbPath = "../../testdb.sqlite"
@@ -44,6 +48,8 @@ var testDbPath = "../../testdb.sqlite"
 var testMarketOrdersXML = "../../testdata/test-marketorders.xml"
 var testOutpostOrdersXML = "../../testdata/test-outpostorders.xml"
 var testOutpostsXML = "../../testdata/test-outposts.xml"
+
+var registerDriver sync.Once
 
 type testElement struct {
 	match string
@@ -119,10 +125,21 @@ func TestMarketOrders(t *testing.T) {
 			}))
 
 		defer ts.Close()
+		registerDriver.Do(func() {
+			sql.Register("sqlite3_spatialite",
+				&sqlite3.SQLiteDriver{
+					Extensions: []string{
+						SpatialiteModulePath(),
+					},
+				})
+		})
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		defer db.Close()
+		router := routing.SQLRouter("sqlite3_spatialite", testDbPath)
+		defer router.Close()
 		// We don't need outpost information here, so we don't pass in a reference
 		// to the EVE XML API.
-		ec := market.EveCentral(db, nil, ts.URL)
+		ec := market.EveCentral(db, router, nil, ts.URL)
 
 		Convey("Given a valid region and item", func() {
 			regionName := "Verge Vendor"
@@ -234,7 +251,7 @@ func TestOutpostOrders(t *testing.T) {
 
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
 		xmlAPI := eveapi.XMLAPI(tsXMLAPI.URL, db)
-		ec := market.EveCentral(db, xmlAPI, ts.URL)
+		ec := market.EveCentral(db, nil, xmlAPI, ts.URL)
 
 		Convey("Given a valid location and item", func() {
 			systemName := "4-EP12"
