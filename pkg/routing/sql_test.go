@@ -15,7 +15,7 @@ limitations under the License.
 
 */
 
-package dbaccess_test
+package routing_test
 
 import (
 	"database/sql"
@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/backerman/evego/pkg/dbaccess"
+	"github.com/backerman/evego/pkg/routing"
 
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
@@ -34,6 +35,8 @@ import (
 var (
 	registerDriver sync.Once
 )
+
+const testDbPath = "../../testdb.sqlite"
 
 func TestRouting(t *testing.T) {
 	Convey("Open a Spatialite-enabled database connection.", t, func() {
@@ -48,8 +51,11 @@ func TestRouting(t *testing.T) {
 					},
 				})
 		})
+		router := routing.SQLRouter("sqlite3_spatialite", testDbPath)
 		db := dbaccess.SQLDatabase("sqlite3_spatialite", testDbPath)
+
 		defer db.Close()
+		defer router.Close()
 
 		Convey("Given a start and end system", func() {
 			startSys, err := db.SolarSystemForName("Orvolle")
@@ -58,7 +64,7 @@ func TestRouting(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("The path is calculated correctly.", func() {
-				numJumps, err := db.NumJumps(startSys, endSys)
+				numJumps, err := router.NumJumps(startSys, endSys)
 				So(err, ShouldBeNil)
 				So(numJumps, ShouldEqual, 5)
 			})
@@ -71,7 +77,7 @@ func TestRouting(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("The path is calculated correctly.", func() {
-				numJumps, err := db.NumJumps(startSys, endSys)
+				numJumps, err := router.NumJumps(startSys, endSys)
 				So(err, ShouldBeNil)
 				So(numJumps, ShouldEqual, 1)
 			})
@@ -84,7 +90,7 @@ func TestRouting(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("The path is calculated correctly.", func() {
-				numJumps, err := db.NumJumps(startSys, endSys)
+				numJumps, err := router.NumJumps(startSys, endSys)
 				So(err, ShouldBeNil)
 				So(numJumps, ShouldEqual, 0)
 			})
@@ -97,7 +103,7 @@ func TestRouting(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Unreachability is correctly indicated.", func() {
-				numJumps, err := db.NumJumps(startSys, endSys)
+				numJumps, err := router.NumJumps(startSys, endSys)
 				So(err, ShouldBeNil)
 				So(numJumps, ShouldEqual, -1)
 			})

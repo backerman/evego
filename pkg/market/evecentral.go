@@ -29,11 +29,13 @@ import (
 	"github.com/backerman/evego/pkg/cache"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/eveapi"
+	"github.com/backerman/evego/pkg/routing"
 	"github.com/backerman/evego/pkg/types"
 )
 
 type eveCentral struct {
 	db        dbaccess.EveDatabase
+	router    routing.EveRouter
 	xmlAPI    eveapi.EveAPI
 	endpoint  *url.URL
 	http      http.Client
@@ -44,21 +46,21 @@ type eveCentral struct {
 // It takes as input an EveDatabase object and an HTTP endpoint;
 // the latter should be http://api.eve-central.com/api/quicklook
 // for the production EVE-Central instance.
-func EveCentralCached(db dbaccess.EveDatabase, xmlAPI eveapi.EveAPI, endpoint string,
+func EveCentralCached(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.EveAPI, endpoint string,
 	aCache cache.Cache) EveMarket {
 	epURL, err := url.Parse(endpoint)
 	if err != nil {
 		log.Fatalf("Invalid URL %v passed for Eve-Central endpoint: %v", endpoint, err)
 	}
-	ec := eveCentral{db: db, endpoint: epURL, xmlAPI: xmlAPI, respCache: aCache}
+	ec := eveCentral{db: db, router: router, endpoint: epURL, xmlAPI: xmlAPI, respCache: aCache}
 	return &ec
 }
 
 // EveCentral returns an uncached interface to the EVE-Central API.
 // This should only be used if the caller will be handling caching.
-func EveCentral(db dbaccess.EveDatabase, xmlAPI eveapi.EveAPI, endpoint string) EveMarket {
+func EveCentral(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.EveAPI, endpoint string) EveMarket {
 	myCache := cache.NilCache()
-	return EveCentralCached(db, xmlAPI, endpoint, myCache)
+	return EveCentralCached(db, router, xmlAPI, endpoint, myCache)
 }
 
 func (e *eveCentral) getURL(u string) ([]byte, error) {
@@ -220,7 +222,7 @@ func (e *eveCentral) BuyInStation(item *types.Item, location *types.Station) (*[
 		case types.BuyRegion:
 			orders = append(orders, o)
 		case types.BuyNumberJumps:
-			numJumps, err := e.db.NumJumpsID(o.Station.SystemID, location.SystemID)
+			numJumps, err := e.router.NumJumpsID(o.Station.SystemID, location.SystemID)
 			if err != nil {
 				return nil, err
 			}
