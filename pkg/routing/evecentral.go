@@ -25,6 +25,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/backerman/evego/pkg/cache"
 	"github.com/backerman/evego/pkg/types"
@@ -64,6 +65,12 @@ func EveCentralRouter(endpoint string, aCache cache.Cache) EveRouter {
 }
 
 func (r *eveCentralRouter) getURL(u string) ([]byte, error) {
+	// Check cache first.
+	cachedBody, found := r.respCache.Get(u)
+	if found {
+		return cachedBody, nil
+	}
+
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, err
@@ -75,6 +82,9 @@ func (r *eveCentralRouter) getURL(u string) ([]byte, error) {
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
+	// EVE-Central doesn't specify a caching time to use, so we're picking
+	// five minutes at random.
+	r.respCache.Put(u, body, time.Now().Add(5*time.Minute))
 	return body, err
 }
 
