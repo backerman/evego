@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0"?>
 <eveapi version="2">
   <currentTime>2015-01-03 22:46:43</currentTime>
   <result>
@@ -7,17 +7,17 @@
     <corporationName>Center for Advanced Studies</corporationName>
     <corporationID>1000169</corporationID>
     <rowset name="jumpClones" key="jumpCloneID" columns="jumpCloneID,typeID,locationID,cloneName">
-      <row jumpCloneID="20397150" typeID="164" locationID="60003760" cloneName="" />
-      <row jumpCloneID="20797782" typeID="164" locationID="60008494" cloneName="" />
-      <row jumpCloneID="19764447" typeID="164" locationID="60013483" cloneName="" />
+      <row jumpCloneID="20397150" typeID="164" locationID="60003760" cloneName=""/>
+      <row jumpCloneID="20797782" typeID="164" locationID="60008494" cloneName=""/>
+      <row jumpCloneID="19764447" typeID="164" locationID="60013483" cloneName=""/>
     </rowset>
     <rowset name="implants" key="typeID" columns="typeID,typeName">
-      <row typeID="10208" typeName="Memory Augmentation - Standard" />
-      <row typeID="10212" typeName="Neural Boost - Standard" />
-      <row typeID="10216" typeName="Ocular Filter - Standard" />
-      <row typeID="10221" typeName="Cybernetic Subprocessor - Standard" />
-      <row typeID="10225" typeName="Social Adaptation Chip - Standard" />
-      <row typeID="33329" typeName="Genolution 'Auroral' AU-79" />
+      <row typeID="10208" typeName="Memory Augmentation - Standard"/>
+      <row typeID="10212" typeName="Neural Boost - Standard"/>
+      <row typeID="10216" typeName="Ocular Filter - Standard"/>
+      <row typeID="10221" typeName="Cybernetic Subprocessor - Standard"/>
+      <row typeID="10225" typeName="Social Adaptation Chip - Standard"/>
+      <row typeID="33329" typeName="Genolution 'Auroral' AU-79"/>
     </rowset>
     <attributes>
       <intelligence>17</intelligence>
@@ -27,23 +27,23 @@
       <willpower>17</willpower>
     </attributes>
     <rowset name="skills" key="typeID" columns="typeID,skillpoints,level,published">
-      <row typeID="3300" skillpoints="256000" level="5" published="1" />
-      <row typeID="3301" skillpoints="256000" level="5" published="1" />
-      <row typeID="3327" skillpoints="45255" level="4" published="1" />
-      <row typeID="3328" skillpoints="512000" level="5" published="1" />
-      <row typeID="3386" skillpoints="256000" level="5" published="1" />
-      <row typeID="3392" skillpoints="256000" level="5" published="1" />
-      <row typeID="3402" skillpoints="45255" level="4" published="1" />
-      <row typeID="3412" skillpoints="135765" level="4" published="1" />
-      <row typeID="3413" skillpoints="256000" level="5" published="1" />
-      <row typeID="21718" skillpoints="135765" level="4" published="1" />
+      <row typeID="3300" skillpoints="256000" level="5" published="1"/>
+      <row typeID="3301" skillpoints="256000" level="5" published="1"/>
+      <row typeID="3327" skillpoints="45255" level="4" published="1"/>
+      <row typeID="3328" skillpoints="512000" level="5" published="1"/>
+      <row typeID="3386" skillpoints="256000" level="5" published="1"/>
+      <row typeID="3392" skillpoints="256000" level="5" published="1"/>
+      <row typeID="3402" skillpoints="45255" level="4" published="1"/>
+      <row typeID="3412" skillpoints="135765" level="4" published="1"/>
+      <row typeID="3413" skillpoints="256000" level="5" published="1"/>
+      <row typeID="21718" skillpoints="135765" level="4" published="1"/>
     </rowset>
-    <rowset name="certificates" key="certificateID" columns="certificateID" />
-    <rowset name="corporationRoles" key="roleID" columns="roleID,roleName" />
-    <rowset name="corporationRolesAtHQ" key="roleID" columns="roleID,roleName" />
-    <rowset name="corporationRolesAtBase" key="roleID" columns="roleID,roleName" />
-    <rowset name="corporationRolesAtOther" key="roleID" columns="roleID,roleName" />
-    <rowset name="corporationTitles" key="titleID" columns="titleID,titleName" />
+    <rowset name="certificates" key="certificateID" columns="certificateID"/>
+    <rowset name="corporationRoles" key="roleID" columns="roleID,roleName"/>
+    <rowset name="corporationRolesAtHQ" key="roleID" columns="roleID,roleName"/>
+    <rowset name="corporationRolesAtBase" key="roleID" columns="roleID,roleName"/>
+    <rowset name="corporationRolesAtOther" key="roleID" columns="roleID,roleName"/>
+    <rowset name="corporationTitles" key="titleID" columns="titleID,titleName"/>
   </result>
   <cachedUntil>2015-01-03 23:43:43</cachedUntil>
 </eveapi>
