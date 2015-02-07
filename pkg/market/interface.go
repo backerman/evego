@@ -37,4 +37,8 @@ type EveMarket interface {
 	// BuyInStation returns the buy orders that are in range of the given
 	// station (i.e., can be sold to by a user there).
 	BuyInStation(itemID *types.Item, location *types.Station) (*[]types.Order, error)
+
+	// OrdersInStation returns the buy orders that are in range of a given station,
+	// and the sell orders available at that station.
+	OrdersInStation(item *types.Item, location *types.Station) (*[]types.Order, error)
 }

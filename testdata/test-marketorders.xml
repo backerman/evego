@@ -1,91 +1,126 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0"?>
 <evec_api version="2.0" method="quicklook">
-          <quicklook>
-            <item>3831</item>
-            <itemname>Medium Shield Extender II</itemname>
-            <regions><region>
+  <quicklook>
+    <item>3831</item>
+    <itemname>Medium Shield Extender II</itemname>
+    <regions>
+      <region>
           Verge Vendor
-        </region></regions>
-            <hours>360</hours>
-            <minqty>1</minqty>
-            <sell_orders><order id="3600182907">
-            <region>10000068</region>
-            <station>60014704</station>
-            <station_name>Ouelletta V - Moon 5 - Federal Navy Academy</station_name>
-            <security>0.4</security>
-            <range>32767</range>
-            <price>999997.74</price>
-            <vol_remain>20</vol_remain>
-            <min_volume>1</min_volume>
-            <expires>2015-03-02</expires>
-            <reported_time>12-02 02:47:43</reported_time>
-          </order><order id="3823275818">
-            <region>10000068</region>
-            <station>60009556</station>
-            <station_name>Alentene VII - Moon 5 - Astral Mining Inc. Refinery</station_name>
-            <security>0.9</security>
-            <range>32767</range>
-            <price>1500000.00</price>
-            <vol_remain>4</vol_remain>
-            <min_volume>1</min_volume>
-            <expires>2015-03-02</expires>
-            <reported_time>12-02 02:47:43</reported_time>
-          </order><order id="3708997421">
-            <region>10000068</region>
-            <station>60014719</station>
-            <station_name>Cistuvaert V - Moon 12 - Center for Advanced Studies School</station_name>
-            <security>1.0</security>
-            <range>32767</range>
-            <price>508989.90</price>
-            <vol_remain>24</vol_remain>
-            <min_volume>1</min_volume>
-            <expires>2015-03-02</expires>
-            <reported_time>12-02 02:47:43</reported_time>
-          </order></sell_orders>
-            <buy_orders><order id="3773465268">
-            <region>10000068</region>
-            <station>60014719</station>
-            <station_name>Cistuvaert V - Moon 12 - Center for Advanced Studies School</station_name>
-            <security>1.0</security>
-            <range>32767</range>
-            <price>277000.00</price>
-            <vol_remain>57</vol_remain>
-            <min_volume>1</min_volume>
-            <expires>2015-03-02</expires>
-            <reported_time>12-02 02:47:43</reported_time>
-          </order><order id="3766368752">
-            <region>10000068</region>
-            <station>60010840</station>
-            <station_name>Gisleres V - Moon 8 - Chemal Tech Factory</station_name>
-            <security>0.8</security>
-            <range>10</range>
-            <price>0.01</price>
-            <vol_remain>64</vol_remain>
-            <min_volume>1</min_volume>
-            <expires>2015-03-02</expires>
-            <reported_time>12-02 02:47:43</reported_time>
-          </order><order id="42">
-            <region>10000068</region>
-            <station>60010840</station>
-            <station_name>Gisleres V - Moon 8 - Chemal Tech Factory</station_name>
-            <security>0.8</security>
-            <range>-1</range>
-            <price>123.45</price>
-            <vol_remain>42</vol_remain>
-            <min_volume>17</min_volume>
-            <expires>2015-01-22</expires>
-            <reported_time>12-02 02:47:43</reported_time>
-          </order><order id="43">
-          <region>10000068</region>
-          <station>60014719</station>
-          <station_name>Cistuvaert V - Moon 12 - Center for Advanced Studies School</station_name>
-          <security>1.0</security>
-          <range>0</range>
-          <price>60000</price>
-          <vol_remain>1000</vol_remain>
-          <min_volume>1</min_volume>
-          <expires>2015-03-02</expires>
-          <reported_time>12-02 02:47:43</reported_time>
-        </order></buy_orders>
-          </quicklook>
-        </evec_api>
+        </region>
+    </regions>
+    <hours>360</hours>
+    <minqty>1</minqty>
+    <sell_orders>
+      <order id="3600182907">
+        <region>10000068</region>
+        <station>60014704</station>
+        <station_name>Ouelletta V - Moon 5 - Federal Navy Academy</station_name>
+        <security>0.4</security>
+        <range>32767</range>
+        <price>999997.74</price>
+        <vol_remain>20</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="3823275818">
+        <region>10000068</region>
+        <station>60009556</station>
+        <station_name>Alentene VII - Moon 5 - Astral Mining Inc. Refinery</station_name>
+        <security>0.9</security>
+        <range>65535</range>
+        <price>1500000.00</price>
+        <vol_remain>4</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="3708997421">
+        <region>10000068</region>
+        <station>60014719</station>
+        <station_name>Cistuvaert V - Moon 12 - Center for Advanced Studies School</station_name>
+        <security>1.0</security>
+        <range>32767</range>
+        <price>508989.90</price>
+        <vol_remain>24</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="424242424242">
+        <region>10000068</region>
+        <station>60010336</station>
+        <station_name>Gisleres IV - Moon 6 - Roden Shipyards Warehouse</station_name>
+        <security>0.8</security>
+        <range>65535</range>
+        <price>1234567.89</price>
+        <vol_remain>42</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+    </sell_orders>
+    <buy_orders>
+      <order id="3773465268">
+        <region>10000068</region>
+        <station>60014719</station>
+        <station_name>Cistuvaert V - Moon 12 - Center for Advanced Studies School</station_name>
+        <security>1.0</security>
+        <range>32767</range>
+        <price>277000.00</price>
+        <vol_remain>57</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="3766368752">
+        <region>10000068</region>
+        <station>60010840</station>
+        <station_name>Gisleres V - Moon 8 - Chemal Tech Factory</station_name>
+        <security>0.8</security>
+        <range>10</range>
+        <price>0.01</price>
+        <vol_remain>64</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="42">
+        <region>10000068</region>
+        <station>60010840</station>
+        <station_name>Gisleres V - Moon 8 - Chemal Tech Factory</station_name>
+        <security>0.8</security>
+        <range>-1</range>
+        <price>123.45</price>
+        <vol_remain>42</vol_remain>
+        <min_volume>17</min_volume>
+        <expires>2015-01-22</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="43">
+        <region>10000068</region>
+        <station>60014719</station>
+        <station_name>Cistuvaert V - Moon 12 - Center for Advanced Studies School</station_name>
+        <security>1.0</security>
+        <range>0</range>
+        <price>60000</price>
+        <vol_remain>1000</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-03-02</expires>
+        <reported_time>12-02 02:47:43</reported_time>
+      </order>
+      <order id="3931896829">
+        <region>10000068</region>
+        <station>60011908</station>
+        <station_name>Sortet V - Moon 1 - Federation Navy Assembly Plant</station_name>
+        <security>0.8</security>
+        <range>65535</range>
+        <price>355500.05</price>
+        <vol_remain>18</vol_remain>
+        <min_volume>1</min_volume>
+        <expires>2015-05-08</expires>
+        <reported_time>02-07 21:16:58</reported_time>
+      </order>
+    </buy_orders>
+  </quicklook>
+</evec_api>

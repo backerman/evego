@@ -135,7 +135,7 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 			// Set the fields specific to buy orders.
 			newOrder.MinQuantity = o.MinimumVolume
 			switch o.Range {
-			case 32767:
+			case 32767, 65535:
 				newOrder.JumpRange = types.BuyRegion
 			case -1:
 				newOrder.JumpRange = types.BuyStation
@@ -241,6 +241,29 @@ func (e *eveCentral) BuyInStation(item *types.Item, location *types.Station) (*[
 	}
 
 	return &orders, nil
+}
+
+func (e *eveCentral) OrdersInStation(item *types.Item, location *types.Station) (*[]types.Order, error) {
+	orders, err := e.BuyInStation(item, location)
+	if err != nil {
+		return nil, err
+	}
+	// Get the sell orders for the entire system, then append the ones for this
+	// station to the returned array.
+	orderSystem, err := e.db.SolarSystemForID(location.SystemID)
+	if err != nil {
+		return nil, err
+	}
+	sellInSystem, err := e.OrdersForItem(item, orderSystem.Name, types.Sell)
+	if err != nil {
+		return nil, err
+	}
+	for _, o := range *sellInSystem {
+		if o.Station.ID == location.ID {
+			*orders = append(*orders, o)
+		}
+	}
+	return orders, nil
 }
 
 func (e *eveCentral) Close() error {

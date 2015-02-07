@@ -150,13 +150,23 @@ func TestMarketOrders(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Results should be successfully processed.", func() {
+				// Ouelletta V - Moon 5 - Federal Navy Academy
 				fna, err := db.StationForID(60014704)
 				So(err, ShouldBeNil)
+				// Alentene VII - Moon 5 - Astral Mining Inc. Refinery
 				amr, err := db.StationForID(60009556)
 				So(err, ShouldBeNil)
+				// Cistuvaert V - Moon 12 - Center for Advanced Studies School
 				cas, err := db.StationForID(60014719)
 				So(err, ShouldBeNil)
+				// Gisleres V - Moon 8 - Chemal Tech Factory
 				ctf, err := db.StationForID(60010840)
+				So(err, ShouldBeNil)
+				// Gisleres IV - Moon 6 - Roden Shipyards Warehouse
+				rsw, err := db.StationForID(60010336)
+				So(err, ShouldBeNil)
+				// Sortet V - Moon 1 - Federation Navy Assembly Plant
+				sfnap, err := db.StationForID(60011908)
 				So(err, ShouldBeNil)
 				expected := &[]types.Order{
 					{Type: types.Sell, Item: item, Quantity: 20, Price: 999997.74, Station: fna,
@@ -164,6 +174,8 @@ func TestMarketOrders(t *testing.T) {
 					{Type: types.Sell, Item: item, Quantity: 4, Price: 1500000, Station: amr,
 						Expiration: time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC)},
 					{Type: types.Sell, Item: item, Quantity: 24, Price: 508989.90, Station: cas,
+						Expiration: time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC)},
+					{Type: types.Sell, Item: item, Quantity: 42, Price: 1234567.89, Station: rsw,
 						Expiration: time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC)},
 					{Type: types.Buy, Item: item, Quantity: 57, Price: 277000.00, Station: cas,
 						Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
@@ -177,6 +189,9 @@ func TestMarketOrders(t *testing.T) {
 					{Type: types.Buy, Item: item, Quantity: 1000, Price: 60000, Station: cas,
 						Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
 						MinQuantity: 1, JumpRange: types.BuySystem},
+					{Type: types.Buy, Item: item, Quantity: 18, Price: 355500.05, Station: sfnap,
+						Expiration:  time.Date(2015, time.May, 8, 0, 0, 0, 0, time.UTC),
+						MinQuantity: 1, JumpRange: types.BuyRegion},
 				}
 
 				// Generate expected URL. url.Parse() sorts the value keys before
@@ -200,23 +215,43 @@ func TestMarketOrders(t *testing.T) {
 			item, err := db.ItemForName("Medium Shield Extender II")
 			So(err, ShouldBeNil)
 			station, err := db.StationForID(60010336) // Gisleres IV-6 Roden Whse
+
+			// Stations in results
+			chemalTech, err := db.StationForID(60010840) // Gisleres V-8 Chemal Tech Factory
+			So(err, ShouldBeNil)
+			cas, err := db.StationForID(60014719) // Cistuvaert V-12 CAS
+			So(err, ShouldBeNil)
+			// Sortet V - Moon 1 - Federation Navy Assembly Plant
+			sfnap, err := db.StationForID(60011908)
+			So(err, ShouldBeNil)
+			expectedBuyOrders := []types.Order{
+				{Type: types.Buy, Item: item, Quantity: 57, Price: 277000.00, Station: cas,
+					Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
+					MinQuantity: 1, JumpRange: types.BuyRegion},
+				{Type: types.Buy, Item: item, Quantity: 64, Price: 0.01, Station: chemalTech,
+					Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
+					MinQuantity: 1, JumpRange: types.BuyNumberJumps, NumJumps: 10},
+				{Type: types.Buy, Item: item, Quantity: 18, Price: 355500.05, Station: sfnap,
+					Expiration:  time.Date(2015, time.May, 8, 0, 0, 0, 0, time.UTC),
+					MinQuantity: 1, JumpRange: types.BuyRegion},
+			}
+
+			expectedAllOrders := append(expectedBuyOrders,
+				types.Order{Type: types.Sell, Item: item, Quantity: 42, Price: 1234567.89, Station: station,
+					Expiration: time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC)})
+
 			Convey("The buy orders valid at that station are identified.", func() {
-				chemalTech, err := db.StationForID(60010840) // Gisleres V-8 Chemal Tech Factory
-				So(err, ShouldBeNil)
-				cas, err := db.StationForID(60014719) // Cistuvaert V-12 CAS
-				So(err, ShouldBeNil)
-				expected := &[]types.Order{
-					{Type: types.Buy, Item: item, Quantity: 57, Price: 277000.00, Station: cas,
-						Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
-						MinQuantity: 1, JumpRange: types.BuyRegion},
-					{Type: types.Buy, Item: item, Quantity: 64, Price: 0.01, Station: chemalTech,
-						Expiration:  time.Date(2015, time.March, 2, 0, 0, 0, 0, time.UTC),
-						MinQuantity: 1, JumpRange: types.BuyNumberJumps, NumJumps: 10},
-				}
 				actual, err := ec.BuyInStation(item, station)
 				So(err, ShouldBeNil)
-				So(actual, ShouldResemble, expected)
+				So(actual, ShouldResemble, &expectedBuyOrders)
 			})
+
+			Convey("The buy and sell orders valid at that station are identified.", func() {
+				actual, err := ec.OrdersInStation(item, station)
+				So(err, ShouldBeNil)
+				So(actual, ShouldResemble, &expectedAllOrders)
+			})
+
 		})
 
 	})
