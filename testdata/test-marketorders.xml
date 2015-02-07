@@ -24,7 +24,7 @@
             <station>60009556</station>
             <station_name>Alentene VII - Moon 5 - Astral Mining Inc. Refinery</station_name>
             <security>0.9</security>
-            <range>32767</range>
+            <range>65535</range>
             <price>1500000.00</price>
             <vol_remain>4</vol_remain>
             <min_volume>1</min_volume>
@@ -41,7 +41,18 @@
             <min_volume>1</min_volume>
             <expires>2015-03-02</expires>
             <reported_time>12-02 02:47:43</reported_time>
-          </order></sell_orders>
+          </order><order id="424242424242">
+          <region>10000068</region>
+          <station>60010336</station>
+          <station_name>Gisleres IV - Moon 6 - Roden Shipyards Warehouse</station_name>
+          <security>0.8</security>
+          <range>65535</range>
+          <price>1234567.89</price>
+          <vol_remain>42</vol_remain>
+          <min_volume>1</min_volume>
+          <expires>2015-03-02</expires>
+          <reported_time>12-02 02:47:43</reported_time>
+        </order></sell_orders>
             <buy_orders><order id="3773465268">
             <region>10000068</region>
             <station>60014719</station>
@@ -86,6 +97,17 @@
           <min_volume>1</min_volume>
           <expires>2015-03-02</expires>
           <reported_time>12-02 02:47:43</reported_time>
-        </order></buy_orders>
+        </order><order id="3931896829">
+            <region>10000068</region>
+            <station>60011908</station>
+            <station_name>Sortet V - Moon 1 - Federation Navy Assembly Plant</station_name>
+            <security>0.8</security>
+            <range>65535</range>
+            <price>355500.05</price>
+            <vol_remain>18</vol_remain>
+            <min_volume>1</min_volume>
+            <expires>2015-05-08</expires>
+            <reported_time>02-07 21:16:58</reported_time>
+          </order></buy_orders>
           </quicklook>
         </evec_api>

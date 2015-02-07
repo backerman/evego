@@ -132,6 +132,7 @@ STATIONS=$(cat<<EOF
 "Gisleres IV - Moon 6 - Roden Shipyards Warehouse",
 "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
 "Ouelletta V - Moon 5 - Federal Navy Academy",
+"Sortet V - Moon 1 - Federation Navy Assembly Plant",
 "Quier IV - Moon 27 - Sisters of EVE Treasury"
 )
 EOF
