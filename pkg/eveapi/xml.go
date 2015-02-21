@@ -37,8 +37,10 @@ var (
 
 const (
 	iso8601            = "2006-01-02 15:04:05"
-	conqerableStations = "/eve/ConquerableStationList.xml.aspx"
+	accountCharacters  = "/account/Characters.xml.aspx"
 	characterSheet     = "/char/CharacterSheet.xml.aspx"
+	characterStandings = "/char/Standings.xml.aspx"
+	conqerableStations = "/eve/ConquerableStationList.xml.aspx"
 )
 
 type xmlAPI struct {
@@ -48,8 +50,8 @@ type xmlAPI struct {
 	db   dbaccess.EveDatabase
 }
 
-// XMLAPI returns an EveAPI that accesses the EVE Online XML API.
-func XMLAPI(serviceURL string, staticDB dbaccess.EveDatabase) EveAPI {
+// EveXMLAPI returns an EveAPI that accesses the EVE Online XML API.
+func EveXMLAPI(serviceURL string, staticDB dbaccess.EveDatabase) XMLAPI {
 	endpoint, err := url.Parse(serviceURL)
 	if err != nil {
 		log.Fatalf("Unable to process endpoint URL: %v", err)

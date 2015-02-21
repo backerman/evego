@@ -57,7 +57,7 @@ func TestOutpostID(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.XMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db)
 
 		Convey("Given a valid outpost ID", func() {
 			outpostID := 61000854
@@ -105,7 +105,7 @@ func TestOutpostName(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.XMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db)
 
 		Convey("Given a valid outpost name pattern", func() {
 			outpostName := "%CAT%station"
@@ -155,7 +155,7 @@ func TestCharacterSheet(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.XMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db)
 
 		Convey("Given a character's API key", func() {
 			characterID := 94319654
