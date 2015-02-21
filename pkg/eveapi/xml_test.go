@@ -19,6 +19,7 @@ package eveapi_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -182,6 +183,11 @@ func TestCharacterSheet(t *testing.T) {
 				}
 				actual, expiration, err := x.CharacterSheet(characterID, keyID, verificationCode)
 				So(err, ShouldBeNil)
+
+				expectedURL := fmt.Sprintf(
+					"/char/CharacterSheet.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
+					characterID, keyID, verificationCode)
+				So(actualURL, ShouldEqual, expectedURL)
 				// expiry time minus "current time" is 57 minutes
 				So(expiration, ShouldHappenWithin, 58*time.Minute, time.Now())
 				So(expiration, ShouldNotHappenWithin, 56*time.Minute, time.Now())
