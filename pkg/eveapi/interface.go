@@ -37,17 +37,17 @@ type XMLAPI interface {
 
 	// OutpostsForName returns the stations matching the provided name pattern.
 	// The percent character (%) may be used as a wildcard.
-	OutpostsForName(name string) (*[]types.Station, error)
-
-	// CharacterSheet returns the character sheet for the given character ID.
-	// It also returns the expiration time for this information; the caller must
-	// cache the returned data until that time.
-	CharacterSheet(characterID, keyID int, verificationCode string) (*types.CharacterSheet, time.Time, error)
+	OutpostsForName(name string) ([]types.Station, error)
 
 	// AccountCharacters returns a list of characters that the provided key can
 	// access. It also returns the expiration time for this information; the caller
 	// must cache the returned data until that time.
-	AccountCharacters(key *XMLKey) (*[]types.Character, time.Time, error)
+	AccountCharacters(key *XMLKey) ([]types.Character, time.Time, error)
+
+	// CharacterSheet returns the character sheet for the given character ID.
+	// It also returns the expiration time for this information; the caller must
+	// cache the returned data until that time.
+	CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, time.Time, error)
 
 	// CharacterStandings returns a character's standings. It also returns the
 	// expiration time for this information; the callermust cache the returned

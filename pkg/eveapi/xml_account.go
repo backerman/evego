@@ -41,7 +41,7 @@ type charsResponse struct {
 	CachedUntil string            `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) AccountCharacters(key *XMLKey) (*[]types.Character, time.Time, error) {
+func (x *xmlAPI) AccountCharacters(key *XMLKey) ([]types.Character, time.Time, error) {
 	params := url.Values{}
 	params.Set("keyID", fmt.Sprintf("%d", key.KeyID))
 	params.Set("vcode", key.VerificationCode)
@@ -52,6 +52,6 @@ func (x *xmlAPI) AccountCharacters(key *XMLKey) (*[]types.Character, time.Time, 
 	var response charsResponse
 	xml.Unmarshal(xmlBytes, &response)
 
-	return &response.Characters,
+	return response.Characters,
 		expirationTime(response.CurrentTime, response.CachedUntil), nil
 }

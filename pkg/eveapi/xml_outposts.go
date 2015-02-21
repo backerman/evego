@@ -116,7 +116,7 @@ func (s stationsList) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (x *xmlAPI) OutpostsForName(name string) (*[]types.Station, error) {
+func (x *xmlAPI) OutpostsForName(name string) ([]types.Station, error) {
 	// This is a horribly inefficient implementation. Switch to SQLite
 	// in-memory DB rather than keeping everything as Golang structs?
 	err := x.checkOutpostCache()
@@ -140,8 +140,8 @@ func (x *xmlAPI) OutpostsForName(name string) (*[]types.Station, error) {
 	}
 
 	if len(stations) == 0 {
-		return &stations, sql.ErrNoRows
+		return stations, sql.ErrNoRows
 	}
 	sort.Sort(stationsList(stations))
-	return &stations, nil
+	return stations, nil
 }

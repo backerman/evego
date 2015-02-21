@@ -101,11 +101,11 @@ type charSheetAPIResponse struct {
 	CachedUntil string    `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) CharacterSheet(characterID, keyID int, verificationCode string) (*types.CharacterSheet, time.Time, error) {
+func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, time.Time, error) {
 	params := url.Values{}
-	params.Set("keyID", fmt.Sprintf("%d", keyID))
-	params.Set("characterID", fmt.Sprintf("%d", characterID))
-	params.Set("vcode", verificationCode)
+	params.Set("keyID", strconv.Itoa(key.KeyID))
+	params.Set("characterID", strconv.Itoa(characterID))
+	params.Set("vcode", key.VerificationCode)
 	xmlBytes, err := x.get(characterSheet, params)
 	if err != nil {
 		return nil, time.Now(), err
