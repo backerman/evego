@@ -148,7 +148,7 @@ func (db *sqlDb) ItemForID(itemID int) (*types.Item, error) {
 }
 
 // itemComposition returns the composition of a named Eve item.
-func (db *sqlDb) ItemComposition(itemID int) (*[]types.InventoryLine, error) {
+func (db *sqlDb) ItemComposition(itemID int) ([]types.InventoryLine, error) {
 	rows, err := db.compStatement.Query(itemID)
 	if err != nil {
 		log.Fatalf("Unable to execute composition query for item %d: %v", itemID, err)
@@ -171,7 +171,7 @@ func (db *sqlDb) ItemComposition(itemID int) (*[]types.InventoryLine, error) {
 		}
 		results = append(results, types.InventoryLine{Quantity: quantity, Item: item})
 	}
-	return &results, nil
+	return results, nil
 }
 
 // MarketGroupForItem returns the parent groups of the market item.
@@ -264,7 +264,7 @@ func (db *sqlDb) SolarSystemForName(systemName string) (*types.SolarSystem, erro
 	return system, err
 }
 
-func (db *sqlDb) SolarSystemsForPattern(systemName string) (*[]types.SolarSystem, error) {
+func (db *sqlDb) SolarSystemsForPattern(systemName string) ([]types.SolarSystem, error) {
 	rows, err := db.systemInfoStatement.Queryx(systemName)
 	if err != nil {
 		return nil, err
@@ -279,7 +279,7 @@ func (db *sqlDb) SolarSystemsForPattern(systemName string) (*[]types.SolarSystem
 	if len(systems) == 0 {
 		err = sql.ErrNoRows
 	}
-	return &systems, err
+	return systems, err
 }
 
 func (db *sqlDb) SolarSystemForID(systemID int) (*types.SolarSystem, error) {
@@ -303,7 +303,7 @@ func (db *sqlDb) StationForID(stationID int) (*types.Station, error) {
 	return station, err
 }
 
-func (db *sqlDb) StationsForName(stationName string) (*[]types.Station, error) {
+func (db *sqlDb) StationsForName(stationName string) ([]types.Station, error) {
 	rows, err := db.stationNameInfoStatement.Queryx(stationName)
 	if err != nil {
 		return nil, err
@@ -318,7 +318,7 @@ func (db *sqlDb) StationsForName(stationName string) (*[]types.Station, error) {
 	if len(stations) == 0 {
 		err = sql.ErrNoRows
 	}
-	return &stations, err
+	return stations, err
 }
 
 func activityToTypeCode(activityStr string) types.ActivityType {
@@ -344,7 +344,7 @@ func activityToTypeCode(activityStr string) types.ActivityType {
 	return types.None
 }
 
-func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) (*[]types.IndustryActivity, error) {
+func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) ([]types.IndustryActivity, error) {
 	rows, err := stmt.Queryx(query)
 	if err != nil {
 		log.Fatalf("Unable to execute query: %v", err)
@@ -383,24 +383,24 @@ func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) (*[]types.Industr
 		results = append(results, rowActivity)
 	}
 
-	return &results, nil
+	return results, nil
 }
 
-func (db *sqlDb) BlueprintOutputs(typeName string) (*[]types.IndustryActivity, error) {
+func (db *sqlDb) BlueprintOutputs(typeName string) ([]types.IndustryActivity, error) {
 	return db.blueprintQuery(db.blueprintProducesStmt, typeName)
 }
 
-func (db *sqlDb) BlueprintForProduct(typeName string) (*[]types.IndustryActivity, error) {
+func (db *sqlDb) BlueprintForProduct(typeName string) ([]types.IndustryActivity, error) {
 	return db.blueprintQuery(db.blueprintProducedByStmt, typeName)
 }
 
-func (db *sqlDb) BlueprintsUsingMaterial(typeName string) (*[]types.IndustryActivity, error) {
+func (db *sqlDb) BlueprintsUsingMaterial(typeName string) ([]types.IndustryActivity, error) {
 
 	return db.blueprintQuery(db.inputMaterialsToBlueprintStmt, typeName)
 }
 
 func (db *sqlDb) BlueprintProductionInputs(
-	typeName string, outputTypeName string) (*[]types.InventoryLine, error) {
+	typeName string, outputTypeName string) ([]types.InventoryLine, error) {
 	rows, err := db.matsForBPProductionStmt.Queryx(typeName, outputTypeName)
 	if err != nil {
 		log.Fatalf("Unable to execute query: %v", err)
@@ -432,5 +432,5 @@ func (db *sqlDb) BlueprintProductionInputs(
 		results = append(results, result)
 	}
 
-	return &results, nil
+	return results, nil
 }

@@ -52,7 +52,7 @@ func removeNonNumeric(s string) string {
 // * ship/station/container inventory
 // * personal assets view
 // * industry tab of item info
-func ParseInventory(pasted string, database dbaccess.EveDatabase) *[]types.InventoryLine {
+func ParseInventory(pasted string, database dbaccess.EveDatabase) []types.InventoryLine {
 	results := []types.InventoryLine{}
 	// Break into individual lines.
 	reader := csv.NewReader(strings.NewReader(pasted))
@@ -60,7 +60,7 @@ func ParseInventory(pasted string, database dbaccess.EveDatabase) *[]types.Inven
 	lines, err := reader.ReadAll()
 	if err != nil {
 		// Unable to parse.
-		return &results
+		return results
 	}
 	for _, line := range lines {
 		var (
@@ -99,5 +99,5 @@ func ParseInventory(pasted string, database dbaccess.EveDatabase) *[]types.Inven
 		results = append(results, types.InventoryLine{Item: item, Quantity: quantity})
 
 	}
-	return &results
+	return results
 }

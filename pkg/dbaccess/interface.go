@@ -33,18 +33,18 @@ type EveDatabase interface {
 
 	ItemForName(itemName string) (*types.Item, error)
 	ItemForID(itemID int) (*types.Item, error)
-	ItemComposition(itemID int) (*[]types.InventoryLine, error)
+	ItemComposition(itemID int) ([]types.InventoryLine, error)
 	MarketGroupForItem(item *types.Item) (*types.MarketGroup, error)
 
 	// Universe locations
 
 	SolarSystemForID(systemID int) (*types.SolarSystem, error)
 	SolarSystemForName(systemName string) (*types.SolarSystem, error)
-	SolarSystemsForPattern(systemName string) (*[]types.SolarSystem, error)
+	SolarSystemsForPattern(systemName string) ([]types.SolarSystem, error)
 
 	RegionForName(regionName string) (*types.Region, error)
 	StationForID(stationID int) (*types.Station, error)
-	StationsForName(stationName string) (*[]types.Station, error)
+	StationsForName(stationName string) ([]types.Station, error)
 
 	// Blueprints, invention, and manufacturing
 
@@ -52,18 +52,18 @@ type EveDatabase interface {
 	// by performing industrial actions on a blueprint given that blueprint's name
 	// (typeName) as a string. The type name may include the percent (%) character
 	// as a wildcard.
-	BlueprintOutputs(typeName string) (*[]types.IndustryActivity, error)
+	BlueprintOutputs(typeName string) ([]types.IndustryActivity, error)
 
 	// BlueprintForProduct returns the blueprints that can produce a given output.
-	BlueprintForProduct(typeName string) (*[]types.IndustryActivity, error)
+	BlueprintForProduct(typeName string) ([]types.IndustryActivity, error)
 
 	// BlueprintsUsingMaterial returns the blueprints that use the given input material
 	// in an industrial process (manufacturing, invention, etc.)
-	BlueprintsUsingMaterial(typeName string) (*[]types.IndustryActivity, error)
+	BlueprintsUsingMaterial(typeName string) ([]types.IndustryActivity, error)
 
 	// BlueprintProductionInputs returns the required materials for one run
 	// of production on an unresearched (ME 0% / TE 0%) blueprint. It takes as
 	// parameters the blueprint to be used and the selected output product.
 	BlueprintProductionInputs(
-		typeName string, outputTypeName string) (*[]types.InventoryLine, error)
+		typeName string, outputTypeName string) ([]types.InventoryLine, error)
 }

@@ -44,22 +44,22 @@ type testElement struct {
 // shouldMatchSystems is a custom matcher for *[]types.Solarsystem;
 // we can't use ShouldResemble because of the float in that struct.
 func shouldMatchSystems(actual interface{}, expected ...interface{}) string {
-	actualSystems, ok := actual.(*[]types.SolarSystem)
+	actualSystems, ok := actual.([]types.SolarSystem)
 	if !ok {
-		return "Failed to cast actual to *[]types.SolarSystem"
+		return "Failed to cast actual to []types.SolarSystem"
 	}
-	expectedSystems, ok := expected[0].(*[]types.SolarSystem)
+	expectedSystems, ok := expected[0].([]types.SolarSystem)
 	if !ok {
-		return "Failed to cast expected to *[]types.SolarSystem"
+		return "Failed to cast expected to []types.SolarSystem"
 	}
-	if len(*actualSystems) != len(*expectedSystems) {
+	if len(actualSystems) != len(expectedSystems) {
 		return fmt.Sprintf("Expected %d systems; received %d",
-			len(*expectedSystems), len(*actualSystems))
+			len(expectedSystems), len(actualSystems))
 	}
 	var messages []string // errors found
 
-	for i := range *expectedSystems {
-		e, a := (*expectedSystems)[i], (*actualSystems)[i]
+	for i := range expectedSystems {
+		e, a := (expectedSystems)[i], (actualSystems)[i]
 		tests := []testElement{
 			{ShouldEqual(a.Name, e.Name), "Name"},
 			{ShouldEqual(a.ID, e.ID), "ID"},
@@ -84,7 +84,7 @@ func shouldMatchSystems(actual interface{}, expected ...interface{}) string {
 }
 
 // shouldMatchSystem is a convenience method for shouldMatchSystems, and takes
-// a *types.SolarSystem instead of a *[]types.SolarSystem.
+// a *types.SolarSystem instead of a []types.SolarSystem.
 func shouldMatchSystem(actual interface{}, expected ...interface{}) string {
 	actualSystem, ok := actual.(*types.SolarSystem)
 	if !ok {
@@ -94,8 +94,8 @@ func shouldMatchSystem(actual interface{}, expected ...interface{}) string {
 	if !ok {
 		return "Failed to cast expected to *types.SolarSystem"
 	}
-	return shouldMatchSystems(&[]types.SolarSystem{*actualSystem},
-		&[]types.SolarSystem{*expectedSystem})
+	return shouldMatchSystems([]types.SolarSystem{*actualSystem},
+		[]types.SolarSystem{*expectedSystem})
 }
 
 func TestItems(t *testing.T) {
@@ -226,7 +226,7 @@ func TestSolarSystems(t *testing.T) {
 			systemName := "Pol%"
 
 			Convey("We get correct information.", func() {
-				expected := &[]types.SolarSystem{
+				expected := []types.SolarSystem{
 					{
 						Name:            "Polaris",
 						ID:              30000380,
@@ -330,7 +330,7 @@ func TestStations(t *testing.T) {
 			stationName := "%sisters%treas%"
 
 			Convey("We get correct information.", func() {
-				expected := &[]types.Station{{
+				expected := []types.Station{{
 					Name:                   "Quier IV - Moon 27 - Sisters of EVE Treasury",
 					ID:                     60012655,
 					SystemID:               30003037,
@@ -390,26 +390,26 @@ func TestRegions(t *testing.T) {
 }
 
 func shouldMatchActivities(actual interface{}, expected ...interface{}) string {
-	actualIA, ok := actual.(*[]types.IndustryActivity)
+	actualIA, ok := actual.([]types.IndustryActivity)
 	if !ok {
-		return "Failed to cast actual to *[]types.IndustryActivity"
+		return "Failed to cast actual to []types.IndustryActivity"
 	}
-	expectedIA, ok := expected[0].(*[]types.IndustryActivity)
+	expectedIA, ok := expected[0].([]types.IndustryActivity)
 	if !ok {
-		return "Failed to cast expected to *[]types.IndustryActivity"
+		return "Failed to cast expected to []types.IndustryActivity"
 	}
 
-	if len(*actualIA) != len(*expectedIA) {
+	if len(actualIA) != len(expectedIA) {
 		return fmt.Sprintf("Lenth mismatch: expected %d activities; received %d",
-			len(*expectedIA), len(*actualIA))
+			len(expectedIA), len(actualIA))
 	}
 
 	// We know that actual and expected are the same length. Verify that
 	// they have equivalent items (in any order).
 	var sActual, sExpected, msgs []string
-	for i := range *actualIA {
-		sActual = append(sActual, (*actualIA)[i].String())
-		sExpected = append(sExpected, (*expectedIA)[i].String())
+	for i := range actualIA {
+		sActual = append(sActual, (actualIA)[i].String())
+		sExpected = append(sExpected, (expectedIA)[i].String())
 	}
 	sort.Sort(sort.StringSlice(sActual))
 	sort.Sort(sort.StringSlice(sExpected))
@@ -437,7 +437,7 @@ func TestBlueprints(t *testing.T) {
 				So(err, ShouldBeNil)
 				ishtarBlueprint, err := db.ItemForName("Ishtar Blueprint")
 				So(err, ShouldBeNil)
-				expected := &[]types.IndustryActivity{
+				expected := []types.IndustryActivity{
 					{InputItem: inputType,
 						ActivityType:   types.Manufacturing,
 						OutputItem:     vexor,
@@ -480,7 +480,7 @@ func TestBlueprints(t *testing.T) {
 				}
 				actual, err := db.BlueprintsUsingMaterial(typeName)
 				So(err, ShouldBeNil)
-				So(actual, shouldMatchActivities, &expected)
+				So(actual, shouldMatchActivities, expected)
 			})
 		})
 
@@ -505,7 +505,7 @@ func TestBlueprints(t *testing.T) {
 				So(err, ShouldBeNil)
 				outBP, err := db.ItemForName(desiredOutput)
 				So(err, ShouldBeNil)
-				expected := &[]types.IndustryActivity{
+				expected := []types.IndustryActivity{
 					{
 						InputItem:      inBP,
 						ActivityType:   types.Invention,

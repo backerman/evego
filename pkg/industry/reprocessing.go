@@ -55,7 +55,7 @@ func round(in float64) float64 {
 
 // ReprocessItem returns the result of reprocessing a given item and the number
 // of input items that were reprocessed.
-func reprocessItem(item *types.Item, itemMats *[]types.InventoryLine, quantity int, stationYield float64, taxRate float64, skills ReproSkills) *[]types.InventoryLine {
+func reprocessItem(item *types.Item, itemMats []types.InventoryLine, quantity int, stationYield float64, taxRate float64, skills ReproSkills) []types.InventoryLine {
 	yield := stationYield
 	switch item.Type {
 	case types.Ice, types.Ore:
@@ -80,7 +80,7 @@ func reprocessItem(item *types.Item, itemMats *[]types.InventoryLine, quantity i
 	}
 
 	// Add yielded items
-	for _, el := range *itemMats {
+	for _, el := range itemMats {
 		// Take station tax based on the truncated number of units produced.
 		newQuantity := math.Floor(float64(quantity*el.Quantity) * yield)
 		stationCut := round(newQuantity * taxRate)
@@ -92,22 +92,22 @@ func reprocessItem(item *types.Item, itemMats *[]types.InventoryLine, quantity i
 		}
 
 	}
-	return &reprocessed
+	return reprocessed
 }
 
 // ReprocessItems reprocesses a number of items, consolidating stacks of each
 // output item. The input station yield and tax rate are expressed as a number
 // in 0..1 (e.g. 0.05 for 5%).
-func ReprocessItems(db dbaccess.EveDatabase, items *[]types.InventoryLine, stationYield float64, taxRate float64, skills ReproSkills) (*[]types.InventoryLine, error) {
+func ReprocessItems(db dbaccess.EveDatabase, items []types.InventoryLine, stationYield float64, taxRate float64, skills ReproSkills) ([]types.InventoryLine, error) {
 
 	reproed := []types.InventoryLine{}
-	for _, item := range *items {
+	for _, item := range items {
 		itemMats, err := db.ItemComposition(item.Item.ID)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to get composition of %v", item.Item)
 		}
 		outItems := reprocessItem(item.Item, itemMats, item.Quantity, stationYield, taxRate, skills)
-		reproed = append(reproed, *outItems...)
+		reproed = append(reproed, outItems...)
 	}
 
 	// Deduplicate items
@@ -123,12 +123,12 @@ func ReprocessItems(db dbaccess.EveDatabase, items *[]types.InventoryLine, stati
 		reproed = append(reproed,
 			types.InventoryLine{Quantity: quantities[item.ID], Item: outItems[item.ID]})
 	}
-	return &reproed, nil
+	return reproed, nil
 }
 
 // ReprocessItem is a convenience function for reprocessing a single item.
-func ReprocessItem(db dbaccess.EveDatabase, item *types.Item, quantity int, stationYield float64, taxRate float64, skills ReproSkills) (*[]types.InventoryLine, error) {
-	items := &[]types.InventoryLine{
+func ReprocessItem(db dbaccess.EveDatabase, item *types.Item, quantity int, stationYield float64, taxRate float64, skills ReproSkills) ([]types.InventoryLine, error) {
+	items := []types.InventoryLine{
 		{Item: item, Quantity: quantity},
 	}
 

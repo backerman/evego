@@ -41,7 +41,7 @@ func (c Component) String() string {
 // ShouldHaveComposition compares a []component expected result
 // against the actual []InventoryLine.
 func ShouldHaveComposition(actual interface{}, expected ...interface{}) string {
-	actualComps, ok := actual.(*[]types.InventoryLine)
+	actualComps, ok := actual.([]types.InventoryLine)
 	if !ok {
 		return "Failed to cast actual to inventory line array"
 	}
@@ -50,10 +50,10 @@ func ShouldHaveComposition(actual interface{}, expected ...interface{}) string {
 		return "Failed to cast expected to component array"
 	}
 	var messages []string
-	if len(*actualComps) != len(expectedComps) {
-		return fmt.Sprintf("Wrong number of components returned. Expected: %v; actual: %v", expectedComps, *actualComps)
+	if len(actualComps) != len(expectedComps) {
+		return fmt.Sprintf("Wrong number of components returned. Expected: %v; actual: %v", expectedComps, actualComps)
 	}
-	for _, comp := range *actualComps {
+	for _, comp := range actualComps {
 		// this is hacky; fix
 		myname := comp.Item.Name
 		found := false

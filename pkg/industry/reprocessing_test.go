@@ -183,7 +183,7 @@ func TestReprocessingOre(t *testing.T) {
 			So(err, ShouldBeNil)
 			scorditeQty := 38841
 
-			items := &[]types.InventoryLine{
+			items := []types.InventoryLine{
 				{Item: cscordite, Quantity: cscorditeQty},
 				{Item: kernite, Quantity: kerniteQty},
 				{Item: scordite, Quantity: scorditeQty},
