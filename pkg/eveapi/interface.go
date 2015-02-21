@@ -48,4 +48,9 @@ type XMLAPI interface {
 	// access. It also returns the expiration time for this information; the caller
 	// must cache the returned data until that time.
 	AccountCharacters(key *XMLKey) (*[]types.Character, time.Time, error)
+
+	// CharacterStandings returns a character's standings. It also returns the
+	// expiration time for this information; the callermust cache the returned
+	// data until that time.
+	CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, time.Time, error)
 }

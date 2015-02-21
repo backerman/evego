@@ -36,11 +36,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var testDbPath = "../../testdb.sqlite"
+const (
+	testDbPath = "../../testdb.sqlite"
 
-var testOutpostsXML = "../../testdata/test-outposts.xml"
-var testCharSheetXML = "../../testdata/test-charsheet.xml"
-var testAccountCharsXML = "../../testdata/acct-characters.xml"
+	testOutpostsXML      = "../../testdata/test-outposts.xml"
+	testCharSheetXML     = "../../testdata/test-charsheet.xml"
+	testAccountCharsXML  = "../../testdata/acct-characters.xml"
+	testCharStandingsXML = "../../testdata/char-standings.xml"
+)
 
 func TestOutpostID(t *testing.T) {
 	Convey("Set up API interface", t, func(c C) {
@@ -251,6 +254,72 @@ func TestAccountCharacters(t *testing.T) {
 				now := time.Now()
 				So(expiration, ShouldHappenWithin, 39*time.Minute, now)
 				So(expiration, ShouldNotHappenWithin, 38*time.Minute, now)
+				So(actual, ShouldResemble, expected)
+			})
+		})
+
+	})
+}
+
+func TestCharacterStandings(t *testing.T) {
+	Convey("Set up API interface", t, func(c C) {
+		var actualURL string
+		ts := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				actualURL = r.URL.String()
+				respFile, err := os.Open(testCharStandingsXML)
+				c.So(err, ShouldBeNil)
+				responseBytes, err := ioutil.ReadAll(respFile)
+				c.So(err, ShouldBeNil)
+				responseBuf := bytes.NewBuffer(responseBytes)
+				responseBuf.WriteTo(w)
+			}))
+
+		defer ts.Close()
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		x := eveapi.EveXMLAPI(ts.URL, db)
+
+		Convey("Given an account's API key and a character ID", func() {
+			key := &eveapi.XMLKey{
+				KeyID:            12345,
+				VerificationCode: "abcdef12345",
+			}
+			characterID := 94319654
+
+			Convey("That character's standings are returned.", func() {
+				expected := []types.Standing{
+					{EntityType: types.NPCAgent, ID: 3009145,
+						Name: "Ostes Zoenceliris", Standing: 1.06},
+					{EntityType: types.NPCAgent, ID: 3009372,
+						Name: "Pauren Aubyrasse", Standing: 1.84},
+					{EntityType: types.NPCAgent, ID: 3009381,
+						Name: "Arnerore Rylerave", Standing: 0.52},
+					{EntityType: types.NPCCorporation, ID: 1000005,
+						Name: "Hyasyoda Corporation", Standing: 0.86},
+					{EntityType: types.NPCCorporation, ID: 1000010,
+						Name: "Kaalakiota Corporation", Standing: 1.06},
+					{EntityType: types.NPCCorporation, ID: 1000017,
+						Name: "Nugoeihuvi Corporation", Standing: 0.61},
+					{EntityType: types.NPCFaction, ID: 500001,
+						Name: "Caldari State", Standing: -0.27},
+					{EntityType: types.NPCFaction, ID: 500002,
+						Name: "Minmatar Republic", Standing: 0.95},
+					{EntityType: types.NPCFaction, ID: 500003,
+						Name: "Amarr Empire", Standing: -2.41},
+					{EntityType: types.NPCFaction, ID: 500004,
+						Name: "Gallente Federation", Standing: 0.77},
+				}
+				actual, expiration, err := x.CharacterStandings(key, characterID)
+				So(err, ShouldBeNil)
+
+				expectedURL := fmt.Sprintf(
+					"/char/Standings.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
+					characterID, key.KeyID, key.VerificationCode)
+				So(actualURL, ShouldEqual, expectedURL)
+				// expiry time minus "current time" is 2h53m49s
+				now := time.Now()
+				So(expiration, ShouldHappenWithin, 2*time.Hour+54*time.Minute, now)
+				So(expiration, ShouldNotHappenWithin, 2*time.Hour+53*time.Minute, now)
 				So(actual, ShouldResemble, expected)
 			})
 		})
