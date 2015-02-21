@@ -19,38 +19,39 @@ package eveapi
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"log"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/backerman/evego/pkg/types"
 )
-
-func unmarshalInt(cdata string, dest *int) {
-	num, _ := strconv.ParseInt(string(cdata), 10, 0)
-	*dest = int(num)
-}
 
 // Functions on a struct must be defined in the struct's package, so we can't
 // define an unmarshaler for types.CharacterSheet here in package eveapi. The
 // solution is to define a new type that's just types.CharacterSheet and then
 // convert back before returning the types.CharacterSheet to the caller.
 
-type charSheet types.CharacterSheet
+type standingsList []types.Standing
 
-func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+type standingsResponse struct {
+	CurrentTime string        `xml:"currentTime"`
+	Standings   standingsList `xml:"result"`
+	CachedUntil string        `xml:"cachedUntil"`
+}
+
+func (sl *standingsList) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var currentElement, rowsetName string
-	for {
+	standings := make([]types.Standing, 0, 2)
+	done := false
+	for !done {
 		token, err := d.Token()
 		switch err {
 		case nil:
 		// pass
 		case io.EOF:
-			return nil
+			done = true
 		default:
 			log.Fatalf("This should not happen: %v", err)
 		}
@@ -66,63 +67,41 @@ func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 					}
 				}
 			case "row":
+				standing := types.Standing{}
+				d.DecodeElement(&standing, &tok)
 				switch rowsetName {
-				case "skills":
-					skillRow := types.Skill{}
-					d.DecodeElement(&skillRow, &tok)
-					cs.Skills = append(cs.Skills, skillRow)
+				case "agents":
+					standing.EntityType = types.NPCAgent
+				case "NPCCorporations":
+					standing.EntityType = types.NPCCorporation
+				case "factions":
+					standing.EntityType = types.NPCFaction
 				}
+				standings = append(standings, standing)
 			}
 			// if this is a row in a rowset, act based on parent rowset.
 		case xml.EndElement:
 			// do nothing
 		case xml.CharData:
-			// FIXME don't bother if all whitespace.
-			contents := strings.TrimSpace(string(tok))
-			if len(contents) > 0 {
-				switch currentElement {
-				case "characterID":
-					unmarshalInt(contents, &cs.ID)
-				case "name":
-					cs.Name = string(contents)
-				case "corporationName":
-					cs.Corporation = string(contents)
-				case "corporationID":
-					unmarshalInt(contents, &cs.CorporationID)
-				}
-			}
+			// do nothing
 		}
 	}
+
+	*sl = standings
+	return nil
 }
 
-type charSheetAPIResponse struct {
-	CurrentTime string    `xml:"currentTime"`
-	CharSheet   charSheet `xml:"result"`
-	CachedUntil string    `xml:"cachedUntil"`
-}
-
-func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, time.Time, error) {
+func (x *xmlAPI) CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, time.Time, error) {
 	params := url.Values{}
 	params.Set("keyID", strconv.Itoa(key.KeyID))
 	params.Set("characterID", strconv.Itoa(characterID))
 	params.Set("vcode", key.VerificationCode)
-	xmlBytes, err := x.get(characterSheet, params)
+	xmlBytes, err := x.get(characterStandings, params)
 	if err != nil {
 		return nil, time.Now(), err
 	}
-	var response charSheetAPIResponse
+	var response standingsResponse
 	xml.Unmarshal(xmlBytes, &response)
-	// Convert back to types.CharacterSheet
-	sheet := types.CharacterSheet(response.CharSheet)
-	// Look up the name of each skill
-	for i := range sheet.Skills {
-		skill := &sheet.Skills[i]
-		skillItem, err := x.db.ItemForID(skill.TypeID)
-		if err != nil {
-			skill.Name = fmt.Sprintf("Unknown skill (%d)", skill.TypeID)
-		} else {
-			skill.Name = skillItem.Name
-		}
-	}
-	return &sheet, expirationTime(response.CurrentTime, response.CachedUntil), nil
+	standings := []types.Standing(response.Standings)
+	return standings, expirationTime(response.CurrentTime, response.CachedUntil), nil
 }

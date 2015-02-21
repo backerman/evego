@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2015-02-17 03:24:35</currentTime>
+  <result>
+    <characterNPCStandings>
+      <rowset name="agents" key="fromID" columns="fromID,fromName,standing">
+        <row fromID="3009145" fromName="Ostes Zoenceliris" standing="1.06" />
+        <row fromID="3009372" fromName="Pauren Aubyrasse" standing="1.84" />
+        <row fromID="3009381" fromName="Arnerore Rylerave" standing="0.52" />
+      </rowset>
+      <rowset name="NPCCorporations" key="fromID" columns="fromID,fromName,standing">
+        <row fromID="1000005" fromName="Hyasyoda Corporation" standing="0.86" />
+        <row fromID="1000010" fromName="Kaalakiota Corporation" standing="1.06" />
+        <row fromID="1000017" fromName="Nugoeihuvi Corporation" standing="0.61" />
+      </rowset>
+      <rowset name="factions" key="fromID" columns="fromID,fromName,standing">
+        <row fromID="500001" fromName="Caldari State" standing="-0.27" />
+        <row fromID="500002" fromName="Minmatar Republic" standing="0.95" />
+        <row fromID="500003" fromName="Amarr Empire" standing="-2.41" />
+        <row fromID="500004" fromName="Gallente Federation" standing="0.77" />
+      </rowset>
+    </characterNPCStandings>
+  </result>
+  <cachedUntil>2015-02-17 06:18:24</cachedUntil>
+</eveapi>
