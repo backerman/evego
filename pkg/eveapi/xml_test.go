@@ -40,6 +40,7 @@ var testDbPath = "../../testdb.sqlite"
 
 var testOutpostsXML = "../../testdata/test-outposts.xml"
 var testCharSheetXML = "../../testdata/test-charsheet.xml"
+var testAccountCharsXML = "../../testdata/acct-characters.xml"
 
 func TestOutpostID(t *testing.T) {
 	Convey("Set up API interface", t, func(c C) {
@@ -191,6 +192,65 @@ func TestCharacterSheet(t *testing.T) {
 				// expiry time minus "current time" is 57 minutes
 				So(expiration, ShouldHappenWithin, 58*time.Minute, time.Now())
 				So(expiration, ShouldNotHappenWithin, 56*time.Minute, time.Now())
+				So(actual, ShouldResemble, expected)
+			})
+		})
+
+	})
+}
+
+func TestAccountCharacters(t *testing.T) {
+	Convey("Set up API interface", t, func(c C) {
+		var actualURL string
+		ts := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				actualURL = r.URL.String()
+				respFile, err := os.Open(testAccountCharsXML)
+				c.So(err, ShouldBeNil)
+				responseBytes, err := ioutil.ReadAll(respFile)
+				c.So(err, ShouldBeNil)
+				responseBuf := bytes.NewBuffer(responseBytes)
+				responseBuf.WriteTo(w)
+			}))
+
+		defer ts.Close()
+		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		x := eveapi.EveXMLAPI(ts.URL, db)
+
+		Convey("Given an account's API key", func() {
+			key := &eveapi.XMLKey{
+				KeyID:            12345,
+				VerificationCode: "abcdef12345",
+			}
+
+			Convey("The available characters on that account are returned.", func() {
+				expected := &[]types.Character{
+					{
+						Name:          "Arjun Kansene",
+						ID:            94319654,
+						Corporation:   "Center for Advanced Studies",
+						CorporationID: 1000169,
+					},
+					{
+						Name:          "All reps on Cain",
+						ID:            123456,
+						Corporation:   "Yes, this is test data",
+						CorporationID: 78910,
+						Alliance:      "Some Alliance",
+						AllianceID:    494949,
+					},
+				}
+				actual, expiration, err := x.AccountCharacters(key)
+				So(err, ShouldBeNil)
+
+				expectedURL := fmt.Sprintf(
+					"/account/Characters.xml.aspx?keyID=%d&vcode=%s",
+					key.KeyID, key.VerificationCode)
+				So(actualURL, ShouldEqual, expectedURL)
+				// expiry time minus "current time" is 38m16s
+				now := time.Now()
+				So(expiration, ShouldHappenWithin, 39*time.Minute, now)
+				So(expiration, ShouldNotHappenWithin, 38*time.Minute, now)
 				So(actual, ShouldResemble, expected)
 			})
 		})
