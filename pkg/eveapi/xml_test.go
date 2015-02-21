@@ -19,6 +19,7 @@ package eveapi_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -56,7 +57,7 @@ func TestOutpostID(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.XMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db)
 
 		Convey("Given a valid outpost ID", func() {
 			outpostID := 61000854
@@ -104,7 +105,7 @@ func TestOutpostName(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.XMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db)
 
 		Convey("Given a valid outpost name pattern", func() {
 			outpostName := "%CAT%station"
@@ -154,7 +155,7 @@ func TestCharacterSheet(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.XMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db)
 
 		Convey("Given a character's API key", func() {
 			characterID := 94319654
@@ -182,6 +183,11 @@ func TestCharacterSheet(t *testing.T) {
 				}
 				actual, expiration, err := x.CharacterSheet(characterID, keyID, verificationCode)
 				So(err, ShouldBeNil)
+
+				expectedURL := fmt.Sprintf(
+					"/char/CharacterSheet.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
+					characterID, keyID, verificationCode)
+				So(actualURL, ShouldEqual, expectedURL)
 				// expiry time minus "current time" is 57 minutes
 				So(expiration, ShouldHappenWithin, 58*time.Minute, time.Now())
 				So(expiration, ShouldNotHappenWithin, 56*time.Minute, time.Now())

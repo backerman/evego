@@ -285,7 +285,7 @@ func TestOutpostOrders(t *testing.T) {
 		defer tsXMLAPI.Close()
 
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		xmlAPI := eveapi.XMLAPI(tsXMLAPI.URL, db)
+		xmlAPI := eveapi.EveXMLAPI(tsXMLAPI.URL, db)
 		ec := market.EveCentral(db, nil, xmlAPI, ts.URL)
 
 		Convey("Given a valid location and item", func() {

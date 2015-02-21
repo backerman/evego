@@ -36,7 +36,7 @@ import (
 type eveCentral struct {
 	db        dbaccess.EveDatabase
 	router    routing.EveRouter
-	xmlAPI    eveapi.EveAPI
+	xmlAPI    eveapi.XMLAPI
 	endpoint  *url.URL
 	http      http.Client
 	respCache cache.Cache
@@ -46,7 +46,7 @@ type eveCentral struct {
 // It takes as input an EveDatabase object and an HTTP endpoint;
 // the latter should be http://api.eve-central.com/api/quicklook
 // for the production EVE-Central instance.
-func EveCentralCached(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.EveAPI, endpoint string,
+func EveCentralCached(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.XMLAPI, endpoint string,
 	aCache cache.Cache) EveMarket {
 	epURL, err := url.Parse(endpoint)
 	if err != nil {
@@ -58,7 +58,7 @@ func EveCentralCached(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI 
 
 // EveCentral returns an uncached interface to the EVE-Central API.
 // This should only be used if the caller will be handling caching.
-func EveCentral(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.EveAPI, endpoint string) EveMarket {
+func EveCentral(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.XMLAPI, endpoint string) EveMarket {
 	myCache := cache.NilCache()
 	return EveCentralCached(db, router, xmlAPI, endpoint, myCache)
 }

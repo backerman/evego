@@ -26,8 +26,10 @@ import (
 	"github.com/backerman/evego/pkg/types"
 )
 
-// EveAPI is an interface to the EVE API.
-type EveAPI interface {
+// XMLAPI is an interface to the EVE XML API. We could make the interface
+// sufficiently abstract to cover multiple APIs, but that seems on the silly
+// side.
+type XMLAPI interface {
 	io.Closer
 
 	// OutpostForID returns a conquerable station with the provided ID.
