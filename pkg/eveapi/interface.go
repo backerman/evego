@@ -43,4 +43,9 @@ type XMLAPI interface {
 	// It also returns the expiration time for this information; the caller must
 	// cache the returned data until that time.
 	CharacterSheet(characterID, keyID int, verificationCode string) (*types.CharacterSheet, time.Time, error)
+
+	// AccountCharacters returns a list of characters that the provided key can
+	// access. It also returns the expiration time for this information; the caller
+	// must cache the returned data until that time.
+	AccountCharacters(key *XMLKey) (*[]types.Character, time.Time, error)
 }

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2015-02-17 03:27:50</currentTime>
+  <result>
+    <rowset name="characters" key="characterID" columns="name,characterID,corporationName,corporationID,allianceID,allianceName,factionID,factionName">
+      <row name="Arjun Kansene" characterID="94319654" corporationName="Center for Advanced Studies" corporationID="1000169" allianceID="0" allianceName="" factionID="0" factionName="" />
+      <row name="All reps on Cain" characterID="123456" corporationName="Yes, this is test data" corporationID="78910" allianceID="494949" allianceName="Some Alliance" factionID="0" factionName="" />
+    </rowset>
+  </result>
+  <cachedUntil>2015-02-17 04:06:06</cachedUntil>
+</eveapi>
