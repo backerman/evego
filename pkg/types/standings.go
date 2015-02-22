@@ -23,7 +23,7 @@ type StandingType int
 
 // StandingType is the type of entity with which a Standing applies.
 const (
-	Unknown StandingType = iota
+	UnknownEntity StandingType = iota
 	NPCFaction
 	NPCCorporation
 	NPCAgent

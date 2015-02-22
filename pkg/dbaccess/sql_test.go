@@ -176,6 +176,27 @@ func TestItems(t *testing.T) {
 				So(err, ShouldNotBeNil)
 			})
 		})
+
+		Convey("With a tiericided item ID", func() {
+			itemID := 5491
+			actual, err := db.ItemForID(itemID)
+
+			Convey("No error is returned.", func() {
+				So(err, ShouldBeNil)
+			})
+
+			Convey("The correct item information is returned.", func() {
+				expected := &types.Item{
+					Name:      "Beta Hull Mod Expanded Cargo",
+					ID:        itemID,
+					Type:      types.UnknownItemType,
+					Group:     "Expanded Cargohold",
+					Category:  "Module",
+					BatchSize: 1,
+				}
+				So(actual, ShouldResemble, expected)
+			})
+		})
 	})
 }
 

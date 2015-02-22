@@ -239,7 +239,7 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 func (db *sqlDb) itemType(item *types.Item) types.ItemType {
 	catTree, err := db.MarketGroupForItem(item)
 	if err != nil {
-		log.Fatalf("Unable to get item type of item %v: %v", *item, err)
+		return types.UnknownItemType
 	}
 	for cur := catTree; cur != nil; cur = cur.Parent {
 		if cur.Name == "Ore" {

@@ -28,7 +28,8 @@ type ItemType int
 
 // ItemType is the type of an Eve item.
 const (
-	Ore ItemType = iota
+	UnknownItemType ItemType = iota
+	Ore
 	Ice
 	Other
 )

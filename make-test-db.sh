@@ -58,6 +58,7 @@ ITEMS=$(cat<<EOF
 "Luminous Kernite",
 "Medium Automated Structural Restoration",
 "Large Asymmetric Remote Capacitor Transmitter",
+"Beta Hull Mod Expanded Cargo",
 "Tripped Power Circuit",
 "Multifrequency S",
 "Armor Plates",

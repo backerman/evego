@@ -4,9 +4,9 @@ package types
 
 import "fmt"
 
-const _ItemType_name = "OreIceOther"
+const _ItemType_name = "UnknownItemTypeOreIceOther"
 
-var _ItemType_index = [...]uint8{3, 6, 11}
+var _ItemType_index = [...]uint8{15, 18, 21, 26}
 
 func (i ItemType) String() string {
 	if i < 0 || i >= ItemType(len(_ItemType_index)) {
