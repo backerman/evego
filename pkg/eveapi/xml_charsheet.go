@@ -25,7 +25,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/backerman/evego/pkg/types"
 )
@@ -101,14 +100,14 @@ type charSheetAPIResponse struct {
 	CachedUntil string    `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, time.Time, error) {
+func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, error) {
 	params := url.Values{}
 	params.Set("keyID", strconv.Itoa(key.KeyID))
 	params.Set("characterID", strconv.Itoa(characterID))
 	params.Set("vcode", key.VerificationCode)
 	xmlBytes, err := x.get(characterSheet, params)
 	if err != nil {
-		return nil, time.Now(), err
+		return nil, err
 	}
 	var response charSheetAPIResponse
 	xml.Unmarshal(xmlBytes, &response)
@@ -124,5 +123,5 @@ func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterS
 			skill.Name = skillItem.Name
 		}
 	}
-	return &sheet, expirationTime(response.CurrentTime, response.CachedUntil), nil
+	return &sheet, nil
 }

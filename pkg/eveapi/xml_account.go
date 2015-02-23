@@ -21,7 +21,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/url"
-	"time"
 
 	"github.com/backerman/evego/pkg/types"
 )
@@ -41,17 +40,16 @@ type charsResponse struct {
 	CachedUntil string            `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) AccountCharacters(key *XMLKey) ([]types.Character, time.Time, error) {
+func (x *xmlAPI) AccountCharacters(key *XMLKey) ([]types.Character, error) {
 	params := url.Values{}
 	params.Set("keyID", fmt.Sprintf("%d", key.KeyID))
 	params.Set("vcode", key.VerificationCode)
 	xmlBytes, err := x.get(accountCharacters, params)
 	if err != nil {
-		return nil, time.Now(), err
+		return nil, err
 	}
 	var response charsResponse
 	xml.Unmarshal(xmlBytes, &response)
 
-	return response.Characters,
-		expirationTime(response.CurrentTime, response.CachedUntil), nil
+	return response.Characters, nil
 }

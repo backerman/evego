@@ -21,7 +21,6 @@ package eveapi
 
 import (
 	"io"
-	"time"
 
 	"github.com/backerman/evego/pkg/types"
 )
@@ -40,17 +39,12 @@ type XMLAPI interface {
 	OutpostsForName(name string) ([]types.Station, error)
 
 	// AccountCharacters returns a list of characters that the provided key can
-	// access. It also returns the expiration time for this information; the caller
-	// must cache the returned data until that time.
-	AccountCharacters(key *XMLKey) ([]types.Character, time.Time, error)
+	// access.
+	AccountCharacters(key *XMLKey) ([]types.Character, error)
 
 	// CharacterSheet returns the character sheet for the given character ID.
-	// It also returns the expiration time for this information; the caller must
-	// cache the returned data until that time.
-	CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, time.Time, error)
+	CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, error)
 
-	// CharacterStandings returns a character's standings. It also returns the
-	// expiration time for this information; the callermust cache the returned
-	// data until that time.
-	CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, time.Time, error)
+	// CharacterStandings returns a character's standings.
+	CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, error)
 }

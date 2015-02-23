@@ -23,7 +23,6 @@ import (
 	"log"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/backerman/evego/pkg/types"
 )
@@ -91,17 +90,17 @@ func (sl *standingsList) UnmarshalXML(d *xml.Decoder, start xml.StartElement) er
 	return nil
 }
 
-func (x *xmlAPI) CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, time.Time, error) {
+func (x *xmlAPI) CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, error) {
 	params := url.Values{}
 	params.Set("keyID", strconv.Itoa(key.KeyID))
 	params.Set("characterID", strconv.Itoa(characterID))
 	params.Set("vcode", key.VerificationCode)
 	xmlBytes, err := x.get(characterStandings, params)
 	if err != nil {
-		return nil, time.Now(), err
+		return nil, err
 	}
 	var response standingsResponse
 	xml.Unmarshal(xmlBytes, &response)
 	standings := []types.Standing(response.Standings)
-	return standings, expirationTime(response.CurrentTime, response.CachedUntil), nil
+	return standings, nil
 }

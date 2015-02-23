@@ -20,12 +20,14 @@ limitations under the License.
 package eveapi
 
 import (
+	"encoding/xml"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/backerman/evego/pkg/cache"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/types"
 )
@@ -45,18 +47,19 @@ const (
 
 type xmlAPI struct {
 	// Endpoint URL to access.
-	url  *url.URL
-	http http.Client
-	db   dbaccess.EveDatabase
+	url   *url.URL
+	http  http.Client
+	db    dbaccess.EveDatabase
+	cache cache.Cache
 }
 
 // EveXMLAPI returns an EveAPI that accesses the EVE Online XML API.
-func EveXMLAPI(serviceURL string, staticDB dbaccess.EveDatabase) XMLAPI {
+func EveXMLAPI(serviceURL string, staticDB dbaccess.EveDatabase, aCache cache.Cache) XMLAPI {
 	endpoint, err := url.Parse(serviceURL)
 	if err != nil {
 		log.Fatalf("Unable to process endpoint URL: %v", err)
 	}
-	return &xmlAPI{url: endpoint, db: staticDB}
+	return &xmlAPI{url: endpoint, db: staticDB, cache: aCache}
 }
 
 func expirationTime(currentTime, cachedUntil string) time.Time {
@@ -77,6 +80,13 @@ func expirationTime(currentTime, cachedUntil string) time.Time {
 	return time.Now().Add(diff)
 }
 
+// get will do an extra unmarshal - it just wants the current time and
+// expiry time.
+type expiryInfo struct {
+	CurrentTime string `xml:"currentTime"`
+	CachedUntil string `xml:"cachedUntil"`
+}
+
 // get executes a call to the EVE API given the endpoint path and an optional
 // url.Values containing the parameters to be passed.
 func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
@@ -90,7 +100,15 @@ func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 	if params != nil {
 		callURL.RawQuery = params[0].Encode()
 	}
-	req, err = http.NewRequest("GET", callURL.String(), nil)
+
+	urlStr := callURL.String()
+	// Check cache.
+	cachedBody, found := x.cache.Get(urlStr)
+	if found {
+		return cachedBody, nil
+	}
+
+	req, err = http.NewRequest("GET", urlStr, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +119,12 @@ func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
+
+	// Put our repsonse in the cache.
+	expiry := expiryInfo{}
+	xml.Unmarshal(body, &expiry)
+	expiresAt := expirationTime(expiry.CurrentTime, expiry.CachedUntil)
+	x.cache.Put(urlStr, body, expiresAt)
 	return body, err
 }
 

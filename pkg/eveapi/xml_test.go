@@ -27,8 +27,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/backerman/evego/pkg/cache"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/eveapi"
+	"github.com/backerman/evego/pkg/test"
 	"github.com/backerman/evego/pkg/types"
 	. "github.com/smartystreets/goconvey/convey"
 
@@ -61,7 +63,7 @@ func TestOutpostID(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db, cache.NilCache())
 
 		Convey("Given a valid outpost ID", func() {
 			outpostID := 61000854
@@ -109,7 +111,7 @@ func TestOutpostName(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db)
+		x := eveapi.EveXMLAPI(ts.URL, db, cache.NilCache())
 
 		Convey("Given a valid outpost name pattern", func() {
 			outpostName := "%CAT%station"
@@ -159,7 +161,8 @@ func TestCharacterSheet(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db)
+		cacheData := test.CacheData{}
+		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given a character's API key", func() {
 			characterID := 94319654
@@ -187,16 +190,21 @@ func TestCharacterSheet(t *testing.T) {
 						{Name: "Hacking", TypeID: 21718, NumSkillpoints: 135765, Level: 4, Published: true},
 					},
 				}
-				actual, expiration, err := x.CharacterSheet(key, characterID)
+				actual, err := x.CharacterSheet(key, characterID)
 				So(err, ShouldBeNil)
 
 				expectedURL := fmt.Sprintf(
 					"/char/CharacterSheet.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
 					characterID, key.KeyID, key.VerificationCode)
 				So(actualURL, ShouldEqual, expectedURL)
+				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
+				expiration := cacheData.PutExpires
 				// expiry time minus "current time" is 57 minutes
-				So(expiration, ShouldHappenWithin, 58*time.Minute, time.Now())
-				So(expiration, ShouldNotHappenWithin, 56*time.Minute, time.Now())
+				now := time.Now()
+				So(expiration, ShouldHappenAfter, now)
+				So(expiration, ShouldHappenWithin, 58*time.Minute, now)
+				So(expiration, ShouldNotHappenWithin, 56*time.Minute, now)
 				So(actual, ShouldResemble, expected)
 			})
 		})
@@ -220,7 +228,8 @@ func TestAccountCharacters(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db)
+		cacheData := test.CacheData{}
+		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given an account's API key", func() {
 			key := &eveapi.XMLKey{
@@ -245,7 +254,7 @@ func TestAccountCharacters(t *testing.T) {
 						AllianceID:    494949,
 					},
 				}
-				actual, expiration, err := x.AccountCharacters(key)
+				actual, err := x.AccountCharacters(key)
 				So(err, ShouldBeNil)
 
 				expectedURL := fmt.Sprintf(
@@ -253,13 +262,16 @@ func TestAccountCharacters(t *testing.T) {
 					key.KeyID, key.VerificationCode)
 				So(actualURL, ShouldEqual, expectedURL)
 				// expiry time minus "current time" is 38m16s
+				expiration := cacheData.PutExpires
+				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
 				now := time.Now()
+				So(expiration, ShouldHappenAfter, now)
 				So(expiration, ShouldHappenWithin, 39*time.Minute, now)
 				So(expiration, ShouldNotHappenWithin, 38*time.Minute, now)
 				So(actual, ShouldResemble, expected)
 			})
 		})
-
 	})
 }
 
@@ -279,7 +291,8 @@ func TestCharacterStandings(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db)
+		cacheData := test.CacheData{}
+		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given an account's API key and a character ID", func() {
 			key := &eveapi.XMLKey{
@@ -311,15 +324,19 @@ func TestCharacterStandings(t *testing.T) {
 					{EntityType: types.NPCFaction, ID: 500004,
 						Name: "Gallente Federation", Standing: 0.77},
 				}
-				actual, expiration, err := x.CharacterStandings(key, characterID)
+				actual, err := x.CharacterStandings(key, characterID)
 				So(err, ShouldBeNil)
 
 				expectedURL := fmt.Sprintf(
 					"/char/Standings.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
 					characterID, key.KeyID, key.VerificationCode)
 				So(actualURL, ShouldEqual, expectedURL)
+				expiration := cacheData.PutExpires
+				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
 				// expiry time minus "current time" is 2h53m49s
 				now := time.Now()
+				So(expiration, ShouldHappenAfter, now)
 				So(expiration, ShouldHappenWithin, 2*time.Hour+54*time.Minute, now)
 				So(expiration, ShouldNotHappenWithin, 2*time.Hour+53*time.Minute, now)
 				So(actual, ShouldResemble, expected)

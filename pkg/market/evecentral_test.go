@@ -31,6 +31,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/backerman/evego/pkg/cache"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/eveapi"
 	"github.com/backerman/evego/pkg/market"
@@ -285,7 +286,7 @@ func TestOutpostOrders(t *testing.T) {
 		defer tsXMLAPI.Close()
 
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		xmlAPI := eveapi.EveXMLAPI(tsXMLAPI.URL, db)
+		xmlAPI := eveapi.EveXMLAPI(tsXMLAPI.URL, db, cache.NilCache())
 		ec := market.EveCentral(db, nil, xmlAPI, ts.URL)
 
 		Convey("Given a valid location and item", func() {
