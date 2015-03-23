@@ -15,7 +15,7 @@ limitations under the License.
 
 */
 
-package types
+package evego
 
 // Character represents one EVE player toon.
 type Character struct {

@@ -25,8 +25,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/backerman/evego/pkg/dbaccess"
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 var (
@@ -52,8 +51,8 @@ func removeNonNumeric(s string) string {
 // * ship/station/container inventory
 // * personal assets view
 // * industry tab of item info
-func ParseInventory(pasted string, database dbaccess.EveDatabase) []types.InventoryLine {
-	results := []types.InventoryLine{}
+func ParseInventory(pasted string, database evego.Database) []evego.InventoryLine {
+	results := []evego.InventoryLine{}
 	// Break into individual lines.
 	reader := csv.NewReader(strings.NewReader(pasted))
 	reader.Comma = '\t'
@@ -96,7 +95,7 @@ func ParseInventory(pasted string, database dbaccess.EveDatabase) []types.Invent
 			// Didn't find a matching item.
 			continue
 		}
-		results = append(results, types.InventoryLine{Item: item, Quantity: quantity})
+		results = append(results, evego.InventoryLine{Item: item, Quantity: quantity})
 
 	}
 	return results

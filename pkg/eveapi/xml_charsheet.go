@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 func unmarshalInt(cdata string, dest *int) {
@@ -35,11 +35,11 @@ func unmarshalInt(cdata string, dest *int) {
 }
 
 // Functions on a struct must be defined in the struct's package, so we can't
-// define an unmarshaler for types.CharacterSheet here in package eveapi. The
-// solution is to define a new type that's just types.CharacterSheet and then
-// convert back before returning the types.CharacterSheet to the caller.
+// define an unmarshaler for evego.CharacterSheet here in package eveapi. The
+// solution is to define a new type that's just evego.CharacterSheet and then
+// convert back before returning the evego.CharacterSheet to the caller.
 
-type charSheet types.CharacterSheet
+type charSheet evego.CharacterSheet
 
 func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var currentElement, rowsetName string
@@ -67,7 +67,7 @@ func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 			case "row":
 				switch rowsetName {
 				case "skills":
-					skillRow := types.Skill{}
+					skillRow := evego.Skill{}
 					d.DecodeElement(&skillRow, &tok)
 					cs.Skills = append(cs.Skills, skillRow)
 				}
@@ -100,7 +100,7 @@ type charSheetAPIResponse struct {
 	CachedUntil string    `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, error) {
+func (x *xmlAPI) CharacterSheet(key *evego.XMLKey, characterID int) (*evego.CharacterSheet, error) {
 	params := url.Values{}
 	params.Set("keyID", strconv.Itoa(key.KeyID))
 	params.Set("characterID", strconv.Itoa(characterID))
@@ -111,8 +111,8 @@ func (x *xmlAPI) CharacterSheet(key *XMLKey, characterID int) (*types.CharacterS
 	}
 	var response charSheetAPIResponse
 	xml.Unmarshal(xmlBytes, &response)
-	// Convert back to types.CharacterSheet
-	sheet := types.CharacterSheet(response.CharSheet)
+	// Convert back to evego.CharacterSheet
+	sheet := evego.CharacterSheet(response.CharSheet)
 	// Look up the name of each skill
 	for i := range sheet.Skills {
 		skill := &sheet.Skills[i]

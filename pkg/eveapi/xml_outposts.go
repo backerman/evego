@@ -28,7 +28,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 // XML headers for unmarshalling
@@ -53,7 +53,7 @@ func (x *xmlAPI) checkOutpostCache() error {
 	if time.Now().After(cacheExpiry) {
 		// The cache has expired or has not yet been populated.
 		// FIXME Only one goroutine should update cache. Mutex? Channel?
-		newOutposts := make(map[int]*types.Station)
+		newOutposts := make(map[int]*evego.Station)
 		xmlBytes, err := x.get(conqerableStations)
 		if err != nil {
 			// FIXME some sort of throttling required
@@ -64,7 +64,7 @@ func (x *xmlAPI) checkOutpostCache() error {
 		cacheExpiry = expirationTime(response.CurrentTime, response.CachedUntil)
 		for i := range response.Outposts {
 			o := response.Outposts[i]
-			stn := types.Station{
+			stn := evego.Station{
 				Name:          o.Name,
 				ID:            o.ID,
 				SystemID:      o.SolarSystemID,
@@ -80,7 +80,7 @@ func (x *xmlAPI) checkOutpostCache() error {
 	return nil
 }
 
-func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
+func (x *xmlAPI) OutpostForID(id int) (*evego.Station, error) {
 	err := x.checkOutpostCache()
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (x *xmlAPI) OutpostForID(id int) (*types.Station, error) {
 
 // Implementation of sort.Interface
 
-type stationsList []types.Station
+type stationsList []evego.Station
 
 func (s stationsList) Len() int {
 	return len(s)
@@ -116,14 +116,14 @@ func (s stationsList) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (x *xmlAPI) OutpostsForName(name string) ([]types.Station, error) {
+func (x *xmlAPI) OutpostsForName(name string) ([]evego.Station, error) {
 	// This is a horribly inefficient implementation. Switch to SQLite
 	// in-memory DB rather than keeping everything as Golang structs?
 	err := x.checkOutpostCache()
 	if err != nil {
 		return nil, err
 	}
-	var stations []types.Station
+	var stations []evego.Station
 	namePattern := "^(?i:" + strings.Replace(name, "%", ".*", -1) + ")$"
 	nameRE, err := regexp.Compile(namePattern)
 	if err != nil {

@@ -24,8 +24,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/backerman/evego/pkg/dbaccess"
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 // ReproSkills is a character's skills that are applicable to reprocessing.
@@ -55,10 +54,10 @@ func round(in float64) float64 {
 
 // ReprocessItem returns the result of reprocessing a given item and the number
 // of input items that were reprocessed.
-func reprocessItem(item *types.Item, itemMats []types.InventoryLine, quantity int, stationYield float64, taxRate float64, skills ReproSkills) []types.InventoryLine {
+func reprocessItem(item *evego.Item, itemMats []evego.InventoryLine, quantity int, stationYield float64, taxRate float64, skills ReproSkills) []evego.InventoryLine {
 	yield := stationYield
 	switch item.Type {
-	case types.Ice, types.Ore:
+	case evego.Ice, evego.Ore:
 		splitName := strings.Split(item.Name, " ")
 		baseName := splitName[len(splitName)-1]
 		yield *= 1.0 + float64(skills.Reprocessing)*0.03
@@ -67,7 +66,7 @@ func reprocessItem(item *types.Item, itemMats []types.InventoryLine, quantity in
 	default:
 		yield *= 1.0 + float64(skills.ScrapmetalProcessing)*0.02
 	}
-	reprocessed := []types.InventoryLine{}
+	reprocessed := []evego.InventoryLine{}
 
 	// Ensure that the quantity is okay.
 	batch := item.BatchSize
@@ -76,7 +75,7 @@ func reprocessItem(item *types.Item, itemMats []types.InventoryLine, quantity in
 		// When the quantity of an item is not an integer multiple of its
 		// batch size, pass through the fractional batch unprocessed.
 		reprocessed = append(reprocessed,
-			types.InventoryLine{Quantity: remainder, Item: item})
+			evego.InventoryLine{Quantity: remainder, Item: item})
 	}
 
 	// Add yielded items
@@ -88,7 +87,7 @@ func reprocessItem(item *types.Item, itemMats []types.InventoryLine, quantity in
 		quantInt := int(newQuantity)
 		if quantInt > 0 {
 			reprocessed = append(reprocessed,
-				types.InventoryLine{Quantity: quantInt, Item: el.Item})
+				evego.InventoryLine{Quantity: quantInt, Item: el.Item})
 		}
 
 	}
@@ -98,9 +97,9 @@ func reprocessItem(item *types.Item, itemMats []types.InventoryLine, quantity in
 // ReprocessItems reprocesses a number of items, consolidating stacks of each
 // output item. The input station yield and tax rate are expressed as a number
 // in 0..1 (e.g. 0.05 for 5%).
-func ReprocessItems(db dbaccess.EveDatabase, items []types.InventoryLine, stationYield float64, taxRate float64, skills ReproSkills) ([]types.InventoryLine, error) {
+func ReprocessItems(db evego.Database, items []evego.InventoryLine, stationYield float64, taxRate float64, skills ReproSkills) ([]evego.InventoryLine, error) {
 
-	reproed := []types.InventoryLine{}
+	reproed := []evego.InventoryLine{}
 	for _, item := range items {
 		itemMats, err := db.ItemComposition(item.Item.ID)
 		if err != nil {
@@ -112,23 +111,23 @@ func ReprocessItems(db dbaccess.EveDatabase, items []types.InventoryLine, statio
 
 	// Deduplicate items
 	quantities := make(map[int]int)
-	outItems := make(map[int]*types.Item)
+	outItems := make(map[int]*evego.Item)
 	for _, line := range reproed {
 		quantities[line.Item.ID] += line.Quantity
 		outItems[line.Item.ID] = line.Item
 	}
 	// blank return array
-	reproed = []types.InventoryLine{}
+	reproed = []evego.InventoryLine{}
 	for _, item := range outItems {
 		reproed = append(reproed,
-			types.InventoryLine{Quantity: quantities[item.ID], Item: outItems[item.ID]})
+			evego.InventoryLine{Quantity: quantities[item.ID], Item: outItems[item.ID]})
 	}
 	return reproed, nil
 }
 
 // ReprocessItem is a convenience function for reprocessing a single item.
-func ReprocessItem(db dbaccess.EveDatabase, item *types.Item, quantity int, stationYield float64, taxRate float64, skills ReproSkills) ([]types.InventoryLine, error) {
-	items := []types.InventoryLine{
+func ReprocessItem(db evego.Database, item *evego.Item, quantity int, stationYield float64, taxRate float64, skills ReproSkills) ([]evego.InventoryLine, error) {
+	items := []evego.InventoryLine{
 		{Item: item, Quantity: quantity},
 	}
 

@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
-//go:generate stringer -output market_string.go -type=OrderType,OrderRange
+//go:generate stringer -output types_market_string.go -type=OrderType,OrderRange
 
-package types
+package evego
 
 import (
 	"fmt"

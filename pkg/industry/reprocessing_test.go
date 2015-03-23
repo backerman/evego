@@ -20,9 +20,9 @@ package industry_test
 import (
 	"testing"
 
+	"github.com/backerman/evego"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/industry"
-	"github.com/backerman/evego/pkg/types"
 
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
@@ -183,7 +183,7 @@ func TestReprocessingOre(t *testing.T) {
 			So(err, ShouldBeNil)
 			scorditeQty := 38841
 
-			items := []types.InventoryLine{
+			items := []evego.InventoryLine{
 				{Item: cscordite, Quantity: cscorditeQty},
 				{Item: kernite, Quantity: kerniteQty},
 				{Item: scordite, Quantity: scorditeQty},

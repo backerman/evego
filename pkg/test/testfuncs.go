@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 // Component is an output of reprocessing.
@@ -41,7 +41,7 @@ func (c Component) String() string {
 // ShouldHaveComposition compares a []component expected result
 // against the actual []InventoryLine.
 func ShouldHaveComposition(actual interface{}, expected ...interface{}) string {
-	actualComps, ok := actual.([]types.InventoryLine)
+	actualComps, ok := actual.([]evego.InventoryLine)
 	if !ok {
 		return "Failed to cast actual to inventory line array"
 	}

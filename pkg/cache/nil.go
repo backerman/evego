@@ -17,7 +17,11 @@ limitations under the License.
 
 package cache
 
-import "time"
+import (
+	"time"
+
+	"github.com/backerman/evego"
+)
 
 type nilCache struct {
 }
@@ -25,7 +29,7 @@ type nilCache struct {
 // NilCache returns a struct satisfying the Cache interface that goes nowhere
 // and does nothing. All calls will GNDN, and Get will always result in a cache
 // miss.
-func NilCache() Cache {
+func NilCache() evego.Cache {
 	return &nilCache{}
 }
 

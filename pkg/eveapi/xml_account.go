@@ -22,25 +22,16 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
-
-// XMLKey is a key ID / verification code pair used to retrieve data from the
-// EVE XML API.
-type XMLKey struct {
-	KeyID            int
-	VerificationCode string
-	// Description is an optional description provided by the user.
-	Description string
-}
 
 type charsResponse struct {
 	CurrentTime string            `xml:"currentTime"`
-	Characters  []types.Character `xml:"result>rowset>row"`
+	Characters  []evego.Character `xml:"result>rowset>row"`
 	CachedUntil string            `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) AccountCharacters(key *XMLKey) ([]types.Character, error) {
+func (x *xmlAPI) AccountCharacters(key *evego.XMLKey) ([]evego.Character, error) {
 	params := url.Values{}
 	params.Set("keyID", fmt.Sprintf("%d", key.KeyID))
 	params.Set("vcode", key.VerificationCode)

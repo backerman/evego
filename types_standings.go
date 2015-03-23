@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
-//go:generate stringer -output standings_string.go -type=StandingType
+//go:generate stringer -output types_standings_string.go -type=StandingType
 
-package types
+package evego
 
 // StandingType is the type of entity with which a Standing applies.
 type StandingType int

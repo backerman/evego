@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/backerman/evego/pkg/cache"
+	"github.com/backerman/evego"
 )
 
 // CacheData maintains information on calls by the test code to the cache.
@@ -38,7 +38,7 @@ type testCache struct {
 }
 
 // Cache returns a cache object used for testing.
-func Cache(data *CacheData) cache.Cache {
+func Cache(data *CacheData) evego.Cache {
 	return &testCache{
 		data: data,
 	}

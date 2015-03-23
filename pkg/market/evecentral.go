@@ -26,28 +26,25 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/backerman/evego"
 	"github.com/backerman/evego/pkg/cache"
-	"github.com/backerman/evego/pkg/dbaccess"
-	"github.com/backerman/evego/pkg/eveapi"
-	"github.com/backerman/evego/pkg/routing"
-	"github.com/backerman/evego/pkg/types"
 )
 
 type eveCentral struct {
-	db        dbaccess.EveDatabase
-	router    routing.EveRouter
-	xmlAPI    eveapi.XMLAPI
+	db        evego.Database
+	router    evego.Router
+	xmlAPI    evego.XMLAPI
 	endpoint  *url.URL
 	http      http.Client
-	respCache cache.Cache
+	respCache evego.Cache
 }
 
 // EveCentralCached returns an interface to the EVE-Central API.
 // It takes as input an EveDatabase object and an HTTP endpoint;
 // the latter should be http://api.eve-central.com/api/quicklook
 // for the production EVE-Central instance.
-func EveCentralCached(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.XMLAPI, endpoint string,
-	aCache cache.Cache) EveMarket {
+func EveCentralCached(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, endpoint string,
+	aCache evego.Cache) evego.Market {
 	epURL, err := url.Parse(endpoint)
 	if err != nil {
 		log.Fatalf("Invalid URL %v passed for Eve-Central endpoint: %v", endpoint, err)
@@ -58,7 +55,7 @@ func EveCentralCached(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI 
 
 // EveCentral returns an uncached interface to the EVE-Central API.
 // This should only be used if the caller will be handling caching.
-func EveCentral(db dbaccess.EveDatabase, router routing.EveRouter, xmlAPI eveapi.XMLAPI, endpoint string) EveMarket {
+func EveCentral(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, endpoint string) evego.Market {
 	myCache := cache.NilCache()
 	return EveCentralCached(db, router, xmlAPI, endpoint, myCache)
 }
@@ -96,16 +93,16 @@ type quicklook struct {
 	BuyOrders  []order `xml:"quicklook>buy_orders>order"`
 }
 
-func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.OrderType) []types.Order {
+func (e *eveCentral) processOrders(data *quicklook, item *evego.Item, t evego.OrderType) []evego.Order {
 	var toProcess *[]order
-	stationCache := make(map[int]*types.Station)
+	stationCache := make(map[int]*evego.Station)
 	switch t {
-	case types.Buy:
+	case evego.Buy:
 		toProcess = &data.BuyOrders
-	case types.Sell:
+	case evego.Sell:
 		toProcess = &data.SellOrders
 	}
-	results := []types.Order{}
+	results := []evego.Order{}
 	for _, o := range *toProcess {
 		if stationCache[o.StationID] == nil {
 			sta, err := e.db.StationForID(o.StationID)
@@ -114,7 +111,7 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 				sta, err = e.xmlAPI.OutpostForID(o.StationID)
 				if err != nil {
 					// Make a dummy station.
-					sta = &types.Station{
+					sta = &evego.Station{
 						Name: fmt.Sprintf("Unknown Station (ID %d)", o.StationID),
 						ID:   o.StationID,
 					}
@@ -123,7 +120,7 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 			stationCache[o.StationID] = sta
 		}
 		oTime, _ := time.Parse("2006-01-02", o.ExpirationDate)
-		newOrder := types.Order{
+		newOrder := evego.Order{
 			Type:       t,
 			Item:       item,
 			Quantity:   o.QuantityAvailable,
@@ -131,18 +128,18 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 			Price:      o.Price,
 			Expiration: oTime,
 		}
-		if t == types.Buy {
+		if t == evego.Buy {
 			// Set the fields specific to buy orders.
 			newOrder.MinQuantity = o.MinimumVolume
 			switch o.Range {
 			case 32767, 65535:
-				newOrder.JumpRange = types.BuyRegion
+				newOrder.JumpRange = evego.BuyRegion
 			case -1:
-				newOrder.JumpRange = types.BuyStation
+				newOrder.JumpRange = evego.BuyStation
 			case 0:
-				newOrder.JumpRange = types.BuySystem
+				newOrder.JumpRange = evego.BuySystem
 			default:
-				newOrder.JumpRange = types.BuyNumberJumps
+				newOrder.JumpRange = evego.BuyNumberJumps
 				newOrder.NumJumps = o.Range
 			}
 		}
@@ -151,10 +148,10 @@ func (e *eveCentral) processOrders(data *quicklook, item *types.Item, t types.Or
 	return results
 }
 
-func (e *eveCentral) OrdersForItem(item *types.Item, location string, orderType types.OrderType) (*[]types.Order, error) {
+func (e *eveCentral) OrdersForItem(item *evego.Item, location string, orderType evego.OrderType) (*[]evego.Order, error) {
 	var (
-		system *types.SolarSystem
-		region *types.Region
+		system *evego.SolarSystem
+		region *evego.Region
 		err    error
 	)
 	system, err = e.db.SolarSystemForName(location)
@@ -193,35 +190,35 @@ func (e *eveCentral) OrdersForItem(item *types.Item, location string, orderType 
 	}
 
 	// Convert returned XML struct into what we present to rest of library.
-	results := []types.Order{}
+	results := []evego.Order{}
 	switch orderType {
-	case types.AllOrders:
+	case evego.AllOrders:
 		// The order here matters, if only because it's the order that the
 		// orders are presented by EVE Central and therefore the order in which
 		// the test cases expect results.
-		results = append(results, e.processOrders(orders, item, types.Sell)...)
-		results = append(results, e.processOrders(orders, item, types.Buy)...)
+		results = append(results, e.processOrders(orders, item, evego.Sell)...)
+		results = append(results, e.processOrders(orders, item, evego.Buy)...)
 	default:
 		results = e.processOrders(orders, item, orderType)
 	}
 	return &results, nil
 }
 
-func (e *eveCentral) BuyInStation(item *types.Item, location *types.Station) (*[]types.Order, error) {
+func (e *eveCentral) BuyInStation(item *evego.Item, location *evego.Station) (*[]evego.Order, error) {
 	system, err := e.db.SolarSystemForID(location.SystemID)
 	if err != nil {
 		return nil, err
 	}
-	regionalOrders, err := e.OrdersForItem(item, system.Region, types.Buy)
+	regionalOrders, err := e.OrdersForItem(item, system.Region, evego.Buy)
 	if err != nil {
 		return nil, err
 	}
-	orders := []types.Order{}
+	orders := []evego.Order{}
 	for _, o := range *regionalOrders {
 		switch o.JumpRange {
-		case types.BuyRegion:
+		case evego.BuyRegion:
 			orders = append(orders, o)
-		case types.BuyNumberJumps:
+		case evego.BuyNumberJumps:
 			numJumps, err := e.router.NumJumpsID(o.Station.SystemID, location.SystemID)
 			if err != nil {
 				return nil, err
@@ -229,11 +226,11 @@ func (e *eveCentral) BuyInStation(item *types.Item, location *types.Station) (*[
 			if numJumps <= o.NumJumps {
 				orders = append(orders, o)
 			}
-		case types.BuySystem:
+		case evego.BuySystem:
 			if o.Station.SystemID == location.SystemID {
 				orders = append(orders, o)
 			}
-		case types.BuyStation:
+		case evego.BuyStation:
 			if o.Station.ID == location.ID {
 				orders = append(orders, o)
 			}
@@ -243,7 +240,7 @@ func (e *eveCentral) BuyInStation(item *types.Item, location *types.Station) (*[
 	return &orders, nil
 }
 
-func (e *eveCentral) OrdersInStation(item *types.Item, location *types.Station) (*[]types.Order, error) {
+func (e *eveCentral) OrdersInStation(item *evego.Item, location *evego.Station) (*[]evego.Order, error) {
 	orders, err := e.BuyInStation(item, location)
 	if err != nil {
 		return nil, err
@@ -254,7 +251,7 @@ func (e *eveCentral) OrdersInStation(item *types.Item, location *types.Station) 
 	if err != nil {
 		return nil, err
 	}
-	sellInSystem, err := e.OrdersForItem(item, orderSystem.Name, types.Sell)
+	sellInSystem, err := e.OrdersForItem(item, orderSystem.Name, evego.Sell)
 	if err != nil {
 		return nil, err
 	}

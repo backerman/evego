@@ -14,11 +14,9 @@
 	limitations under the License.
 
 */
-//go:generate stringer -output items_string.go -type=ItemType
+//go:generate stringer -output types_items_string.go -type=ItemType
 
-// Package types contains types that represent items in the EVE universe and
-// are used by other packages in this library.
-package types
+package evego
 
 import "fmt"
 

@@ -27,14 +27,12 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/backerman/evego/pkg/cache"
-	"github.com/backerman/evego/pkg/dbaccess"
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 var (
 	cacheExpiry = time.Time{}
-	outposts    = make(map[int]*types.Station)
+	outposts    = make(map[int]*evego.Station)
 )
 
 const (
@@ -49,12 +47,12 @@ type xmlAPI struct {
 	// Endpoint URL to access.
 	url   *url.URL
 	http  http.Client
-	db    dbaccess.EveDatabase
-	cache cache.Cache
+	db    evego.Database
+	cache evego.Cache
 }
 
 // EveXMLAPI returns an EveAPI that accesses the EVE Online XML API.
-func EveXMLAPI(serviceURL string, staticDB dbaccess.EveDatabase, aCache cache.Cache) XMLAPI {
+func EveXMLAPI(serviceURL string, staticDB evego.Database, aCache evego.Cache) evego.XMLAPI {
 	endpoint, err := url.Parse(serviceURL)
 	if err != nil {
 		log.Fatalf("Unable to process endpoint URL: %v", err)

@@ -24,15 +24,15 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 // Functions on a struct must be defined in the struct's package, so we can't
-// define an unmarshaler for types.CharacterSheet here in package eveapi. The
-// solution is to define a new type that's just types.CharacterSheet and then
-// convert back before returning the types.CharacterSheet to the caller.
+// define an unmarshaler for evego.CharacterSheet here in package eveapi. The
+// solution is to define a new type that's just evego.CharacterSheet and then
+// convert back before returning the evego.CharacterSheet to the caller.
 
-type standingsList []types.Standing
+type standingsList []evego.Standing
 
 type standingsResponse struct {
 	CurrentTime string        `xml:"currentTime"`
@@ -42,7 +42,7 @@ type standingsResponse struct {
 
 func (sl *standingsList) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var currentElement, rowsetName string
-	standings := make([]types.Standing, 0, 2)
+	standings := make([]evego.Standing, 0, 2)
 	done := false
 	for !done {
 		token, err := d.Token()
@@ -66,15 +66,15 @@ func (sl *standingsList) UnmarshalXML(d *xml.Decoder, start xml.StartElement) er
 					}
 				}
 			case "row":
-				standing := types.Standing{}
+				standing := evego.Standing{}
 				d.DecodeElement(&standing, &tok)
 				switch rowsetName {
 				case "agents":
-					standing.EntityType = types.NPCAgent
+					standing.EntityType = evego.NPCAgent
 				case "NPCCorporations":
-					standing.EntityType = types.NPCCorporation
+					standing.EntityType = evego.NPCCorporation
 				case "factions":
-					standing.EntityType = types.NPCFaction
+					standing.EntityType = evego.NPCFaction
 				}
 				standings = append(standings, standing)
 			}
@@ -90,7 +90,7 @@ func (sl *standingsList) UnmarshalXML(d *xml.Decoder, start xml.StartElement) er
 	return nil
 }
 
-func (x *xmlAPI) CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, error) {
+func (x *xmlAPI) CharacterStandings(key *evego.XMLKey, characterID int) ([]evego.Standing, error) {
 	params := url.Values{}
 	params.Set("keyID", strconv.Itoa(key.KeyID))
 	params.Set("characterID", strconv.Itoa(characterID))
@@ -101,6 +101,6 @@ func (x *xmlAPI) CharacterStandings(key *XMLKey, characterID int) ([]types.Stand
 	}
 	var response standingsResponse
 	xml.Unmarshal(xmlBytes, &response)
-	standings := []types.Standing(response.Standings)
+	standings := []evego.Standing(response.Standings)
 	return standings, nil
 }

@@ -23,7 +23,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -57,7 +57,7 @@ const (
 )
 
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
-func SQLDatabase(driver, dataSource string) EveDatabase {
+func SQLDatabase(driver, dataSource string) evego.Database {
 	evedb := new(sqlDb)
 	var err error
 	evedb.db, err = sqlx.Connect(driver, dataSource)
@@ -121,9 +121,9 @@ func SQLDatabase(driver, dataSource string) EveDatabase {
 }
 
 // ItemForName returns a populated Item object for a given item title.
-func (db *sqlDb) ItemForName(itemName string) (*types.Item, error) {
+func (db *sqlDb) ItemForName(itemName string) (*evego.Item, error) {
 	var err error
-	object := types.Item{}
+	object := evego.Item{}
 	row := db.itemInfoStatement.QueryRowx(itemName)
 	err = row.StructScan(&object)
 	if err == sql.ErrNoRows {
@@ -134,9 +134,9 @@ func (db *sqlDb) ItemForName(itemName string) (*types.Item, error) {
 	return &object, err
 }
 
-func (db *sqlDb) ItemForID(itemID int) (*types.Item, error) {
+func (db *sqlDb) ItemForID(itemID int) (*evego.Item, error) {
 	var err error
-	object := types.Item{}
+	object := evego.Item{}
 	row := db.itemIDInfoStatement.QueryRowx(itemID)
 	err = row.StructScan(&object)
 	if err == sql.ErrNoRows {
@@ -148,14 +148,14 @@ func (db *sqlDb) ItemForID(itemID int) (*types.Item, error) {
 }
 
 // itemComposition returns the composition of a named Eve item.
-func (db *sqlDb) ItemComposition(itemID int) ([]types.InventoryLine, error) {
+func (db *sqlDb) ItemComposition(itemID int) ([]evego.InventoryLine, error) {
 	rows, err := db.compStatement.Query(itemID)
 	if err != nil {
 		log.Fatalf("Unable to execute composition query for item %d: %v", itemID, err)
 	}
 	defer rows.Close()
 
-	var results []types.InventoryLine
+	var results []evego.InventoryLine
 	for rows.Next() {
 		var (
 			id       int
@@ -169,13 +169,13 @@ func (db *sqlDb) ItemComposition(itemID int) ([]types.InventoryLine, error) {
 		if err != nil {
 			log.Fatalf("Unable to execute query for item %d component %d: %v", itemID, id, err)
 		}
-		results = append(results, types.InventoryLine{Quantity: quantity, Item: item})
+		results = append(results, evego.InventoryLine{Quantity: quantity, Item: item})
 	}
 	return results, nil
 }
 
 // MarketGroupForItem returns the parent groups of the market item.
-func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error) {
+func (db *sqlDb) MarketGroupForItem(item *evego.Item) (*evego.MarketGroup, error) {
 	rows, err := db.catTreeFromItemStatement.Query(item.ID)
 	// The query doesn't return ErrNoRows, so we'll check for that case
 	// below.
@@ -183,8 +183,8 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 		log.Fatalf("Unable to execute query: %v", err)
 	}
 	defer rows.Close()
-	var itemGroup *types.MarketGroup
-	var curLevel *types.MarketGroup
+	var itemGroup *evego.MarketGroup
+	var curLevel *evego.MarketGroup
 	// The SQL query returns the market group hierarchy for the queried item,
 	// beginning with the item's group and walking the group hierarchy until
 	// the most broad group is found.
@@ -201,7 +201,7 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 	for rows.Next() {
 		hasRows = true
 		rows.Scan(&groupID, &groupName, &description, &parentID, &parentName, &parentDescription)
-		nextLevel := &types.MarketGroup{
+		nextLevel := &evego.MarketGroup{
 			ID:          groupID,
 			Name:        groupName,
 			Parent:      nil,
@@ -224,7 +224,7 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 	}
 	// The last row's parentID and parentName are the first-level market category;
 	// add them as the final parent.
-	curLevel.Parent = &types.MarketGroup{
+	curLevel.Parent = &evego.MarketGroup{
 		ID:          parentID,
 		Name:        parentName,
 		Parent:      nil,
@@ -236,43 +236,43 @@ func (db *sqlDb) MarketGroupForItem(item *types.Item) (*types.MarketGroup, error
 
 // itemType returns the type of this item, as required for reprocessing yield
 // calculation. It's either ore, ice, or other.
-func (db *sqlDb) itemType(item *types.Item) types.ItemType {
+func (db *sqlDb) itemType(item *evego.Item) evego.ItemType {
 	catTree, err := db.MarketGroupForItem(item)
 	if err != nil {
-		return types.UnknownItemType
+		return evego.UnknownItemType
 	}
 	for cur := catTree; cur != nil; cur = cur.Parent {
 		if cur.Name == "Ore" {
-			return types.Ore
+			return evego.Ore
 		}
 		if cur.Name == "Ice Ore" {
-			return types.Ice
+			return evego.Ice
 		}
 	}
 	// Ret
-	return types.Other
+	return evego.Other
 }
 
 func (db *sqlDb) Close() error {
 	return db.db.Close()
 }
 
-func (db *sqlDb) SolarSystemForName(systemName string) (*types.SolarSystem, error) {
+func (db *sqlDb) SolarSystemForName(systemName string) (*evego.SolarSystem, error) {
 	row := db.systemInfoStatement.QueryRowx(systemName)
-	system := &types.SolarSystem{}
+	system := &evego.SolarSystem{}
 	err := row.StructScan(system)
 	return system, err
 }
 
-func (db *sqlDb) SolarSystemsForPattern(systemName string) ([]types.SolarSystem, error) {
+func (db *sqlDb) SolarSystemsForPattern(systemName string) ([]evego.SolarSystem, error) {
 	rows, err := db.systemInfoStatement.Queryx(systemName)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var systems []types.SolarSystem
+	var systems []evego.SolarSystem
 	for rows.Next() {
-		system := types.SolarSystem{}
+		system := evego.SolarSystem{}
 		rows.StructScan(&system)
 		systems = append(systems, system)
 	}
@@ -282,36 +282,36 @@ func (db *sqlDb) SolarSystemsForPattern(systemName string) ([]types.SolarSystem,
 	return systems, err
 }
 
-func (db *sqlDb) SolarSystemForID(systemID int) (*types.SolarSystem, error) {
+func (db *sqlDb) SolarSystemForID(systemID int) (*evego.SolarSystem, error) {
 	row := db.systemIDInfoStatement.QueryRowx(systemID)
-	system := &types.SolarSystem{}
+	system := &evego.SolarSystem{}
 	err := row.StructScan(system)
 	return system, err
 }
 
-func (db *sqlDb) RegionForName(regionName string) (*types.Region, error) {
+func (db *sqlDb) RegionForName(regionName string) (*evego.Region, error) {
 	row := db.regionInfoStatement.QueryRowx(regionName)
-	region := &types.Region{}
+	region := &evego.Region{}
 	err := row.StructScan(region)
 	return region, err
 }
 
-func (db *sqlDb) StationForID(stationID int) (*types.Station, error) {
+func (db *sqlDb) StationForID(stationID int) (*evego.Station, error) {
 	row := db.stationIDInfoStatement.QueryRowx(stationID)
-	station := &types.Station{}
+	station := &evego.Station{}
 	err := row.StructScan(station)
 	return station, err
 }
 
-func (db *sqlDb) StationsForName(stationName string) ([]types.Station, error) {
+func (db *sqlDb) StationsForName(stationName string) ([]evego.Station, error) {
 	rows, err := db.stationNameInfoStatement.Queryx(stationName)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var stations []types.Station
+	var stations []evego.Station
 	for rows.Next() {
-		station := types.Station{}
+		station := evego.Station{}
 		rows.StructScan(&station)
 		stations = append(stations, station)
 	}
@@ -321,36 +321,36 @@ func (db *sqlDb) StationsForName(stationName string) ([]types.Station, error) {
 	return stations, err
 }
 
-func activityToTypeCode(activityStr string) types.ActivityType {
+func activityToTypeCode(activityStr string) evego.ActivityType {
 	switch activityStr {
 	case "Manufacturing":
-		return types.Manufacturing
+		return evego.Manufacturing
 	case "Researching Technology":
-		return types.ResearchingTechnology
+		return evego.ResearchingTechnology
 	case "Researching Time Efficiency":
-		return types.ResearchingTE
+		return evego.ResearchingTE
 	case "Researching Material Efficiency":
-		return types.ResearchingME
+		return evego.ResearchingME
 	case "Copying":
-		return types.Copying
+		return evego.Copying
 	case "Duplicating":
-		return types.Duplicating
+		return evego.Duplicating
 	case "Reverse Engineering":
-		return types.ReverseEngineering
+		return evego.ReverseEngineering
 	case "Invention":
-		return types.Invention
+		return evego.Invention
 	}
 	// Unknown
-	return types.None
+	return evego.None
 }
 
-func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) ([]types.IndustryActivity, error) {
+func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) ([]evego.IndustryActivity, error) {
 	rows, err := stmt.Queryx(query)
 	if err != nil {
 		log.Fatalf("Unable to execute query: %v", err)
 	}
 	defer rows.Close()
-	var results []types.IndustryActivity
+	var results []evego.IndustryActivity
 	for rows.Next() {
 		row := struct {
 			InputItem        string `db:"inputItem"`
@@ -374,7 +374,7 @@ func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) ([]types.Industry
 		if err != nil {
 			return nil, err
 		}
-		rowActivity := types.IndustryActivity{
+		rowActivity := evego.IndustryActivity{
 			InputItem:      input,
 			OutputItem:     output,
 			OutputQuantity: row.OutputProductQty,
@@ -386,27 +386,27 @@ func (db *sqlDb) blueprintQuery(stmt *sqlx.Stmt, query string) ([]types.Industry
 	return results, nil
 }
 
-func (db *sqlDb) BlueprintOutputs(typeName string) ([]types.IndustryActivity, error) {
+func (db *sqlDb) BlueprintOutputs(typeName string) ([]evego.IndustryActivity, error) {
 	return db.blueprintQuery(db.blueprintProducesStmt, typeName)
 }
 
-func (db *sqlDb) BlueprintForProduct(typeName string) ([]types.IndustryActivity, error) {
+func (db *sqlDb) BlueprintForProduct(typeName string) ([]evego.IndustryActivity, error) {
 	return db.blueprintQuery(db.blueprintProducedByStmt, typeName)
 }
 
-func (db *sqlDb) BlueprintsUsingMaterial(typeName string) ([]types.IndustryActivity, error) {
+func (db *sqlDb) BlueprintsUsingMaterial(typeName string) ([]evego.IndustryActivity, error) {
 
 	return db.blueprintQuery(db.inputMaterialsToBlueprintStmt, typeName)
 }
 
 func (db *sqlDb) BlueprintProductionInputs(
-	typeName string, outputTypeName string) ([]types.InventoryLine, error) {
+	typeName string, outputTypeName string) ([]evego.InventoryLine, error) {
 	rows, err := db.matsForBPProductionStmt.Queryx(typeName, outputTypeName)
 	if err != nil {
 		log.Fatalf("Unable to execute query: %v", err)
 	}
 	defer rows.Close()
-	var results []types.InventoryLine
+	var results []evego.InventoryLine
 	for rows.Next() {
 		row := struct {
 			InputItem        string `db:"inputItem"`
@@ -425,7 +425,7 @@ func (db *sqlDb) BlueprintProductionInputs(
 			log.Fatalf("Database inconsistency error: item %#v not available; %v",
 				row.InputItem, err)
 		}
-		result := types.InventoryLine{
+		result := evego.InventoryLine{
 			Quantity: row.InputMaterialQty,
 			Item:     inputMat,
 		}

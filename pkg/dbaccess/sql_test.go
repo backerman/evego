@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/backerman/evego"
 	"github.com/backerman/evego/pkg/dbaccess"
-	"github.com/backerman/evego/pkg/types"
 
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
@@ -41,16 +41,16 @@ type testElement struct {
 	name  string
 }
 
-// shouldMatchSystems is a custom matcher for *[]types.Solarsystem;
+// shouldMatchSystems is a custom matcher for *[]evego.Solarsystem;
 // we can't use ShouldResemble because of the float in that struct.
 func shouldMatchSystems(actual interface{}, expected ...interface{}) string {
-	actualSystems, ok := actual.([]types.SolarSystem)
+	actualSystems, ok := actual.([]evego.SolarSystem)
 	if !ok {
-		return "Failed to cast actual to []types.SolarSystem"
+		return "Failed to cast actual to []evego.SolarSystem"
 	}
-	expectedSystems, ok := expected[0].([]types.SolarSystem)
+	expectedSystems, ok := expected[0].([]evego.SolarSystem)
 	if !ok {
-		return "Failed to cast expected to []types.SolarSystem"
+		return "Failed to cast expected to []evego.SolarSystem"
 	}
 	if len(actualSystems) != len(expectedSystems) {
 		return fmt.Sprintf("Expected %d systems; received %d",
@@ -84,18 +84,18 @@ func shouldMatchSystems(actual interface{}, expected ...interface{}) string {
 }
 
 // shouldMatchSystem is a convenience method for shouldMatchSystems, and takes
-// a *types.SolarSystem instead of a []types.SolarSystem.
+// a *evego.SolarSystem instead of a []evego.SolarSystem.
 func shouldMatchSystem(actual interface{}, expected ...interface{}) string {
-	actualSystem, ok := actual.(*types.SolarSystem)
+	actualSystem, ok := actual.(*evego.SolarSystem)
 	if !ok {
-		return "Failed to cast actual to *types.SolarSystem"
+		return "Failed to cast actual to *evego.SolarSystem"
 	}
-	expectedSystem, ok := expected[0].(*types.SolarSystem)
+	expectedSystem, ok := expected[0].(*evego.SolarSystem)
 	if !ok {
-		return "Failed to cast expected to *types.SolarSystem"
+		return "Failed to cast expected to *evego.SolarSystem"
 	}
-	return shouldMatchSystems([]types.SolarSystem{*actualSystem},
-		[]types.SolarSystem{*expectedSystem})
+	return shouldMatchSystems([]evego.SolarSystem{*actualSystem},
+		[]evego.SolarSystem{*expectedSystem})
 }
 
 func TestItems(t *testing.T) {
@@ -106,10 +106,10 @@ func TestItems(t *testing.T) {
 		Convey("With a valid item name", func() {
 			itemName := "Medium Shield Extender II"
 			itemID := 3831
-			expected := types.Item{
+			expected := evego.Item{
 				Name:      itemName,
 				ID:        itemID,
-				Type:      types.Other,
+				Type:      evego.Other,
 				Category:  "Module",
 				Group:     "Shield Extender",
 				BatchSize: 1,
@@ -150,10 +150,10 @@ func TestItems(t *testing.T) {
 		Convey("With a valid item type ID", func() {
 			itemID := 3328
 			itemName := "Gallente Frigate"
-			expected := &types.Item{
+			expected := &evego.Item{
 				Name:      itemName,
 				ID:        itemID,
-				Type:      types.Other,
+				Type:      evego.Other,
 				Group:     "Spaceship Command",
 				Category:  "Skill",
 				BatchSize: 1,
@@ -186,10 +186,10 @@ func TestItems(t *testing.T) {
 			})
 
 			Convey("The correct item information is returned.", func() {
-				expected := &types.Item{
+				expected := &evego.Item{
 					Name:      "Beta Hull Mod Expanded Cargo",
 					ID:        itemID,
-					Type:      types.UnknownItemType,
+					Type:      evego.UnknownItemType,
 					Group:     "Expanded Cargohold",
 					Category:  "Module",
 					BatchSize: 1,
@@ -209,7 +209,7 @@ func TestSolarSystems(t *testing.T) {
 			systemName := "Poitot"
 
 			Convey("We get correct information.", func() {
-				expected := &types.SolarSystem{
+				expected := &evego.SolarSystem{
 					Name:            "Poitot",
 					ID:              30003271,
 					Security:        -0.019552,
@@ -228,7 +228,7 @@ func TestSolarSystems(t *testing.T) {
 			systemID := 30003333
 
 			Convey("We get correct information.", func() {
-				expected := &types.SolarSystem{
+				expected := &evego.SolarSystem{
 					Name:            "RF-GGF",
 					ID:              30003333,
 					Security:        -0.246618,
@@ -247,7 +247,7 @@ func TestSolarSystems(t *testing.T) {
 			systemName := "Pol%"
 
 			Convey("We get correct information.", func() {
-				expected := []types.SolarSystem{
+				expected := []evego.SolarSystem{
 					{
 						Name:            "Polaris",
 						ID:              30000380,
@@ -322,7 +322,7 @@ func TestStations(t *testing.T) {
 			stationID := 60010312
 
 			Convey("We get correct information.", func() {
-				expected := &types.Station{
+				expected := &evego.Station{
 					Name:                   "Junsoraert XI - Moon 9 - Roden Shipyards Factory",
 					ID:                     60010312,
 					SystemID:               30003016,
@@ -351,7 +351,7 @@ func TestStations(t *testing.T) {
 			stationName := "%sisters%treas%"
 
 			Convey("We get correct information.", func() {
-				expected := []types.Station{{
+				expected := []evego.Station{{
 					Name:                   "Quier IV - Moon 27 - Sisters of EVE Treasury",
 					ID:                     60012655,
 					SystemID:               30003037,
@@ -388,7 +388,7 @@ func TestRegions(t *testing.T) {
 			regionName := "Outer Ring"
 
 			Convey("We get correct information.", func() {
-				expected := &types.Region{
+				expected := &evego.Region{
 					Name: "Outer Ring",
 					ID:   10000057,
 				}
@@ -411,13 +411,13 @@ func TestRegions(t *testing.T) {
 }
 
 func shouldMatchActivities(actual interface{}, expected ...interface{}) string {
-	actualIA, ok := actual.([]types.IndustryActivity)
+	actualIA, ok := actual.([]evego.IndustryActivity)
 	if !ok {
-		return "Failed to cast actual to []types.IndustryActivity"
+		return "Failed to cast actual to []evego.IndustryActivity"
 	}
-	expectedIA, ok := expected[0].([]types.IndustryActivity)
+	expectedIA, ok := expected[0].([]evego.IndustryActivity)
 	if !ok {
-		return "Failed to cast expected to []types.IndustryActivity"
+		return "Failed to cast expected to []evego.IndustryActivity"
 	}
 
 	if len(actualIA) != len(expectedIA) {
@@ -458,14 +458,14 @@ func TestBlueprints(t *testing.T) {
 				So(err, ShouldBeNil)
 				ishtarBlueprint, err := db.ItemForName("Ishtar Blueprint")
 				So(err, ShouldBeNil)
-				expected := []types.IndustryActivity{
+				expected := []evego.IndustryActivity{
 					{InputItem: inputType,
-						ActivityType:   types.Manufacturing,
+						ActivityType:   evego.Manufacturing,
 						OutputItem:     vexor,
 						OutputQuantity: 1,
 					},
 					{InputItem: inputType,
-						ActivityType:   types.Invention,
+						ActivityType:   evego.Invention,
 						OutputItem:     ishtarBlueprint,
 						OutputQuantity: 1,
 					},
@@ -486,15 +486,15 @@ func TestBlueprints(t *testing.T) {
 					"Gallente Administrative Outpost Platform",
 					"Minmatar Service Outpost Platform",
 				}
-				var expected []types.IndustryActivity
+				var expected []evego.IndustryActivity
 				for _, platform := range expectedNames {
 					inBP, err := db.ItemForName(platform + " Blueprint")
 					So(err, ShouldBeNil)
 					outPlatform, err := db.ItemForName(platform)
 					So(err, ShouldBeNil)
-					expected = append(expected, types.IndustryActivity{
+					expected = append(expected, evego.IndustryActivity{
 						InputItem:      inBP,
-						ActivityType:   types.Manufacturing,
+						ActivityType:   evego.Manufacturing,
 						OutputQuantity: 1,
 						OutputItem:     outPlatform,
 					})
@@ -526,10 +526,10 @@ func TestBlueprints(t *testing.T) {
 				So(err, ShouldBeNil)
 				outBP, err := db.ItemForName(desiredOutput)
 				So(err, ShouldBeNil)
-				expected := []types.IndustryActivity{
+				expected := []evego.IndustryActivity{
 					{
 						InputItem:      inBP,
-						ActivityType:   types.Invention,
+						ActivityType:   evego.Invention,
 						OutputItem:     outBP,
 						OutputQuantity: 1,
 					},

@@ -27,11 +27,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/backerman/evego"
 	"github.com/backerman/evego/pkg/cache"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/eveapi"
 	"github.com/backerman/evego/pkg/test"
-	"github.com/backerman/evego/pkg/types"
 	. "github.com/smartystreets/goconvey/convey"
 
 	// Register SQLite3 driver for static database export
@@ -69,7 +69,7 @@ func TestOutpostID(t *testing.T) {
 			outpostID := 61000854
 
 			Convey("Its information is returned.", func() {
-				expected := &types.Station{
+				expected := &evego.Station{
 					Name:            "4-EP12 VIII - 4-EP12 Inches for Mittens",
 					ID:              outpostID,
 					SystemID:        30004553,
@@ -117,7 +117,7 @@ func TestOutpostName(t *testing.T) {
 			outpostName := "%CAT%station"
 
 			Convey("Matching outposts are returned.", func() {
-				expected := []types.Station{
+				expected := []evego.Station{
 					{
 						Name:            "8WA-Z6 VIII - CAT IN STATION",
 						ID:              61000189,
@@ -166,18 +166,18 @@ func TestCharacterSheet(t *testing.T) {
 
 		Convey("Given a character's API key", func() {
 			characterID := 94319654
-			key := &eveapi.XMLKey{
+			key := &evego.XMLKey{
 				KeyID:            12345,
 				VerificationCode: "abcdef12345",
 			}
 
 			Convey("Its information is returned.", func() {
-				expected := &types.CharacterSheet{
+				expected := &evego.CharacterSheet{
 					Name:          "Arjun Kansene",
 					ID:            characterID,
 					Corporation:   "Center for Advanced Studies",
 					CorporationID: 1000169,
-					Skills: []types.Skill{
+					Skills: []evego.Skill{
 						{Name: "Gunnery", TypeID: 3300, NumSkillpoints: 256000, Level: 5, Published: true},
 						{Name: "Small Hybrid Turret", TypeID: 3301, NumSkillpoints: 256000, Level: 5, Published: true},
 						{Name: "Spaceship Command", TypeID: 3327, NumSkillpoints: 45255, Level: 4, Published: true},
@@ -232,13 +232,13 @@ func TestAccountCharacters(t *testing.T) {
 		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given an account's API key", func() {
-			key := &eveapi.XMLKey{
+			key := &evego.XMLKey{
 				KeyID:            12345,
 				VerificationCode: "abcdef12345",
 			}
 
 			Convey("The available characters on that account are returned.", func() {
-				expected := []types.Character{
+				expected := []evego.Character{
 					{
 						Name:          "Arjun Kansene",
 						ID:            94319654,
@@ -295,33 +295,33 @@ func TestCharacterStandings(t *testing.T) {
 		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given an account's API key and a character ID", func() {
-			key := &eveapi.XMLKey{
+			key := &evego.XMLKey{
 				KeyID:            12345,
 				VerificationCode: "abcdef12345",
 			}
 			characterID := 94319654
 
 			Convey("That character's standings are returned.", func() {
-				expected := []types.Standing{
-					{EntityType: types.NPCAgent, ID: 3009145,
+				expected := []evego.Standing{
+					{EntityType: evego.NPCAgent, ID: 3009145,
 						Name: "Ostes Zoenceliris", Standing: 1.06},
-					{EntityType: types.NPCAgent, ID: 3009372,
+					{EntityType: evego.NPCAgent, ID: 3009372,
 						Name: "Pauren Aubyrasse", Standing: 1.84},
-					{EntityType: types.NPCAgent, ID: 3009381,
+					{EntityType: evego.NPCAgent, ID: 3009381,
 						Name: "Arnerore Rylerave", Standing: 0.52},
-					{EntityType: types.NPCCorporation, ID: 1000005,
+					{EntityType: evego.NPCCorporation, ID: 1000005,
 						Name: "Hyasyoda Corporation", Standing: 0.86},
-					{EntityType: types.NPCCorporation, ID: 1000010,
+					{EntityType: evego.NPCCorporation, ID: 1000010,
 						Name: "Kaalakiota Corporation", Standing: 1.06},
-					{EntityType: types.NPCCorporation, ID: 1000017,
+					{EntityType: evego.NPCCorporation, ID: 1000017,
 						Name: "Nugoeihuvi Corporation", Standing: 0.61},
-					{EntityType: types.NPCFaction, ID: 500001,
+					{EntityType: evego.NPCFaction, ID: 500001,
 						Name: "Caldari State", Standing: -0.27},
-					{EntityType: types.NPCFaction, ID: 500002,
+					{EntityType: evego.NPCFaction, ID: 500002,
 						Name: "Minmatar Republic", Standing: 0.95},
-					{EntityType: types.NPCFaction, ID: 500003,
+					{EntityType: evego.NPCFaction, ID: 500003,
 						Name: "Amarr Empire", Standing: -2.41},
-					{EntityType: types.NPCFaction, ID: 500004,
+					{EntityType: evego.NPCFaction, ID: 500004,
 						Name: "Gallente Federation", Standing: 0.77},
 				}
 				actual, err := x.CharacterStandings(key, characterID)

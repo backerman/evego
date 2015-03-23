@@ -15,15 +15,20 @@ limitations under the License.
 
 */
 
-// Package eveapi is the public interface for accessing the
-// EVE APIs (XML, CREST, or whatever.)
-package eveapi
+package evego
 
 import (
 	"io"
-
-	"github.com/backerman/evego/pkg/types"
 )
+
+// XMLKey is a key ID / verification code pair used to retrieve data from the
+// EVE XML API.
+type XMLKey struct {
+	KeyID            int
+	VerificationCode string
+	// Description is an optional description provided by the user.
+	Description string
+}
 
 // XMLAPI is an interface to the EVE XML API. We could make the interface
 // sufficiently abstract to cover multiple APIs, but that seems on the silly
@@ -32,19 +37,19 @@ type XMLAPI interface {
 	io.Closer
 
 	// OutpostForID returns a conquerable station with the provided ID.
-	OutpostForID(id int) (*types.Station, error)
+	OutpostForID(id int) (*Station, error)
 
 	// OutpostsForName returns the stations matching the provided name pattern.
 	// The percent character (%) may be used as a wildcard.
-	OutpostsForName(name string) ([]types.Station, error)
+	OutpostsForName(name string) ([]Station, error)
 
 	// AccountCharacters returns a list of characters that the provided key can
 	// access.
-	AccountCharacters(key *XMLKey) ([]types.Character, error)
+	AccountCharacters(key *XMLKey) ([]Character, error)
 
 	// CharacterSheet returns the character sheet for the given character ID.
-	CharacterSheet(key *XMLKey, characterID int) (*types.CharacterSheet, error)
+	CharacterSheet(key *XMLKey, characterID int) (*CharacterSheet, error)
 
 	// CharacterStandings returns a character's standings.
-	CharacterStandings(key *XMLKey, characterID int) ([]types.Standing, error)
+	CharacterStandings(key *XMLKey, characterID int) ([]Standing, error)
 }

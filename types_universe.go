@@ -15,7 +15,7 @@ limitations under the License.
 
 */
 
-package types
+package evego
 
 // SolarSystem is a solar system within the EVE universe.
 type SolarSystem struct {

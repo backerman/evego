@@ -15,30 +15,26 @@ limitations under the License.
 
 */
 
-// Package market is the public interface for accessing
-// EVE market data.
-package market
+package evego
 
 import (
 	"io"
-
-	"github.com/backerman/evego/pkg/types"
 )
 
-// EveMarket returns information about market orders.
-type EveMarket interface {
+// Market returns information about market orders.
+type Market interface {
 	io.Closer
 
 	// OrdersForItem returns the market orders for a given item.
 	// location is the name of either a system or a region.
 	// type can be Buy, Sell, or All.
-	OrdersForItem(itemID *types.Item, location string, orderType types.OrderType) (*[]types.Order, error)
+	OrdersForItem(itemID *Item, location string, orderType OrderType) (*[]Order, error)
 
 	// BuyInStation returns the buy orders that are in range of the given
 	// station (i.e., can be sold to by a user there).
-	BuyInStation(itemID *types.Item, location *types.Station) (*[]types.Order, error)
+	BuyInStation(itemID *Item, location *Station) (*[]Order, error)
 
 	// OrdersInStation returns the buy orders that are in range of a given station,
 	// and the sell orders available at that station.
-	OrdersInStation(item *types.Item, location *types.Station) (*[]types.Order, error)
+	OrdersInStation(item *Item, location *Station) (*[]Order, error)
 }

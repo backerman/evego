@@ -15,8 +15,7 @@ limitations under the License.
 
 */
 
-// Package cache defines an interface for caller-provided caches.
-package cache
+package evego
 
 import (
 	"io"

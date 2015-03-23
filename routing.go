@@ -15,22 +15,19 @@ limitations under the License.
 
 */
 
-// Package routing provides services to calculate paths between points in EVE.
-package routing
+package evego
 
 import (
 	"io"
-
-	"github.com/backerman/evego/pkg/types"
 )
 
-// EveRouter is the interface for the backing service that provides a router.
-type EveRouter interface {
+// Router is the interface for the backing service that provides a router.
+type Router interface {
 	io.Closer
 	// NumJumps returns the number of jumps in the shortest path from
 	// fromSystem to toSystem, or -1 if the destination is unreachable
 	// from the start.
-	NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error)
+	NumJumps(fromSystem, toSystem *SolarSystem) (int, error)
 
 	// NumJumpsID is a convenience method for NumJumps. Or is it the reverse?
 	NumJumpsID(fromSystemID, toSystemID int) (int, error)

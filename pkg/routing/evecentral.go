@@ -27,8 +27,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/backerman/evego/pkg/cache"
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 )
 
 // Yes, the http.Client here is nil. We don't actually need to set anything
@@ -37,7 +36,7 @@ import (
 type eveCentralRouter struct {
 	http      http.Client
 	endpoint  *url.URL
-	respCache cache.Cache
+	respCache evego.Cache
 }
 
 // jsonResponse is the response provided by the EVE-Central server.
@@ -56,7 +55,7 @@ type jsonSystem struct {
 // EveCentralRouter creates an EveRouter that uses EVE-Central's API
 // to provide routing. The endpoint argument will normally be
 // "http://api.eve-central.com/api/route".
-func EveCentralRouter(endpoint string, aCache cache.Cache) EveRouter {
+func EveCentralRouter(endpoint string, aCache evego.Cache) evego.Router {
 	epURL, err := url.Parse(endpoint)
 	if err != nil {
 		log.Fatalf("Invalid URL %v passed for Eve-Central endpoint: %v", endpoint, err)
@@ -88,7 +87,7 @@ func (r *eveCentralRouter) getURL(u string) ([]byte, error) {
 	return body, err
 }
 
-func (r *eveCentralRouter) NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error) {
+func (r *eveCentralRouter) NumJumps(fromSystem, toSystem *evego.SolarSystem) (int, error) {
 	return r.NumJumpsID(fromSystem.ID, toSystem.ID)
 }
 

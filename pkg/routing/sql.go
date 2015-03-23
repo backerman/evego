@@ -24,7 +24,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/backerman/evego/pkg/types"
+	"github.com/backerman/evego"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -51,7 +51,7 @@ type sqlRouter struct {
 }
 
 // SQLRouter reutrns a thingy.
-func SQLRouter(driver, dataSource string) EveRouter {
+func SQLRouter(driver, dataSource string) evego.Router {
 	db, err := sqlx.Connect(driver, dataSource)
 	if err != nil {
 		log.Fatalf("Unable to open routing database (driver: %s, datasource: %s): %v",
@@ -74,7 +74,7 @@ func SQLRouter(driver, dataSource string) EveRouter {
 	return &sqlRouter{db: db, dialect: dialect, numJumpsStmt: numJumpsStmt}
 }
 
-func (r *sqlRouter) NumJumps(fromSystem, toSystem *types.SolarSystem) (int, error) {
+func (r *sqlRouter) NumJumps(fromSystem, toSystem *evego.SolarSystem) (int, error) {
 	if fromSystem == nil {
 		return 0, errors.New("Starting system must be non-nil")
 	}
