@@ -51,8 +51,8 @@ type xmlAPI struct {
 	cache evego.Cache
 }
 
-// EveXMLAPI returns an EveAPI that accesses the EVE Online XML API.
-func EveXMLAPI(serviceURL string, staticDB evego.Database, aCache evego.Cache) evego.XMLAPI {
+// XML returns an object that accesses the EVE Online XML API.
+func XML(serviceURL string, staticDB evego.Database, aCache evego.Cache) evego.XMLAPI {
 	endpoint, err := url.Parse(serviceURL)
 	if err != nil {
 		log.Fatalf("Unable to process endpoint URL: %v", err)

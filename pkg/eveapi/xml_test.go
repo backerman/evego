@@ -63,7 +63,7 @@ func TestOutpostID(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db, cache.NilCache())
+		x := eveapi.XML(ts.URL, db, cache.NilCache())
 
 		Convey("Given a valid outpost ID", func() {
 			outpostID := 61000854
@@ -111,7 +111,7 @@ func TestOutpostName(t *testing.T) {
 
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
-		x := eveapi.EveXMLAPI(ts.URL, db, cache.NilCache())
+		x := eveapi.XML(ts.URL, db, cache.NilCache())
 
 		Convey("Given a valid outpost name pattern", func() {
 			outpostName := "%CAT%station"
@@ -162,7 +162,7 @@ func TestCharacterSheet(t *testing.T) {
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
 		cacheData := test.CacheData{}
-		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
+		x := eveapi.XML(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given a character's API key", func() {
 			characterID := 94319654
@@ -229,7 +229,7 @@ func TestAccountCharacters(t *testing.T) {
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
 		cacheData := test.CacheData{}
-		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
+		x := eveapi.XML(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given an account's API key", func() {
 			key := &evego.XMLKey{
@@ -292,7 +292,7 @@ func TestCharacterStandings(t *testing.T) {
 		defer ts.Close()
 		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
 		cacheData := test.CacheData{}
-		x := eveapi.EveXMLAPI(ts.URL, db, test.Cache(&cacheData))
+		x := eveapi.XML(ts.URL, db, test.Cache(&cacheData))
 
 		Convey("Given an account's API key and a character ID", func() {
 			key := &evego.XMLKey{
