@@ -40,8 +40,6 @@ const (
 // a buy order.
 type OrderRange int
 
-// OrderRange is the area from which capsuleers can sell to
-// a buy order.
 const (
 	// BuyStation is only the order's station.
 	BuyStation OrderRange = iota
