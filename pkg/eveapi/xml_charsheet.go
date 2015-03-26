@@ -76,7 +76,6 @@ func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 		case xml.EndElement:
 			// do nothing
 		case xml.CharData:
-			// FIXME don't bother if all whitespace.
 			contents := strings.TrimSpace(string(tok))
 			if len(contents) > 0 {
 				switch currentElement {
@@ -88,6 +87,10 @@ func (cs *charSheet) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 					cs.Corporation = string(contents)
 				case "corporationID":
 					unmarshalInt(contents, &cs.CorporationID)
+				case "allianceName":
+					cs.Alliance = string(contents)
+				case "allianceID":
+					unmarshalInt(contents, &cs.AllianceID)
 				}
 			}
 		}

@@ -112,10 +112,10 @@ func (x *xmlAPI) get(endpoint string, params ...url.Values) ([]byte, error) {
 	}
 	req.Header.Add("User-Agent", "evego (https://github.com/backerman/evego)")
 	resp, err := x.http.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
 	// Put our repsonse in the cache.

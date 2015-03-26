@@ -6,6 +6,8 @@
     <name>Arjun Kansene</name>
     <corporationName>Center for Advanced Studies</corporationName>
     <corporationID>1000169</corporationID>
+    <allianceName>C C P Alliance</allianceName>
+    <allianceID>434243723</allianceID>
     <rowset name="jumpClones" key="jumpCloneID" columns="jumpCloneID,typeID,locationID,cloneName">
       <row jumpCloneID="20397150" typeID="164" locationID="60003760" cloneName=""/>
       <row jumpCloneID="20797782" typeID="164" locationID="60008494" cloneName=""/>
