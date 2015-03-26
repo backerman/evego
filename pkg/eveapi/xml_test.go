@@ -173,12 +173,14 @@ func TestCharacterSheet(t *testing.T) {
 
 			Convey("Its information is returned.", func() {
 				expected := &evego.CharacterSheet{
-					Name:          "Arjun Kansene",
-					ID:            characterID,
-					Corporation:   "Center for Advanced Studies",
-					CorporationID: 1000169,
-					Alliance:      "C C P Alliance",
-					AllianceID:    434243723,
+					Character: evego.Character{
+						Name:          "Arjun Kansene",
+						ID:            characterID,
+						Corporation:   "Center for Advanced Studies",
+						CorporationID: 1000169,
+						Alliance:      "C C P Alliance",
+						AllianceID:    434243723,
+					},
 					Skills: []evego.Skill{
 						{Name: "Gunnery", TypeID: 3300, NumSkillpoints: 256000, Level: 5, Published: true},
 						{Name: "Small Hybrid Turret", TypeID: 3301, NumSkillpoints: 256000, Level: 5, Published: true},

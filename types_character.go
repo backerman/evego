@@ -29,13 +29,8 @@ type Character struct {
 
 // CharacterSheet ...
 type CharacterSheet struct {
-	Name          string  `json:"name"`
-	ID            int     `json:"id"`
-	Corporation   string  `json:"corporation"`
-	CorporationID int     `json:"corporationID"`
-	Alliance      string  `json:"alliance"`
-	AllianceID    int     `json:"allianceID"`
-	Skills        []Skill `json:"skills"`
+	Character
+	Skills []Skill `json:"skills"`
 }
 
 // Skill ...
