@@ -122,8 +122,10 @@ func (x *xmlAPI) CharacterSheet(key *evego.XMLKey, characterID int) (*evego.Char
 		skillItem, err := x.db.ItemForID(skill.TypeID)
 		if err != nil {
 			skill.Name = fmt.Sprintf("Unknown skill (%d)", skill.TypeID)
+			skill.Group = fmt.Sprintf("Unknown")
 		} else {
 			skill.Name = skillItem.Name
+			skill.Group = skillItem.Group
 		}
 	}
 	return &sheet, nil
