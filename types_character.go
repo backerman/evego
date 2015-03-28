@@ -17,6 +17,8 @@ limitations under the License.
 
 package evego
 
+import "sort"
+
 // Character represents one EVE player toon.
 type Character struct {
 	Name          string `json:"name"          xml:"name,attr"`
@@ -27,13 +29,14 @@ type Character struct {
 	AllianceID    int    `json:"allianceID"    xml:"allianceID,attr"`
 }
 
-// CharacterSheet ...
+// CharacterSheet contains the character sheet information for a toon
+// as provied by the /char/CharacterSheet.xml.aspx endpoint.
 type CharacterSheet struct {
 	Character
 	Skills []Skill `json:"skills"`
 }
 
-// Skill ...
+// Skill is one of a character's injected skills.
 type Skill struct {
 	Name           string `json:"name"`
 	Group          string `json:"group"`
@@ -41,4 +44,19 @@ type Skill struct {
 	NumSkillpoints int    `json:"numSkillpoints" xml:"skillpoints,attr"`
 	Level          int    `json:"level"          xml:"level,attr"`
 	Published      bool   `json:"isPublished"    xml:"published,attr"`
+}
+
+// Wrappers to sort skills using the standard library's sort package.
+type skillsSorted []Skill
+
+func (s skillsSorted) Len() int      { return len(s) }
+func (s skillsSorted) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s skillsSorted) Less(i, j int) bool {
+	return s[i].Group < s[j].Group || (s[i].Group == s[j].Group && s[i].Name < s[j].Name)
+}
+
+// SortSkills sorts the provided skill array by group and name.
+func SortSkills(skills []Skill) {
+	sortMe := skillsSorted(skills)
+	sort.Sort(sortMe)
 }
