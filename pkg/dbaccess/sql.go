@@ -109,7 +109,9 @@ func SQLDatabase(driver, dataSource string) evego.Database {
 		// that requires Spatialite, but the Spatialite module has not been
 		// loaded. Don't complain now; only complain if the caller attempts
 		// to actually use spatial functionality.
-		if err != nil && strings.Index(err.Error(), "virtualnetwork") < 0 {
+		if err != nil &&
+			strings.Index(err.Error(), "virtualnetwork") < 0 &&
+			strings.Index(err.Error(), "no such table") < 0 {
 			log.Fatalf("Unable to prepare statement: %v", err)
 		}
 	} else {
