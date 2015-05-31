@@ -31,11 +31,14 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var testDbPath = "../../testdb.sqlite"
+var (
+	testDbPath   = "../../testdb.sqlite"
+	testDbDriver = "sqlite3"
+)
 
 func TestReprocessingModules(t *testing.T) {
 	Convey("Set up mock database", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 
 		Convey("Given a module", func() {
@@ -167,7 +170,7 @@ func TestReprocessingModules(t *testing.T) {
 func TestReprocessingOre(t *testing.T) {
 
 	Convey("Set up mock database", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 
 		Convey("Given some ore", func() {

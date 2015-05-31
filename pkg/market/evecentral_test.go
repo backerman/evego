@@ -44,7 +44,10 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-var testDbPath = "../../testdb.sqlite"
+var (
+	testDbPath   = "../../testdb.sqlite"
+	testDbDriver = "sqlite3"
+)
 
 var testMarketOrdersXML = "../../testdata/test-marketorders.xml"
 var testOutpostOrdersXML = "../../testdata/test-outpostorders.xml"
@@ -134,7 +137,7 @@ func TestMarketOrders(t *testing.T) {
 					},
 				})
 		})
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 		router := routing.SQLRouter("sqlite3_spatialite", testDbPath)
 		defer router.Close()
@@ -285,7 +288,7 @@ func TestOutpostOrders(t *testing.T) {
 			}))
 		defer tsXMLAPI.Close()
 
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		xmlAPI := eveapi.XML(tsXMLAPI.URL, db, cache.NilCache())
 		ec := market.EveCentral(db, nil, xmlAPI, ts.URL)
 

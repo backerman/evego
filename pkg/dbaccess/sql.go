@@ -114,10 +114,14 @@ func SQLDatabase(driver, dataSource string) evego.Database {
 			strings.Index(err.Error(), "no such table") < 0 {
 			log.Fatalf("Unable to prepare statement: %v", err)
 		}
+	} else if strings.Index(driver, "pgsql") != -1 {
+		log.Printf("Postgres support is still limited; routing is not supported.")
+		// FIXME: Add PostGIS setup here.
+		evedb.dbType = PostgreSQL
 	} else {
 		// Unknown database. PostgreSQL will be supported, but it isn't
 		// right now.
-		log.Fatalf("Unknown database driver %v", driver)
+		log.Printf("Unknown database driver %v; routing is not supported.", driver)
 	}
 	return evedb
 }

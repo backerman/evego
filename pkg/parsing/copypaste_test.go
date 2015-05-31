@@ -30,7 +30,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var testDbPath = "../../testdb.sqlite"
+var (
+	testDbPath   = "../../testdb.sqlite"
+	testDbDriver = "sqlite3"
+)
 
 func TestInventoryCopyPaste(t *testing.T) {
 
@@ -39,7 +42,7 @@ func TestInventoryCopyPaste(t *testing.T) {
 		inventoryStr := string(inventory)
 		So(err, ShouldBeNil)
 
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 
 		Convey("It is correctly parsed.", func() {
@@ -67,7 +70,7 @@ func TestIndustryCopyPaste(t *testing.T) {
 		inventoryStr := string(inventory)
 		So(err, ShouldBeNil)
 
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 
 		Convey("It is correctly parsed.", func() {
@@ -88,7 +91,7 @@ func TestIndustryCopyPaste(t *testing.T) {
 func TestBadCopyPaste(t *testing.T) {
 	Convey("Given completely malformed input", t, func() {
 		inventoryStr := "fred"
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 
 		Convey("It returns an empty result.", func() {

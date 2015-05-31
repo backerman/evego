@@ -36,9 +36,12 @@ var (
 	registerDriver sync.Once
 )
 
-const testDbPath = "../../testdb.sqlite"
+const (
+	testDbPath   = "../../testdb.sqlite"
+	testDbDriver = "sqlite3"
+)
 
-func TestRouting(t *testing.T) {
+func TestSpatialiteRouting(t *testing.T) {
 	Convey("Open a Spatialite-enabled database connection.", t, func() {
 		// Register a custom SQLite3 driver with the Spatialite extension.
 		// Has to be wrapped in a Once because this is executed multiple

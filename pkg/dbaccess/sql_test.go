@@ -34,7 +34,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var testDbPath = "../../testdb.sqlite"
+var (
+	testDbPath   = "../../testdb.sqlite"
+	testDbDriver = "sqlite3"
+)
 
 type testElement struct {
 	match string
@@ -100,7 +103,7 @@ func shouldMatchSystem(actual interface{}, expected ...interface{}) string {
 
 func TestItems(t *testing.T) {
 	Convey("Open a database connection", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
 
 		Convey("With a valid item name", func() {
@@ -203,7 +206,7 @@ func TestItems(t *testing.T) {
 func TestSolarSystems(t *testing.T) {
 
 	Convey("Open a database connection", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 
 		Convey("With a valid system name", func() {
 			systemName := "Poitot"
@@ -316,7 +319,7 @@ func TestSolarSystems(t *testing.T) {
 func TestStations(t *testing.T) {
 
 	Convey("Open a database connection", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 
 		Convey("With a valid station ID", func() {
 			stationID := 60010312
@@ -382,7 +385,7 @@ func TestStations(t *testing.T) {
 func TestRegions(t *testing.T) {
 
 	Convey("Open a database connection", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 
 		Convey("With a valid region name", func() {
 			regionName := "Outer Ring"
@@ -446,7 +449,7 @@ func shouldMatchActivities(actual interface{}, expected ...interface{}) string {
 func TestBlueprints(t *testing.T) {
 
 	Convey("Open a database connection", t, func() {
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 
 		Convey("With a valid input blueprint", func() {
 			typeName := "Vexor Blueprint"

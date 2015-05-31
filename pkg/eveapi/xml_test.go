@@ -39,7 +39,8 @@ import (
 )
 
 const (
-	testDbPath = "../../testdb.sqlite"
+	testDbPath   = "../../testdb.sqlite"
+	testDbDriver = "sqlite3"
 
 	testOutpostsXML      = "../../testdata/test-outposts.xml"
 	testCharSheetXML     = "../../testdata/test-charsheet.xml"
@@ -62,7 +63,7 @@ func TestOutpostID(t *testing.T) {
 			}))
 
 		defer ts.Close()
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		x := eveapi.XML(ts.URL, db, cache.NilCache())
 
 		Convey("Given a valid outpost ID", func() {
@@ -110,7 +111,7 @@ func TestOutpostName(t *testing.T) {
 			}))
 
 		defer ts.Close()
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		x := eveapi.XML(ts.URL, db, cache.NilCache())
 
 		Convey("Given a valid outpost name pattern", func() {
@@ -160,7 +161,7 @@ func TestCharacterSheet(t *testing.T) {
 			}))
 
 		defer ts.Close()
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		cacheData := test.CacheData{}
 		x := eveapi.XML(ts.URL, db, test.Cache(&cacheData))
 
@@ -231,7 +232,7 @@ func TestAccountCharacters(t *testing.T) {
 			}))
 
 		defer ts.Close()
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		cacheData := test.CacheData{}
 		x := eveapi.XML(ts.URL, db, test.Cache(&cacheData))
 
@@ -294,7 +295,7 @@ func TestCharacterStandings(t *testing.T) {
 			}))
 
 		defer ts.Close()
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		cacheData := test.CacheData{}
 		x := eveapi.XML(ts.URL, db, test.Cache(&cacheData))
 

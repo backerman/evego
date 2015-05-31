@@ -101,7 +101,7 @@ func TestEVECentralRouting(t *testing.T) {
 		defer ts.Close()
 
 		router := routing.EveCentralRouter(ts.URL, cache.NilCache())
-		db := dbaccess.SQLDatabase("sqlite3", testDbPath)
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 
 		defer db.Close()
 		defer router.Close()
