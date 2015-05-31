@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"io/ioutil"
-	"log"
 	"strconv"
 	"testing"
 	"time"
@@ -52,13 +51,12 @@ func TestRedisCache(t *testing.T) {
 		testCache := cache.RedisCache(testRedis)
 
 		Convey("Putting a thing to the cache succeeds.", func() {
-			key := "Testing!" + strconv.Itoa(time.Now().Nanosecond())
+			key := "Testing! " + strconv.FormatInt(time.Now().UnixNano(), 10)
 			value, expiry := "Fred", time.Now().Add(15*time.Second)
 			conn := pool.Get()
 			defer conn.Close()
 
 			// Shouldn't be there until it's created
-			log.Printf("Key: %v", key)
 			resp, err := conn.Do("GET", key)
 			So(err, ShouldBeNil)
 			So(resp, ShouldBeNil)
@@ -95,7 +93,7 @@ func TestRedisCache(t *testing.T) {
 		})
 
 		Convey("Getting something not in the cache fails.", func() {
-			key := "This had better not be there. " + string(time.Now().Nanosecond())
+			key := "This had better not be there. " + strconv.FormatInt(time.Now().UnixNano(), 10)
 			_, found := testCache.Get(key)
 			So(found, ShouldBeFalse)
 		})
