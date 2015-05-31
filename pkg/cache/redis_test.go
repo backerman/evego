@@ -21,6 +21,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"io/ioutil"
+	"log"
+	"strconv"
 	"testing"
 	"time"
 
@@ -50,12 +52,13 @@ func TestRedisCache(t *testing.T) {
 		testCache := cache.RedisCache(testRedis)
 
 		Convey("Putting a thing to the cache succeeds.", func() {
-			key := "Testing!" + string(time.Now().Nanosecond())
+			key := "Testing!" + strconv.Itoa(time.Now().Nanosecond())
 			value, expiry := "Fred", time.Now().Add(15*time.Second)
 			conn := pool.Get()
 			defer conn.Close()
 
 			// Shouldn't be there until it's created
+			log.Printf("Key: %v", key)
 			resp, err := conn.Do("GET", key)
 			So(err, ShouldBeNil)
 			So(resp, ShouldBeNil)
