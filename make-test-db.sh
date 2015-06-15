@@ -44,7 +44,7 @@ EOF
 ITEMS=$(cat<<EOF
 (
 "150mm Prototype Gauss Gun",
-"800mm Reinforced Crystalline Carbonide Plates I",
+"800mm Crystalline Carbonide Restrained Plates",
 "650mm Medium Carbine Howitzer I",
 "Tritanium",
 "Pyerite",

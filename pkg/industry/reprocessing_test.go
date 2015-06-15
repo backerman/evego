@@ -91,7 +91,7 @@ func TestReprocessingModules(t *testing.T) {
 		})
 
 		Convey("Given another module", func() {
-			plate, err := db.ItemForName("800mm Reinforced Crystalline Carbonide Plates I")
+			plate, err := db.ItemForName("800mm Crystalline Carbonide Restrained Plates")
 			So(err, ShouldBeNil)
 
 			Convey("With reprocessing rate of 50% and no scrapmetal skills", func() {
