@@ -25,15 +25,23 @@ import (
 	"github.com/backerman/evego/pkg/parsing"
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/viper"
 
-	// Register SQLite3 driver for static database export
+	// Register SQLite3 and PgSQL drivers
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var (
-	testDbPath   = "../../testdb.sqlite"
-	testDbDriver = "sqlite3"
-)
+var testDbDriver, testDbPath string
+
+func init() {
+	viper.SetDefault("DBDriver", "sqlite3")
+	viper.SetDefault("DBPath", "../../testdb.sqlite")
+	viper.SetEnvPrefix("EVEGO_TEST")
+	viper.AutomaticEnv()
+	testDbDriver = viper.GetString("DBDriver")
+	testDbPath = viper.GetString("DBPath")
+}
 
 func TestInventoryCopyPaste(t *testing.T) {
 

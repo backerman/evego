@@ -39,15 +39,23 @@ import (
 	"github.com/backerman/evego/pkg/routing"
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/viper"
 
-	// Register SQLite3 driver for static database export
+	// Register SQLite3 and PgSQL drivers
+	_ "github.com/lib/pq"
 	"github.com/mattn/go-sqlite3"
 )
 
-var (
-	testDbPath   = "../../testdb.sqlite"
-	testDbDriver = "sqlite3"
-)
+var testDbDriver, testDbPath string
+
+func init() {
+	viper.SetDefault("DBDriver", "sqlite3")
+	viper.SetDefault("DBPath", "../../testdb.sqlite")
+	viper.SetEnvPrefix("EVEGO_TEST")
+	viper.AutomaticEnv()
+	testDbDriver = viper.GetString("DBDriver")
+	testDbPath = viper.GetString("DBPath")
+}
 
 var testMarketOrdersXML = "../../testdata/test-marketorders.xml"
 var testOutpostOrdersXML = "../../testdata/test-outpostorders.xml"
@@ -116,6 +124,12 @@ func TestMarketOrders(t *testing.T) {
 	// the context (by accepting it in our test function) and call
 	// the So function on it directly.
 	Convey("Set up test data.", t, func(c C) {
+		// FIXME: Need to get PostGIS working. So skip for now.
+		if testDbDriver != "sqlite3" {
+			Println("The database under test does not yet support routing; skipping.")
+			return
+		}
+
 		var actualURL string
 		ts := httptest.NewServer(
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

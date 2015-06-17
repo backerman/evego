@@ -42,6 +42,10 @@ var numJumpsSQL = map[dbType]string{
     FROM   jump_route
     WHERE  NodeFrom = ? AND NodeTo = ?
     `,
+	postgres: `
+		SELECT COUNT(*)
+		FROM eve_findRoute(?, ?)
+		`,
 }
 
 type sqlRouter struct {
@@ -60,6 +64,8 @@ func SQLRouter(driver, dataSource string) evego.Router {
 	var dialect dbType
 	if strings.Index(driver, "sqlite3") != -1 {
 		dialect = sqlite
+	} else if driver == "postgres" {
+		dialect = postgres
 	} else {
 		dialect = unknown
 	}
@@ -107,11 +113,25 @@ func (r *sqlRouter) NumJumpsID(fromSystemID, toSystemID int) (int, error) {
 			return -1, nil
 		}
 		return numRows - 1, nil
+	case postgres:
+		var numRows int
+		err := r.numJumpsStmt.Get(&numRows, fromSystemID, toSystemID)
+		if err != nil {
+			return 0, err
+		}
+		// numRows does not have a header. The row count n is zero for an impossible
+		// route (e.g. anything to Polaris), one for origin and destination in the
+		// same system, and k jumps where k=n+1 if n>=2. Since we've already checked
+		// for the same-system case, that doesn't apply here.
+		if numRows == 0 {
+			return -1, nil
+		}
+		return numRows - 1, nil
 	default:
 		return -1, fmt.Errorf("Routing is not supported for this database type.")
 	}
 }
 
 func (r *sqlRouter) Close() error {
-	return nil
+	return r.db.Close()
 }

@@ -21,14 +21,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/backerman/evego"
 	"github.com/jmoiron/sqlx"
 )
 
 type sqlDb struct {
-	dbType                        databaseType
 	db                            *sqlx.DB
 	compStatement                 *sqlx.Stmt
 	itemInfoStatement             *sqlx.Stmt
@@ -43,18 +41,7 @@ type sqlDb struct {
 	inputMaterialsToBlueprintStmt *sqlx.Stmt
 	blueprintProducedByStmt       *sqlx.Stmt
 	matsForBPProductionStmt       *sqlx.Stmt
-	countJumpsStmt                *sqlx.Stmt
 }
-
-// DatabaseType is the SQL vendor that we're using.
-type databaseType int
-
-// The possible databse types
-const (
-	Unknown databaseType = iota
-	SQLite
-	PostgreSQL
-)
 
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
 func SQLDatabase(driver, dataSource string) evego.Database {
@@ -91,38 +78,13 @@ func SQLDatabase(driver, dataSource string) evego.Database {
 	for _, s := range stmts {
 		prepared, err := db.Preparex(db.Rebind(s.statementText))
 		if err != nil {
-			log.Fatalf("Unable to prepare statement: %v", err)
+			log.Fatalf("Unable to prepare statement: %v\n%v", err, s.statementText)
 		}
 		// Pointer magic, stage 2: Dereference the pointer to the pointer
 		// and set it to point to the statement we just prepared.
 		*s.preparedStatement = prepared
 	}
 
-	// Routing is not standardized, so we need to treat these statements
-	// specially.
-	if strings.Index(driver, "sqlite3") != -1 {
-		// This is SQLite.
-		evedb.dbType = SQLite
-		evedb.countJumpsStmt, err = db.Preparex(countJumpsSQLite)
-		// If the statement preparation returned an error and it's
-		// "no such module: virtualnetwork", we're trying to do something
-		// that requires Spatialite, but the Spatialite module has not been
-		// loaded. Don't complain now; only complain if the caller attempts
-		// to actually use spatial functionality.
-		if err != nil &&
-			strings.Index(err.Error(), "virtualnetwork") < 0 &&
-			strings.Index(err.Error(), "no such table") < 0 {
-			log.Fatalf("Unable to prepare statement: %v", err)
-		}
-	} else if strings.Index(driver, "pgsql") != -1 {
-		log.Printf("Postgres support is still limited; routing is not supported.")
-		// FIXME: Add PostGIS setup here.
-		evedb.dbType = PostgreSQL
-	} else {
-		// Unknown database. PostgreSQL will be supported, but it isn't
-		// right now.
-		log.Printf("Unknown database driver %v; routing is not supported.", driver)
-	}
 	return evedb
 }
 
@@ -423,7 +385,10 @@ func (db *sqlDb) BlueprintProductionInputs(
 			OutputProductQty int    `db:"outputProductQty"`
 			Consume          bool   `db:"consume"`
 		}{}
-		rows.StructScan(&row)
+		err = rows.StructScan(&row)
+		if err != nil {
+			log.Fatalf("Unable to scan struct: %v", err)
+		}
 
 		// Process into an InventoryLine.
 		inputMat, err := db.ItemForName(row.InputMaterial)

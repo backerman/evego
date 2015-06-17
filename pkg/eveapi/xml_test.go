@@ -33,20 +33,30 @@ import (
 	"github.com/backerman/evego/pkg/eveapi"
 	"github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/viper"
 
-	// Register SQLite3 driver for static database export
+	// Register SQLite3 and PgSQL drivers
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	testDbPath   = "../../testdb.sqlite"
-	testDbDriver = "sqlite3"
-
 	testOutpostsXML      = "../../testdata/test-outposts.xml"
 	testCharSheetXML     = "../../testdata/test-charsheet.xml"
 	testAccountCharsXML  = "../../testdata/acct-characters.xml"
 	testCharStandingsXML = "../../testdata/char-standings.xml"
 )
+
+var testDbDriver, testDbPath string
+
+func init() {
+	viper.SetDefault("DBDriver", "sqlite3")
+	viper.SetDefault("DBPath", "../../testdb.sqlite")
+	viper.SetEnvPrefix("EVEGO_TEST")
+	viper.AutomaticEnv()
+	testDbDriver = viper.GetString("DBDriver")
+	testDbPath = viper.GetString("DBPath")
+}
 
 func TestOutpostID(t *testing.T) {
 	Convey("Set up API interface", t, func(c C) {

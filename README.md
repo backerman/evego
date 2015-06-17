@@ -21,15 +21,27 @@ use evego in your own code, please let me know.)
 
 ## Dependencies
 
-This library depends on [spatialite][spatialite] for routing functionality;
-while ellipsoid 4326 is nowhere to be found in New Eden, we still need
-Dijkstra's algorithm for calculating jump paths. ([PostgreSQL][pgsql] and
-[PostGIS][postgis] will be the other available backend option, but they're not
-supported yet.)
+External routing functionality is required for the market features (in
+particular, determining which buy orders are available to sell to at a given
+station). Because I'm not going to reimplment Dijkstra's algorithm, we use
+one of three options:
+
+* [Spatialite][spatialite] with a SQLite backend (primarily for development
+  purposes; this won't work that well in production);
+* [PostGIS][postgis] and [pgRouting][pgrouting] with a [PostgreSQL][pgsql] (≥ version 9.3) backend; or
+* the [EVE-Central][evecentral] [routing API][ecapi], if you don't care to
+  set up the geospatial bits.
+
+To spatialize the SQLite data export, use `spatialize-sqlite.sh`; to spatialize the PostgreSQL data export, see the readme file in `db/pgsql`.
+
+**N.B. While PostgreSQL works, I haven't set it up for the Travis builds yet. Just so you know.**
 
 [spatialite]: https://www.gaia-gis.it/fossil/libspatialite/index
 [pgsql]: http://www.postgresql.org
 [postgis]: http://www.postgis.net
+[pgrouting]: http://pgrouting.org
+[evecentral]: https://eve-central.com
+[ecapi]: https://eve-central.com/home/develop.html
 
 ## To-do list
 
@@ -63,6 +75,8 @@ full SDE;
 * Run the spatialize.sh script to generate the routing table for jump path
 calculations; and
 * Add the new version of `testdb.sqlite` to your changeset.
+
+By default, the test suite uses the provided SQLite excerpt; to test against PostgreSQL, set the `EVEGO_TEST_DBDRIVER` and `EVEGO_TEST_DBPATH` environment variables as appropriate.
 
 [conversion]: https://www.fuzzwork.co.uk/dump/
 [sde]: https://developers.eveonline.com/resource/static-data-export

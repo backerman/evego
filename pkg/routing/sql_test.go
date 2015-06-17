@@ -22,40 +22,60 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/backerman/evego"
 	"github.com/backerman/evego/pkg/dbaccess"
 	"github.com/backerman/evego/pkg/routing"
 
 	. "github.com/backerman/evego/pkg/test"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/viper"
 
-	// Register SQLite3 driver
-	sqlite3 "github.com/mattn/go-sqlite3"
+	// Register SQLite3 and PgSQL drivers
+	_ "github.com/lib/pq"
+	"github.com/mattn/go-sqlite3"
 )
+
+var testDbDriver, testDbPath string
+
+func init() {
+	viper.SetDefault("DBDriver", "sqlite3")
+	viper.SetDefault("DBPath", "../../testdb.sqlite")
+	viper.SetEnvPrefix("EVEGO_TEST")
+	viper.AutomaticEnv()
+	testDbDriver = viper.GetString("DBDriver")
+	testDbPath = viper.GetString("DBPath")
+}
 
 var (
 	registerDriver sync.Once
 )
 
-const (
-	testDbPath   = "../../testdb.sqlite"
-	testDbDriver = "sqlite3"
-)
-
-func TestSpatialiteRouting(t *testing.T) {
-	Convey("Open a Spatialite-enabled database connection.", t, func() {
-		// Register a custom SQLite3 driver with the Spatialite extension.
-		// Has to be wrapped in a Once because this is executed multiple
-		// times by GoConvey.
-		registerDriver.Do(func() {
-			sql.Register("sqlite3_spatialite",
-				&sqlite3.SQLiteDriver{
-					Extensions: []string{
-						SpatialiteModulePath(),
-					},
-				})
-		})
-		router := routing.SQLRouter("sqlite3_spatialite", testDbPath)
-		db := dbaccess.SQLDatabase("sqlite3_spatialite", testDbPath)
+func TestSQLRouting(t *testing.T) {
+	Convey("Open a database connection.", t, func() {
+		var router evego.Router
+		var db evego.Database
+		switch testDbDriver {
+		case "sqlite3":
+			// Register a custom SQLite3 driver with the Spatialite extension.
+			// Has to be wrapped in a Once because this is executed multiple
+			// times by GoConvey.
+			registerDriver.Do(func() {
+				sql.Register("sqlite3_spatialite",
+					&sqlite3.SQLiteDriver{
+						Extensions: []string{
+							SpatialiteModulePath(),
+						},
+					})
+			})
+			router = routing.SQLRouter("sqlite3_spatialite", testDbPath)
+			db = dbaccess.SQLDatabase("sqlite3_spatialite", testDbPath)
+		case "postgres":
+			router = routing.SQLRouter(testDbDriver, testDbPath)
+			db = dbaccess.SQLDatabase(testDbDriver, testDbPath)
+		default:
+			Println("The database under test does not yet support routing; skipping.")
+			return
+		}
 
 		defer db.Close()
 		defer router.Close()

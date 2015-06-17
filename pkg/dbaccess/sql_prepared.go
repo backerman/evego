@@ -22,144 +22,129 @@ import "strings"
 // Our hand-crafted SQL statements.
 var (
 	materialComposition = `
-  SELECT mt.typeID AS materialID, m.quantity AS quantity
-  FROM invTypes t, invTypes mt, invTypeMaterials m
-  WHERE t.typeID = ?
-  AND t.typeID = m.typeID
-  AND mt.typeID = m.materialTypeID
+  SELECT mt."typeID" AS "materialID", m."quantity" AS "quantity"
+  FROM "invTypes" t, "invTypes" mt, "invTypeMaterials" m
+  WHERE t."typeID" = ?
+  AND t."typeID" = m."typeID"
+  AND mt."typeID" = m."materialTypeID"
   `
 	itemInfo = `
-  SELECT t.typeID, t.typeName, t.portionSize, g.groupName, c.categoryName
-  FROM invTypes t, invCategories c, invGroups g
-  WHERE t.typeName = ? AND t.groupID = g.groupID
-  AND   g.categoryID = c.categoryID
+  SELECT t."typeID", t."typeName", t."portionSize", g."groupName", c."categoryName"
+  FROM "invTypes" t, "invCategories" c, "invGroups" g
+  WHERE t."typeName" = ? AND t."groupID" = g."groupID"
+  AND   g."categoryID" = c."categoryID"
   `
 	itemIDInfo = `
-  SELECT t.typeID, t.typeName, t.portionSize, g.groupName, c.categoryName
-  FROM invTypes t, invCategories c, invGroups g
-  WHERE t.typeID = ? AND t.groupID = g.groupID
-  AND   g.categoryID = c.categoryID
+  SELECT t."typeID", t."typeName", t."portionSize", g."groupName", c."categoryName"
+  FROM "invTypes" t, "invCategories" c, "invGroups" g
+  WHERE t."typeID" = ? AND t."groupID" = g."groupID"
+  AND   g."categoryID" = c."categoryID"
   `
 	catTree = `
   WITH RECURSIVE
-  parents(marketGroupID, parentGroupID) AS
+  parents("marketGroupID", "parentGroupID") AS
   (
-    SELECT marketGroupID, parentGroupID FROM invMarketGroups
-    WHERE marketGroupID = (
-      SELECT marketGroupID
-      FROM invTypes i
-      JOIN invMarketGroups m USING(marketGroupID)
-      WHERE i.typeID = ?
+    SELECT "marketGroupID", "parentGroupID" FROM "invMarketGroups"
+    WHERE "marketGroupID" = (
+      SELECT "marketGroupID"
+      FROM "invTypes" i
+      JOIN "invMarketGroups" m USING("marketGroupID")
+      WHERE i."typeID" = ?
       )
       UNION ALL
-      SELECT mg.marketGroupID, mg.parentGroupID
-      FROM invMarketGroups mg
-      INNER JOIN parents p ON mg.marketGroupID=p.parentGroupID
+      SELECT mg."marketGroupID", mg."parentGroupID"
+      FROM "invMarketGroups" mg
+      INNER JOIN parents p ON mg."marketGroupID"=p."parentGroupID"
       )
-      SELECT p.marketGroupID, m1.marketGroupName, m1.description, p.parentGroupID, m2.marketGroupName, m2.description
+      SELECT p."marketGroupID", m1."marketGroupName", m1."description", p."parentGroupID", m2."marketGroupName", m2."description"
       FROM parents p
-      JOIN invMarketGroups m1 ON p.marketGroupID = m1.marketGroupID
-      JOIN invMarketGroups m2 ON p.parentGroupID = m2.marketGroupID
+      JOIN "invMarketGroups" m1 ON p."marketGroupID" = m1."marketGroupID"
+      JOIN "invMarketGroups" m2 ON p."parentGroupID" = m2."marketGroupID"
       `
 
 	systemInfo = `
-      SELECT   s.solarSystemName, s.solarSystemID, s.security,
-               c.constellationName, c.constellationID, r.regionName, r.regionID
-      FROM     mapSolarSystems s
-      JOIN     mapConstellations c USING(constellationID)
-      JOIN     mapRegions r USING(regionID)
-      WHERE    LOWER(s.solarSystemName) LIKE LOWER(?)
-			ORDER BY s.solarSystemName
+      SELECT   s."solarSystemName", s."solarSystemID", s."security",
+               c."constellationName", c."constellationID", r."regionName", r."regionID"
+      FROM     "mapSolarSystems" s
+      JOIN     "mapConstellations" c USING("constellationID")
+      JOIN     "mapRegions" r ON r."regionID" = c."regionID"
+      WHERE    LOWER(s."solarSystemName") LIKE LOWER(?)
+			ORDER BY s."solarSystemName"
       `
 
 	systemIDInfo = `
-      SELECT s.solarSystemName, s.solarSystemID, s.security,
-             c.constellationName, c.constellationID, r.regionName, r.regionID
-      FROM   mapSolarSystems s
-      JOIN   mapConstellations c USING(constellationID)
-      JOIN   mapRegions r USING(regionID)
-      WHERE  s.solarSystemID = ?
+      SELECT s."solarSystemName", s."solarSystemID", s."security",
+             c."constellationName", c."constellationID", r."regionName", r."regionID"
+      FROM   "mapSolarSystems" s
+      JOIN   "mapConstellations" c USING("constellationID")
+      JOIN   "mapRegions" r ON r."regionID" = c."regionID"
+      WHERE  s."solarSystemID" = ?
       `
 
 	regionInfo = `
-      SELECT regionid, regionname
-      FROM   mapregions
-      WHERE  regionName = ?
+      SELECT "regionID", "regionName"
+      FROM   "mapRegions"
+      WHERE  "regionName" = ?
       `
 
 	stationIDInfo = `
-      SELECT stationName, stationID, solarSystemID, constellationID, regionID,
-						 corporationID, itemName corporationName, reprocessingEfficiency
-      FROM   staStations s
-			JOIN   invNames n ON n.itemID = s.corporationID
-      WHERE  stationID = ?
+      SELECT "stationName", "stationID", "solarSystemID", "constellationID", "regionID",
+						 "corporationID", "itemName" "corporationName", "reprocessingEfficiency"
+      FROM   "staStations" s
+			JOIN   "invNames" n ON n."itemID" = s."corporationID"
+      WHERE  "stationID" = ?
       `
 	stationNameInfo = `
-		SELECT stationName, stationID, solarSystemID, constellationID, regionID,
-					 corporationID, itemName corporationName, reprocessingEfficiency
-		FROM   staStations s
-		JOIN   invNames n ON n.itemID = s.corporationID
-		WHERE  LOWER(stationName) LIKE LOWER(?)
-		ORDER BY stationName
+		SELECT "stationName", "stationID", "solarSystemID", "constellationID", "regionID",
+					 "corporationID", "itemName" "corporationName", "reprocessingEfficiency"
+		FROM   "staStations" s
+		JOIN   "invNames" n ON n."itemID" = s."corporationID"
+		WHERE  LOWER("stationName") LIKE LOWER(?)
+		ORDER BY "stationName"
 		`
 
 	blueprintBase = `
-		SELECT ti.typeName inputItem, ram.activityName, tyo.typeName outputProduct,
-		       iap.quantity outputProductQty
-		FROM   industryActivityProducts iap
-		JOIN   invTypes ti USING(typeID)
-		JOIN   ramActivities ram USING(activityID)
-		JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
+		SELECT ti."typeName" "inputItem", ram."activityName", tyo."typeName" "outputProduct",
+		       iap."quantity" "outputProductQty"
+		FROM   "industryActivityProducts" iap
+		JOIN   "invTypes" ti USING("typeID")
+		JOIN   "ramActivities" ram USING("activityID")
+		JOIN   "invTypes" tyo ON iap."productTypeID" = tyo."typeID"
 		WHERE  QUERYCOLUMN LIKE ?
-		ORDER BY inputItem, outputProduct
+		ORDER BY "inputItem", "outputProduct"
 		`
 
 	// What items can I produce with a blueprint?
-	blueprintProduces = strings.Replace(blueprintBase, "QUERYCOLUMN", "inputItem", 1)
+	blueprintProduces = strings.Replace(blueprintBase, "QUERYCOLUMN", "ti.\"typeName\"", 1)
 
 	// How can I produce a blueprint?
-	blueprintProducedBy = strings.Replace(blueprintBase, "QUERYCOLUMN", "outputProduct", 1)
+	blueprintProducedBy = strings.Replace(blueprintBase, "QUERYCOLUMN", "tyo.\"typeName\"", 1)
 
 	// Extra stanzas for WHERE when querying on input materials
 	inputMatsWhere = `
-		JOIN   industryActivityMaterials iam
-		ON     iam.typeID = ti.typeID
-		JOIN   invTypes tm
-		ON     iam.materialTypeID = tm.typeID
+		JOIN   "industryActivityMaterials" iam
+		ON     iam."typeID" = ti."typeID"
+		JOIN   "invTypes" tm
+		ON     iam."materialTypeID" = tm."typeID"
 	`
 	inputMaterialsToBlueprint = strings.Replace(
 		strings.Replace(blueprintBase, "WHERE", inputMatsWhere+" WHERE ", 1),
-		"QUERYCOLUMN", "tm.typeName", 1)
+		"QUERYCOLUMN", "tm.\"typeName\"", 1)
 
 	// Given a blueprint, what items do I need to manufacture/invent with it?
 	materialsForBlueprintProduction = `
-		SELECT ti.typeName inputItem, activityName, tm.typeName inputMaterial,
-					 iam.quantity inputMaterialQty, consume, tyo.typeName outputProduct,
-					 iap.quantity outputProductQty
-		FROM   industryActivityMaterials iam
-		JOIN   invTypes ti USING(typeID)
-		JOIN   invTypes tm
-		ON     iam.materialTypeID = tm.typeID
-		JOIN   ramActivities USING(activityID)
-		JOIN   industryActivityProducts iap
-		ON     iap.typeID = ti.typeID AND iap.activityID=iam.activityID
-		JOIN   invTypes tyo ON iap.productTypeID = tyo.typeID
-		WHERE  inputItem = ? AND outputProduct = ?
-		ORDER BY inputItem, outputProduct, inputMaterial
+		SELECT ti."typeName" "inputItem", "activityName", tm."typeName" "inputMaterial",
+					 iam."quantity" "inputMaterialQty", "consume", tyo."typeName" "outputProduct",
+					 iap."quantity" "outputProductQty"
+		FROM   "industryActivityMaterials" iam
+		JOIN   "invTypes" ti USING("typeID")
+		JOIN   "invTypes" tm
+		ON     iam."materialTypeID" = tm."typeID"
+		JOIN   "ramActivities" USING("activityID")
+		JOIN   "industryActivityProducts" iap
+		ON     iap."typeID" = ti."typeID" AND iap."activityID"=iam."activityID"
+		JOIN   "invTypes" tyo ON iap."productTypeID" = tyo."typeID"
+		WHERE  ti."typeName" = ? AND tyo."typeName" = ?
+		ORDER BY "inputItem", "outputProduct", "inputMaterial"
 		`
-
-	// Routing: get the path from point A to point B. All results will have
-	// a header row with ArcRowid null; if the destination is unreachable,
-	// NodeFrom and NodeTo will be null. The remaning rows are each jump in
-	// the path.
-	//
-	// Returns a nonnegative integer: if 0, the destination is not reachable;
-	// otherwise, returns (n+1) where n is the the number of jumps between
-	// the source and destination systems. We assume that NodeFrom and NodeTo
-	// are not the same; if they are, this breaks.
-	countJumpsSQLite = `
-		SELECT COUNT(*)
-		FROM   jump_route
-		WHERE  NodeFrom = ? AND NodeTo = ?
-	`
 )
