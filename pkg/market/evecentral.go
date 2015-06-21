@@ -53,6 +53,11 @@ func EveCentral(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, end
 }
 
 func (e *eveCentral) getURL(u string) ([]byte, error) {
+	// Start by checking cache.
+	body, found := e.respCache.Get(u)
+	if found {
+		return body, nil
+	}
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, err
@@ -63,7 +68,12 @@ func (e *eveCentral) getURL(u string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// EVE-Central doesn't specify a caching time to use, so we're picking
+		// ten minutes at random.
+		e.respCache.Put(u, body, time.Now().Add(10*time.Minute))
+	}
 	return body, err
 }
 
@@ -87,6 +97,7 @@ type quicklook struct {
 
 func (e *eveCentral) processOrders(data *quicklook, item *evego.Item, t evego.OrderType) []evego.Order {
 	var toProcess *[]order
+	// Set up a temporary cache so that we only get each station's object once.
 	stationCache := make(map[int]*evego.Station)
 	switch t {
 	case evego.Buy:
@@ -163,19 +174,13 @@ func (e *eveCentral) OrdersForItem(item *evego.Item, location string, orderType 
 	}
 	query.Set("typeid", fmt.Sprintf("%d", item.ID))
 	e.endpoint.RawQuery = query.Encode()
-	orderXML, found := e.respCache.Get(query.Encode())
-	if !found {
-		var err error
-		orderXML, err = e.getURL(e.endpoint.String())
-		if err != nil {
-			return nil, err
-		}
-		// EVE-Central doesn't specify a caching time to use, so we're picking
-		// five minutes at random.
-		e.respCache.Put(query.Encode(), orderXML, time.Now().Add(5*time.Minute))
+	orderXML, err := e.getURL(e.endpoint.String())
+	if err != nil {
+		return nil, err
 	}
-	orders := &quicklook{}
 
+	// We received a quicklook XML document from EVE-Central. Unmarshal it.
+	orders := &quicklook{}
 	err = xml.Unmarshal(orderXML, orders)
 	if err != nil {
 		return nil, err
