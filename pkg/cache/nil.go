@@ -28,7 +28,8 @@ type nilCache struct {
 
 // NilCache returns a struct satisfying the Cache interface that goes nowhere
 // and does nothing. All calls will GNDN, and Get will always result in a cache
-// miss.
+// miss. This option should probably not be used except for writing this
+// package's tests.
 func NilCache() evego.Cache {
 	return &nilCache{}
 }

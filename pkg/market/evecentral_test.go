@@ -157,7 +157,7 @@ func TestMarketOrders(t *testing.T) {
 		defer router.Close()
 		// We don't need outpost information here, so we don't pass in a reference
 		// to the EVE XML API.
-		ec := market.EveCentral(db, router, nil, ts.URL)
+		ec := market.EveCentral(db, router, nil, ts.URL, cache.NilCache())
 
 		Convey("Given a valid region and item", func() {
 			regionName := "Verge Vendor"
@@ -304,7 +304,7 @@ func TestOutpostOrders(t *testing.T) {
 
 		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		xmlAPI := eveapi.XML(tsXMLAPI.URL, db, cache.NilCache())
-		ec := market.EveCentral(db, nil, xmlAPI, ts.URL)
+		ec := market.EveCentral(db, nil, xmlAPI, ts.URL, cache.NilCache())
 
 		Convey("Given a valid location and item", func() {
 			systemName := "4-EP12"

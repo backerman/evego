@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/backerman/evego"
-	"github.com/backerman/evego/pkg/cache"
 )
 
 type eveCentral struct {
@@ -39,11 +38,11 @@ type eveCentral struct {
 	respCache evego.Cache
 }
 
-// EveCentralCached returns an interface to the EVE-Central API.
+// EveCentral returns an interface to the EVE-Central API.
 // It takes as input an EveDatabase object and an HTTP endpoint;
 // the latter should be http://api.eve-central.com/api/quicklook
 // for the production EVE-Central instance.
-func EveCentralCached(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, endpoint string,
+func EveCentral(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, endpoint string,
 	aCache evego.Cache) evego.Market {
 	epURL, err := url.Parse(endpoint)
 	if err != nil {
@@ -51,13 +50,6 @@ func EveCentralCached(db evego.Database, router evego.Router, xmlAPI evego.XMLAP
 	}
 	ec := eveCentral{db: db, router: router, endpoint: epURL, xmlAPI: xmlAPI, respCache: aCache}
 	return &ec
-}
-
-// EveCentral returns an uncached interface to the EVE-Central API.
-// This should only be used if the caller will be handling caching.
-func EveCentral(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, endpoint string) evego.Market {
-	myCache := cache.NilCache()
-	return EveCentralCached(db, router, xmlAPI, endpoint, myCache)
 }
 
 func (e *eveCentral) getURL(u string) ([]byte, error) {
