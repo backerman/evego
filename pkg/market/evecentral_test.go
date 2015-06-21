@@ -155,9 +155,12 @@ func TestMarketOrders(t *testing.T) {
 		defer db.Close()
 		router := routing.SQLRouter("sqlite3_spatialite", testDbPath)
 		defer router.Close()
+
+		myCacheData := CacheData{}
+		myCache := Cache(&myCacheData)
 		// We don't need outpost information here, so we don't pass in a reference
 		// to the EVE XML API.
-		ec := market.EveCentral(db, router, nil, ts.URL, cache.NilCache())
+		ec := market.EveCentral(db, router, nil, ts.URL+"/", myCache)
 
 		Convey("Given a valid region and item", func() {
 			regionName := "Verge Vendor"
@@ -225,6 +228,13 @@ func TestMarketOrders(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(actualURL, ShouldEqual, expectedURL)
 				So(actual, shouldMatchOrders, expected)
+
+				// Verify caching.
+				fullURL := ts.URL + expectedURL
+				So(myCacheData.GetKey, ShouldEqual, fullURL)
+				So(myCacheData.PutKey, ShouldEqual, fullURL)
+				So(myCacheData.NumGets, ShouldEqual, 1)
+				So(myCacheData.NumPuts, ShouldEqual, 1)
 			})
 
 		})

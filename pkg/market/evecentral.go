@@ -69,7 +69,7 @@ func (e *eveCentral) getURL(u string) ([]byte, error) {
 		return nil, err
 	}
 	body, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
+	if err == nil {
 		// EVE-Central doesn't specify a caching time to use, so we're picking
 		// ten minutes at random.
 		e.respCache.Put(u, body, time.Now().Add(10*time.Minute))
