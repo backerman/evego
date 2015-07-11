@@ -124,8 +124,7 @@ func TestMarketOrders(t *testing.T) {
 	// the context (by accepting it in our test function) and call
 	// the So function on it directly.
 	Convey("Set up test data.", t, func(c C) {
-		// FIXME: Need to get PostGIS working. So skip for now.
-		if testDbDriver != "sqlite3" {
+		if !(testDbDriver == "sqlite3" || testDbDriver == "postgres") {
 			Println("The database under test does not yet support routing; skipping.")
 			return
 		}
@@ -153,7 +152,12 @@ func TestMarketOrders(t *testing.T) {
 		})
 		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		defer db.Close()
-		router := routing.SQLRouter("sqlite3_spatialite", testDbPath)
+		var router evego.Router
+		if testDbDriver == "sqlite3" {
+			router = routing.SQLRouter("sqlite3_spatialite", testDbPath, cache.NilCache())
+		} else {
+			router = routing.SQLRouter(testDbDriver, testDbPath, cache.NilCache())
+		}
 		defer router.Close()
 
 		myCacheData := CacheData{}

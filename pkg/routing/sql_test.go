@@ -54,6 +54,7 @@ func TestSQLRouting(t *testing.T) {
 	Convey("Open a database connection.", t, func() {
 		var router evego.Router
 		var db evego.Database
+		cacheData := &CacheData{}
 		switch testDbDriver {
 		case "sqlite3":
 			// Register a custom SQLite3 driver with the Spatialite extension.
@@ -67,10 +68,10 @@ func TestSQLRouting(t *testing.T) {
 						},
 					})
 			})
-			router = routing.SQLRouter("sqlite3_spatialite", testDbPath)
+			router = routing.SQLRouter("sqlite3_spatialite", testDbPath, Cache(cacheData))
 			db = dbaccess.SQLDatabase("sqlite3_spatialite", testDbPath)
 		case "postgres":
-			router = routing.SQLRouter(testDbDriver, testDbPath)
+			router = routing.SQLRouter(testDbDriver, testDbPath, Cache(cacheData))
 			db = dbaccess.SQLDatabase(testDbDriver, testDbPath)
 		default:
 			Println("The database under test does not yet support routing; skipping.")
@@ -81,15 +82,22 @@ func TestSQLRouting(t *testing.T) {
 		defer router.Close()
 
 		Convey("Given a start and end system", func() {
-			startSys, err := db.SolarSystemForName("Orvolle")
+			startSys, err := db.SolarSystemForName("Orvolle") // system ID 30003830
 			So(err, ShouldBeNil)
-			endSys, err := db.SolarSystemForName("RF-GGF")
+			endSys, err := db.SolarSystemForName("RF-GGF") // system ID 30003333
 			So(err, ShouldBeNil)
 
 			Convey("The path is calculated correctly.", func() {
 				numJumps, err := router.NumJumps(startSys, endSys)
 				So(err, ShouldBeNil)
 				So(numJumps, ShouldEqual, 5)
+
+				Convey("The result is correctly stored in the cache.", func() {
+					So(cacheData.GetKey, ShouldEqual, "numjumps:30003830:30003333")
+					So(cacheData.PutKey, ShouldEqual, "numjumps:30003830:30003333")
+					So(cacheData.NumPuts, ShouldEqual, 1)
+					So(cacheData.NumGets, ShouldEqual, 1)
+				})
 			})
 		})
 
@@ -120,15 +128,19 @@ func TestSQLRouting(t *testing.T) {
 		})
 
 		Convey("Given an end system that cannot be reached from the start", func() {
-			startSys, err := db.SolarSystemForName("Orvolle")
+			startSys, err := db.SolarSystemForName("Orvolle") // system ID 30003830
 			So(err, ShouldBeNil)
-			endSys, err := db.SolarSystemForName("Polaris")
+			endSys, err := db.SolarSystemForName("Polaris") // system ID 30000380
 			So(err, ShouldBeNil)
 
 			Convey("Unreachability is correctly indicated.", func() {
 				numJumps, err := router.NumJumps(startSys, endSys)
 				So(err, ShouldBeNil)
 				So(numJumps, ShouldEqual, -1)
+
+				Convey("The result is cached.", func() {
+					So(cacheData.PutKey, ShouldEqual, "numjumps:30003830:30000380")
+				})
 			})
 		})
 

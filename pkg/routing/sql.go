@@ -22,7 +22,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/backerman/evego"
 	"github.com/jmoiron/sqlx"
@@ -52,10 +54,13 @@ type sqlRouter struct {
 	db           *sqlx.DB
 	numJumpsStmt *sqlx.Stmt
 	dialect      dbType
+	cache        evego.Cache
 }
 
-// SQLRouter reutrns a thingy.
-func SQLRouter(driver, dataSource string) evego.Router {
+// SQLRouter returns a router that uses topological data stored in a SQL
+// database. Currently, SQLite (with Spatialite) and PostgreSQL (with pgrouting
+// and PostGIS) are supported.
+func SQLRouter(driver, dataSource string, aCache evego.Cache) evego.Router {
 	db, err := sqlx.Connect(driver, dataSource)
 	if err != nil {
 		log.Fatalf("Unable to open routing database (driver: %s, datasource: %s): %v",
@@ -77,7 +82,7 @@ func SQLRouter(driver, dataSource string) evego.Router {
 	if err != nil {
 		log.Fatalf("Unable to prepare jump plan statement: %v", err)
 	}
-	return &sqlRouter{db: db, dialect: dialect, numJumpsStmt: numJumpsStmt}
+	return &sqlRouter{db: db, dialect: dialect, numJumpsStmt: numJumpsStmt, cache: aCache}
 }
 
 func (r *sqlRouter) NumJumps(fromSystem, toSystem *evego.SolarSystem) (int, error) {
@@ -90,6 +95,32 @@ func (r *sqlRouter) NumJumps(fromSystem, toSystem *evego.SolarSystem) (int, erro
 	return r.NumJumpsID(fromSystem.ID, toSystem.ID)
 }
 
+// putCache adds a routing result to the cache. The expiration time is
+// arbitrarily set to one day.
+func (r *sqlRouter) putCache(fromSystemID, toSystemID, numJumps int) error {
+	key := "numjumps:" + strconv.Itoa(fromSystemID) +
+		":" + strconv.Itoa(toSystemID)
+	val := []byte(strconv.Itoa(numJumps))
+	return r.cache.Put(key, val, time.Now().Add(24*time.Hour))
+}
+
+// getCache finds a routing result in the cache. It returns the number of jumps
+// (undefined if not found) and whether the result was contained in the cache.
+func (r *sqlRouter) getCache(fromSystemID, toSystemID int) (int, bool) {
+	key := "numjumps:" + strconv.Itoa(fromSystemID) +
+		":" + strconv.Itoa(toSystemID)
+	val, found := r.cache.Get(key)
+	if found {
+		// Convert cached from []byte to integer and return it.
+		cachedAsInt, err := strconv.Atoi(string(val))
+		if err != nil {
+			return 0, false
+		}
+		return cachedAsInt, true
+	}
+	return 0, false
+}
+
 func (r *sqlRouter) NumJumpsID(fromSystemID, toSystemID int) (int, error) {
 	// This function will be implemented differently depending on the
 	// backend database.
@@ -97,6 +128,13 @@ func (r *sqlRouter) NumJumpsID(fromSystemID, toSystemID int) (int, error) {
 		// These are the same system.
 		return 0, nil
 	}
+
+	// Check for this result in the cache; if it's already there, return it.
+	cached, found := r.getCache(fromSystemID, toSystemID)
+	if found {
+		return cached, nil
+	}
+
 	switch r.dialect {
 	case sqlite:
 		var numRows int
@@ -110,8 +148,10 @@ func (r *sqlRouter) NumJumpsID(fromSystemID, toSystemID int) (int, error) {
 		// Therefore, if numRows-1 is 0, there is no route; otherwise, the
 		// route contains numRows-1 jumps.
 		if numRows == 1 {
+			r.putCache(fromSystemID, toSystemID, -1)
 			return -1, nil
 		}
+		r.putCache(fromSystemID, toSystemID, numRows-1)
 		return numRows - 1, nil
 	case postgres:
 		var numRows int
@@ -124,8 +164,10 @@ func (r *sqlRouter) NumJumpsID(fromSystemID, toSystemID int) (int, error) {
 		// same system, and k jumps where k=n+1 if n>=2. Since we've already checked
 		// for the same-system case, that doesn't apply here.
 		if numRows == 0 {
+			r.putCache(fromSystemID, toSystemID, -1)
 			return -1, nil
 		}
+		r.putCache(fromSystemID, toSystemID, numRows-1)
 		return numRows - 1, nil
 	default:
 		return -1, fmt.Errorf("Routing is not supported for this database type.")
