@@ -217,7 +217,7 @@ func TestReprocessingOre(t *testing.T) {
 					reprocessed, err := industry.ReprocessItem(db, cscordite, cscorditeQty, reproRate, taxRate, skills)
 					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
-						{"Tritanium", 294646},
+						{"Tritanium", 295459},
 						{"Pyerite", 147729},
 						{"Condensed Scordite", 25},
 					})
@@ -227,9 +227,9 @@ func TestReprocessingOre(t *testing.T) {
 					reprocessed, err := industry.ReprocessItem(db, kernite, kerniteQty, reproRate, taxRate, skills)
 					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
-						{"Tritanium", 18044},
+						{"Tritanium", 18173},
 						{"Mexallon", 36218},
-						{"Isogen", 18044},
+						{"Isogen", 18173},
 						{"Luminous Kernite", 83},
 					})
 				})
@@ -248,10 +248,10 @@ func TestReprocessingOre(t *testing.T) {
 					reprocessed, err := industry.ReprocessItems(db, items, reproRate, taxRate, skills)
 					So(err, ShouldBeNil)
 					So(reprocessed, ShouldHaveComposition, []Component{
-						{"Tritanium", 396641},
+						{"Tritanium", 397583},
 						{"Pyerite", 189705},
 						{"Mexallon", 36218},
-						{"Isogen", 18044},
+						{"Isogen", 18173},
 						{"Condensed Scordite", 25},
 						{"Luminous Kernite", 83},
 						{"Scordite", 41},
