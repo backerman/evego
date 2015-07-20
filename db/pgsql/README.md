@@ -6,9 +6,27 @@ dropdb --if-exists evetool && createdb evetool
 pg_restore -d evetool -O postgres-latest.dmp
 ```
 
-Then apply them in numerical order:
+To load the data into a schema other than public (here, we use `sde`):
+
+```
+dropdb --if-exists evetool && createdb evetool
+bzcat postgres-latest.dmp.bz2| pg_restore -O | sed '/^SET search_path/ d' |
+  (echo "create schema sde; set search_path to sde;" && cat ) |
+  psql -1 evetool
+```
+
+Then apply the SQL files in this directory in numerical order:
 ```
 psql evetool < *.sql
+
+# or if you're doing the schema thing
+# pgrouting v2.0.0 has a bug that prevents installing in a schema other than
+# public
+psql evetool <<EOF
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgrouting;
+EOF
+(echo "set search_path to sde,public;" && cat *.sql) | psql evetool
 ```
 
 (evetool is the default database name, but you can choose a different one.)
