@@ -354,3 +354,38 @@ func TestOutpostOrders(t *testing.T) {
 	})
 
 }
+
+func TestConnectionError(t *testing.T) {
+	Convey("Set up erroring server", t, func() {
+		serverCalled := false
+		ts := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				serverCalled = true
+				http.Error(w, "Test error", http.StatusInternalServerError)
+			}))
+		// defer ts.Close()
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
+		xmlAPI := eveapi.XML(ts.URL, db, cache.NilCache())
+		ec := market.EveCentral(db, nil, xmlAPI, ts.URL, cache.NilCache())
+
+		Convey("An erroring server should result in an error.", func() {
+			regionName := "Verge Vendor"
+			orderType := evego.AllOrders
+			item, err := db.ItemForName("Medium Shield Extender II")
+			So(err, ShouldBeNil)
+			_, err = ec.OrdersForItem(item, regionName, orderType)
+			So(err, ShouldNotBeNil)
+			So(serverCalled, ShouldBeTrue)
+		})
+
+		Convey("A nonexistent server should result in an error.", func() {
+			ts.Close()
+			regionName := "Verge Vendor"
+			orderType := evego.AllOrders
+			item, err := db.ItemForName("Medium Shield Extender II")
+			So(err, ShouldBeNil)
+			_, err = ec.OrdersForItem(item, regionName, orderType)
+			So(err, ShouldNotBeNil)
+		})
+	})
+}

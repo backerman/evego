@@ -64,10 +64,10 @@ func (e *eveCentral) getURL(u string) ([]byte, error) {
 	}
 	req.Header.Add("User-Agent", "evego (https://github.com/backerman/evego)")
 	resp, err := e.http.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	body, err = ioutil.ReadAll(resp.Body)
 	if err == nil {
 		// EVE-Central doesn't specify a caching time to use, so we're picking
