@@ -29,13 +29,13 @@ var (
   AND mt."typeID" = m."materialTypeID"
   `
 	itemInfo = `
-  SELECT t."typeID", t."typeName", t."portionSize", g."groupName", c."categoryName"
+  SELECT t."typeID", t."typeName", t."portionSize", g."groupID", g."groupName", c."categoryName"
   FROM "invTypes" t, "invCategories" c, "invGroups" g
   WHERE t."typeName" = ? AND t."groupID" = g."groupID"
   AND   g."categoryID" = c."categoryID"
   `
 	itemIDInfo = `
-  SELECT t."typeID", t."typeName", t."portionSize", g."groupName", c."categoryName"
+  SELECT t."typeID", t."typeName", t."portionSize", g."groupID", g."groupName", c."categoryName"
   FROM "invTypes" t, "invCategories" c, "invGroups" g
   WHERE t."typeID" = ? AND t."groupID" = g."groupID"
   AND   g."categoryID" = c."categoryID"

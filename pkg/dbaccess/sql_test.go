@@ -123,6 +123,7 @@ func TestItems(t *testing.T) {
 				Type:      evego.Other,
 				Category:  "Module",
 				Group:     "Shield Extender",
+				GroupID:   38,
 				BatchSize: 1,
 			}
 
@@ -166,6 +167,7 @@ func TestItems(t *testing.T) {
 				ID:        itemID,
 				Type:      evego.Other,
 				Group:     "Spaceship Command",
+				GroupID:   257,
 				Category:  "Skill",
 				BatchSize: 1,
 			}
@@ -202,6 +204,7 @@ func TestItems(t *testing.T) {
 					ID:        itemID,
 					Type:      evego.UnknownItemType,
 					Group:     "Expanded Cargohold",
+					GroupID:   765,
 					Category:  "Module",
 					BatchSize: 1,
 				}

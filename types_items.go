@@ -39,6 +39,7 @@ type Item struct {
 	Type      ItemType
 	Category  string `db:"categoryName"` // e.g. Module, Drone, Charge
 	Group     string `db:"groupName"`    // e.g. Omber, Logistic Drone, Footwear
+	GroupID   int    `db:"groupID"`
 	BatchSize int    `db:"portionSize"`
 }
 
