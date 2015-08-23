@@ -40,6 +40,7 @@ type CharacterSheet struct {
 type Skill struct {
 	Name           string `json:"name"`
 	Group          string `json:"group"`
+	GroupID        int    `json:"groupID"`
 	TypeID         int    `json:"typeID"         xml:"typeID,attr"`
 	NumSkillpoints int    `json:"numSkillpoints" xml:"skillpoints,attr"`
 	Level          int    `json:"level"          xml:"level,attr"`

@@ -126,6 +126,7 @@ func (x *xmlAPI) CharacterSheet(key *evego.XMLKey, characterID int) (*evego.Char
 		} else {
 			skill.Name = skillItem.Name
 			skill.Group = skillItem.Group
+			skill.GroupID = skillItem.GroupID
 		}
 	}
 	return &sheet, nil
