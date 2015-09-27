@@ -9,7 +9,7 @@ const _ActivityType_name = "NoneManufacturingResearchingTechnologyResearchingTER
 var _ActivityType_index = [...]uint8{0, 4, 17, 38, 51, 64, 71, 82, 100, 109}
 
 func (i ActivityType) String() string {
-	if i < 0 || i+1 >= ActivityType(len(_ActivityType_index)) {
+	if i < 0 || i >= ActivityType(len(_ActivityType_index)-1) {
 		return fmt.Sprintf("ActivityType(%d)", i)
 	}
 	return _ActivityType_name[_ActivityType_index[i]:_ActivityType_index[i+1]]

@@ -9,7 +9,7 @@ const _StandingType_name = "UnknownEntityNPCFactionNPCCorporationNPCAgentPlayerC
 var _StandingType_index = [...]uint8{0, 13, 23, 37, 45, 60, 77, 91}
 
 func (i StandingType) String() string {
-	if i < 0 || i+1 >= StandingType(len(_StandingType_index)) {
+	if i < 0 || i >= StandingType(len(_StandingType_index)-1) {
 		return fmt.Sprintf("StandingType(%d)", i)
 	}
 	return _StandingType_name[_StandingType_index[i]:_StandingType_index[i+1]]
