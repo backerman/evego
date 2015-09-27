@@ -234,9 +234,9 @@ func TestMarketOrders(t *testing.T) {
 				So(actual, shouldMatchOrders, expected)
 
 				// Verify caching.
-				fullURL := ts.URL + expectedURL
-				So(myCacheData.GetKey, ShouldEqual, fullURL)
-				So(myCacheData.PutKey, ShouldEqual, fullURL)
+				cacheKey := fmt.Sprintf("evecentral:orders:AllOrders:%v:%v", item.ID, regionName)
+				So(myCacheData.GetKey, ShouldEqual, cacheKey)
+				So(myCacheData.PutKey, ShouldEqual, cacheKey)
 				So(myCacheData.NumGets, ShouldEqual, 1)
 				So(myCacheData.NumPuts, ShouldEqual, 1)
 			})

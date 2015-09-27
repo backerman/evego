@@ -18,6 +18,8 @@ limitations under the License.
 package market
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -38,6 +40,37 @@ type eveCentral struct {
 	respCache evego.Cache
 }
 
+// getCachedOrders checks the cache for the results of this function call.
+// If found, the gob will be unmarshalled and returned.
+func (e *eveCentral) getCachedOrders(key string) ([]evego.Order, bool) {
+	gobbed, found := e.respCache.Get(key)
+	if found {
+		gobBuffer := bytes.NewBuffer(gobbed)
+		dec := gob.NewDecoder(gobBuffer)
+		ungobbed := make([]evego.Order, 0, 10)
+		err := dec.Decode(&ungobbed)
+		if err != nil {
+			log.Fatalf("Unable to unmarshal cached data: %v", err)
+		}
+		return ungobbed, true
+	}
+	return nil, false
+}
+
+// putCachedOrders puts the specified slice of orders into the cache.
+func (e *eveCentral) putCachedOrders(key string, orders []evego.Order) error {
+	var gobbed bytes.Buffer
+	enc := gob.NewEncoder(&gobbed)
+	err := enc.Encode(&orders)
+	if err != nil {
+		log.Fatalf("Unable to marshal cached data: %v", err)
+	}
+	// 10 minutes is arbitrary; EVE-Central doesn't request a specific caching
+	// duration.
+	e.respCache.Put(key, gobbed.Bytes(), time.Now().Add(10*time.Minute))
+	return nil
+}
+
 // EveCentral returns an interface to the EVE-Central API.
 // It takes as input an EveDatabase object and an HTTP endpoint;
 // the latter should be http://api.eve-central.com/api/quicklook
@@ -53,11 +86,6 @@ func EveCentral(db evego.Database, router evego.Router, xmlAPI evego.XMLAPI, end
 }
 
 func (e *eveCentral) getURL(u string) ([]byte, error) {
-	// Start by checking cache.
-	body, found := e.respCache.Get(u)
-	if found {
-		return body, nil
-	}
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, err
@@ -68,12 +96,7 @@ func (e *eveCentral) getURL(u string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
-	if err == nil {
-		// EVE-Central doesn't specify a caching time to use, so we're picking
-		// ten minutes at random.
-		e.respCache.Put(u, body, time.Now().Add(10*time.Minute))
-	}
+	body, err := ioutil.ReadAll(resp.Body)
 	return body, err
 }
 
@@ -152,6 +175,12 @@ func (e *eveCentral) processOrders(data *quicklook, item *evego.Item, t evego.Or
 }
 
 func (e *eveCentral) OrdersForItem(item *evego.Item, location string, orderType evego.OrderType) (*[]evego.Order, error) {
+	// Check cache.
+	cacheKey := fmt.Sprintf("evecentral:orders:%v:%v:%v", orderType.String(), item.ID, location)
+	cached, found := e.getCachedOrders(cacheKey)
+	if found {
+		return &cached, nil
+	}
 	var (
 		system *evego.SolarSystem
 		region *evego.Region
@@ -198,6 +227,9 @@ func (e *eveCentral) OrdersForItem(item *evego.Item, location string, orderType 
 	default:
 		results = e.processOrders(orders, item, orderType)
 	}
+
+	// Cache and return the results.
+	e.putCachedOrders(cacheKey, results)
 	return &results, nil
 }
 
@@ -238,6 +270,12 @@ func (e *eveCentral) BuyInStation(item *evego.Item, location *evego.Station) (*[
 }
 
 func (e *eveCentral) OrdersInStation(item *evego.Item, location *evego.Station) (*[]evego.Order, error) {
+	// Check cache.
+	cacheKey := fmt.Sprintf("evecentral:orders-station:%v:%v", item.ID, location.ID)
+	cached, found := e.getCachedOrders(cacheKey)
+	if found {
+		return &cached, nil
+	}
 	orders, err := e.BuyInStation(item, location)
 	if err != nil {
 		return nil, err
@@ -257,6 +295,9 @@ func (e *eveCentral) OrdersInStation(item *evego.Item, location *evego.Station) 
 			*orders = append(*orders, o)
 		}
 	}
+
+	// Cache and return the results.
+	e.putCachedOrders(cacheKey, *orders)
 	return orders, nil
 }
 
