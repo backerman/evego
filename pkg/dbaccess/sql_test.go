@@ -556,3 +556,63 @@ func TestBlueprints(t *testing.T) {
 
 	})
 }
+
+// shouldContainItem takes a slice of Items and a type ID, and passes if some
+// item in the slice has the input type ID.
+func shouldContainItem(actual interface{}, expected ...interface{}) string {
+	actualItems, ok := actual.([]evego.Item)
+	if !ok {
+		return "Failed to cast actual to []evego.Item"
+	}
+	expectedItem, ok := expected[0].(int)
+	if !ok {
+		return "Failed to cast expected to int"
+	}
+	for _, i := range actualItems {
+		if i.ID == expectedItem {
+			return ""
+		}
+	}
+	return fmt.Sprintf("The item with type ID %v was not found in the actual items.", expectedItem)
+}
+
+// shouldNotContainItem matches the inverse of shouldContainItem.
+func shouldNotContainItem(actual interface{}, expected ...interface{}) string {
+	_, ok := actual.([]evego.Item)
+	if !ok {
+		return "Failed to cast actual to []evego.Item"
+	}
+	expectedItem, ok := expected[0].(int)
+	if !ok {
+		return "Failed to cast expected to int"
+	}
+	result := shouldContainItem(actual, expected...)
+	if strings.Contains(result, "was not found") {
+		// We're good.
+		return ""
+	}
+	if result == "" {
+		// Found the item.
+		return fmt.Sprintf("The item with type ID %v was found in the actual items.", expectedItem)
+	}
+	// Not the blank string, but not the error we want to see.
+	return result
+}
+
+func TestReprocessOutputs(t *testing.T) {
+	Convey("Open a database connection.", t, func() {
+		db := dbaccess.SQLDatabase(testDbDriver, testDbPath)
+
+		Convey("Get the list of reprocessing outputs", func() {
+			outputs, err := db.ReprocessOutputMaterials()
+			So(err, ShouldBeNil)
+			So(outputs, ShouldNotBeEmpty)
+			Convey("Passes basic checks", func() {
+				So(outputs, shouldContainItem, 11399)  // Morphite
+				So(outputs, shouldContainItem, 11558)  // Sustained Shield Emitter
+				So(outputs, shouldNotContainItem, 626) // Vexor
+			})
+		})
+
+	})
+}

@@ -17,7 +17,9 @@ limitations under the License.
 
 package evego
 
-import "io"
+import (
+	"io"
+)
 
 // Database is an object that returns information about items in EVE.
 type Database interface {
@@ -60,4 +62,8 @@ type Database interface {
 	// parameters the blueprint to be used and the selected output product.
 	BlueprintProductionInputs(
 		typeName string, outputTypeName string) ([]InventoryLine, error)
+
+	// ReprocessOutputMaterials produces a list of all materials that are possible
+	// outputs from reprocessing.
+	ReprocessOutputMaterials() ([]Item, error)
 }

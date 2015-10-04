@@ -41,6 +41,7 @@ type sqlDb struct {
 	inputMaterialsToBlueprintStmt *sqlx.Stmt
 	blueprintProducedByStmt       *sqlx.Stmt
 	matsForBPProductionStmt       *sqlx.Stmt
+	reprocessOutputsStmt          *sqlx.Stmt
 }
 
 // SQLDatabase returns an EveDatabase object that can be used to access an SQL backend.
@@ -73,6 +74,7 @@ func SQLDatabase(driver, dataSource string) evego.Database {
 		{&evedb.inputMaterialsToBlueprintStmt, inputMaterialsToBlueprint},
 		{&evedb.blueprintProducedByStmt, blueprintProducedBy},
 		{&evedb.matsForBPProductionStmt, materialsForBlueprintProduction},
+		{&evedb.reprocessOutputsStmt, reprocessOutputsStmt},
 	}
 
 	for _, s := range stmts {
@@ -404,4 +406,25 @@ func (db *sqlDb) BlueprintProductionInputs(
 	}
 
 	return results, nil
+}
+
+func (db *sqlDb) ReprocessOutputMaterials() ([]evego.Item, error) {
+	rows, err := db.reprocessOutputsStmt.Query()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to execute query: %v", err)
+	}
+	items := make([]evego.Item, 0, 410)
+	for rows.Next() {
+		var typeID int
+		err = rows.Scan(&typeID)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to execute query: %v", err)
+		}
+		item, err := db.ItemForID(typeID)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, *item)
+	}
+	return items, nil
 }

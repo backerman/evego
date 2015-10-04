@@ -147,4 +147,15 @@ var (
 		WHERE  ti."typeName" = ? AND tyo."typeName" = ?
 		ORDER BY "inputItem", "outputProduct", "inputMaterial"
 		`
+
+	// What are the possible outputs from reprocessing an item?
+	reprocessOutputsStmt = `
+		SELECT t_mat."typeID"
+		FROM   "invTypes" t_mat
+		JOIN   "invTypeMaterials" tm ON tm."materialTypeID" = t_mat."typeID"
+		JOIN   "invTypes" t_prod ON tm."typeID" = t_prod."typeID"
+		WHERE  t_prod."marketGroupID" IS NOT NULL
+		GROUP BY t_mat."typeID"
+		ORDER BY t_mat."typeName"
+		`
 )
