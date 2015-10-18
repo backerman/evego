@@ -21,6 +21,7 @@ package evesso
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"golang.org/x/oauth2"
@@ -56,6 +57,9 @@ type Authenticator interface {
 	// CharacterInfo returns information on the authentication token's scopes
 	// and the character that was authenticated.
 	CharacterInfo(token *oauth2.Token) (*CharacterInfo, error)
+	// GetClient returns an http.Client that uses the provided token to authenticate
+	// and auto-refreshes as necessary.
+	GetClient(token *oauth2.Token) *http.Client
 }
 
 type ssoAuthenticator struct {
@@ -114,4 +118,9 @@ func (a *ssoAuthenticator) CharacterInfo(token *oauth2.Token) (*CharacterInfo, e
 		return nil, err
 	}
 	return charInfo, nil
+}
+
+func (a *ssoAuthenticator) GetClient(token *oauth2.Token) *http.Client {
+	client := a.config.Client(oauth2.NoContext, token)
+	return client
 }
