@@ -52,4 +52,7 @@ type XMLAPI interface {
 
 	// CharacterStandings returns a character's standings.
 	CharacterStandings(key *XMLKey, characterID int) ([]Standing, error)
+
+	// Assets gets a character's assets.
+	Assets(key *XMLKey, characterID int) ([]InventoryItem, error)
 }

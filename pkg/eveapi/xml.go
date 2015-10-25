@@ -38,6 +38,7 @@ var (
 const (
 	iso8601            = "2006-01-02 15:04:05"
 	accountCharacters  = "/account/Characters.xml.aspx"
+	characterAssets    = "/char/AssetList.xml.aspx"
 	characterSheet     = "/char/CharacterSheet.xml.aspx"
 	characterStandings = "/char/Standings.xml.aspx"
 	conqerableStations = "/eve/ConquerableStationList.xml.aspx"

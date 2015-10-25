@@ -65,6 +65,11 @@ var (
 		Short: "Get the character sheet",
 		Run:   characterInfo,
 	}
+	charAssetsCmd = &cobra.Command{
+		Use:   "assets",
+		Short: "Get the character's assets",
+		Run:   characterAssets,
+	}
 )
 
 var ts *httptest.Server
@@ -187,6 +192,47 @@ func characterInfo(cmd *cobra.Command, args []string) {
 	}
 }
 
+func printAssetsInt(sde evego.Database, assets []evego.InventoryItem, indentLevel int) {
+	for _, asset := range assets {
+		thisItem, err := sde.ItemForID(asset.TypeID)
+		if err != nil {
+			log.Fatalf("Bad item ID: %v", asset.TypeID)
+		}
+		for i := 0; i < indentLevel; i++ {
+			fmt.Print(" ")
+		}
+		var packaged string
+		if asset.Unpackaged {
+			packaged = "(unpackaged)"
+		} else {
+			packaged = ""
+		}
+		fmt.Printf("%v x %v in %v, %v %v (%v)\n", asset.Quantity, thisItem.Name,
+			asset.LocationID, packaged, asset.BlueprintType, asset.Flag)
+		if len(asset.Contents) > 0 {
+			printAssetsInt(sde, asset.Contents, indentLevel+2)
+		}
+
+	}
+}
+
+func printAssets(sde evego.Database, assets []evego.InventoryItem) {
+	fmt.Printf("Assets:\n")
+	printAssetsInt(sde, assets, 2)
+}
+
+func characterAssets(cmd *cobra.Command, args []string) {
+	xmlKey := getAPIKey()
+	sde := getSDE()
+	xmlapi := getXMLAPI(sde)
+	charID := viper.GetInt("charid")
+	assets, err := xmlapi.Assets(xmlKey, charID)
+	if err != nil {
+		log.Fatalf("Unable to call API: %v", err)
+	}
+	printAssets(sde, assets)
+}
+
 func main() {
 	rootCmd.PersistentFlags().Int("keyid", 0, "The key ID to use for accessing the account.")
 	rootCmd.PersistentFlags().String("vcode", "", "The API key's verification code.")
@@ -201,6 +247,7 @@ func main() {
 	accountCmd.AddCommand(accountListCharsCmd)
 	rootCmd.AddCommand(charCmd)
 	charCmd.AddCommand(charSheetCmd)
+	charCmd.AddCommand(charAssetsCmd)
 	charCmd.PersistentFlags().Int("charid", 0, "The character ID of the toon to get information on.")
 	flagNames = []string{"charid"}
 	for _, fname := range flagNames {

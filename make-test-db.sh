@@ -84,7 +84,13 @@ ITEMS=$(cat<<EOF
 "Science",
 "Astrometrics",
 "Power Grid Management",
-"Hacking"
+"Hacking",
+"Liquid Ozone",
+"Reaper",
+"Civilian Gatling Autocannon",
+"Civilian Miner",
+"Tritanium",
+"Medium Ancillary Armor Repairer Blueprint"
 )
 EOF
 )
