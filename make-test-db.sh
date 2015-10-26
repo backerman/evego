@@ -90,7 +90,9 @@ ITEMS=$(cat<<EOF
 "Civilian Gatling Autocannon",
 "Civilian Miner",
 "Tritanium",
-"Medium Ancillary Armor Repairer Blueprint"
+"Medium Ancillary Armor Repairer Blueprint",
+"Station Container",
+"Station Warehouse Container Blueprint"
 )
 EOF
 )

@@ -55,4 +55,7 @@ type XMLAPI interface {
 
 	// Assets gets a character's assets.
 	Assets(key *XMLKey, characterID int) ([]InventoryItem, error)
+
+	// Blueprints gets a character's blueprints.
+	Blueprints(key *XMLKey, characterID int) ([]BlueprintItem, error)
 }

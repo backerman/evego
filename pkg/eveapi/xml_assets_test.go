@@ -134,6 +134,26 @@ func TestAccountAssets(t *testing.T) {
 						BlueprintType: evego.BlueprintCopy,
 						Contents:      []evego.InventoryItem{},
 					},
+					{
+						ItemID:        1019265170333,
+						LocationID:    61000829,
+						TypeID:        17366,
+						Quantity:      1,
+						Flag:          evego.InventoryFlag(4),
+						Unpackaged:    true,
+						BlueprintType: evego.NotBlueprint,
+						Contents: []evego.InventoryItem{
+							{
+								ItemID:        1016396811813,
+								TypeID:        27309,
+								Quantity:      1,
+								Flag:          evego.InventoryFlag(64),
+								Unpackaged:    true,
+								BlueprintType: evego.BlueprintCopy,
+								Contents:      []evego.InventoryItem{},
+							},
+						},
+					},
 				}
 				actual, err := x.Assets(key, charID)
 				So(err, ShouldBeNil)

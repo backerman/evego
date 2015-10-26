@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2015-10-25 20:38:49</currentTime>
+  <result>
+    <rowset name="blueprints" key="itemID" columns="itemID,locationID,typeID,typeName,flagID,quantity,timeEfficiency,materialEfficiency,runs">
+      <row itemID="1008668596403" locationID="61000500" typeID="2509" typeName="Nova Torpedo Blueprint" flagID="4" quantity="-1" timeEfficiency="16" materialEfficiency="10" runs="-1" />
+      <row itemID="1014948732937" locationID="60009514" typeID="33102" typeName="Medium Ancillary Armor Repairer Blueprint" flagID="4" quantity="-2" timeEfficiency="0" materialEfficiency="0" runs="25" />
+      <row itemID="1014949259398" locationID="60009514" typeID="33077" typeName="Small Ancillary Armor Repairer Blueprint" flagID="4" quantity="-2" timeEfficiency="0" materialEfficiency="0" runs="3" />
+      <row itemID="1016396811813" locationID="1019265170333" typeID="27309" typeName="Station Warehouse Container Blueprint" flagID="64" quantity="-2" timeEfficiency="0" materialEfficiency="7" runs="35" />
+    </rowset>
+  </result>
+  <cachedUntil>2015-10-26 08:08:50</cachedUntil>
+</eveapi>

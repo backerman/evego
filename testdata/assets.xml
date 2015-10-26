@@ -13,6 +13,11 @@
         </rowset>
       </row>
       <row itemID="1014948732937" locationID="60009514" typeID="33102" quantity="1" flag="4" singleton="1" rawQuantity="-2" />
+      <row itemID="1019265170333" locationID="61000829" typeID="17366" quantity="1" flag="4" singleton="1" rawQuantity="-1">
+        <rowset name="contents" key="itemID" columns="itemID,typeID,quantity,flag,singleton">
+          <row itemID="1016396811813" typeID="27309" quantity="1" flag="64" singleton="1" rawQuantity="-2" />
+        </rowset>
+      </row>
     </rowset>
   </result>
   <cachedUntil>2015-10-25 08:24:54</cachedUntil>

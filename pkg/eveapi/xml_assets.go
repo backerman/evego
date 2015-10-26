@@ -31,11 +31,18 @@ const (
 )
 
 type assetsList []evego.InventoryItem
+type blueprintsList []evego.BlueprintItem
 
 type assetsResponse struct {
 	CurrentTime string     `xml:"currentTime"`
 	Assets      assetsList `xml:"result>rowset>row"`
 	CachedUntil string     `xml:"cachedUntil"`
+}
+
+type blueprintsResponse struct {
+	CurrentTime string         `xml:"currentTime"`
+	Blueprints  blueprintsList `xml:"result>rowset>row"`
+	CachedUntil string         `xml:"cachedUntil"`
 }
 
 func (x *xmlAPI) processAssets(assets []evego.InventoryItem) error {
@@ -90,4 +97,62 @@ func (x *xmlAPI) Assets(key *evego.XMLKey, characterID int) ([]evego.InventoryIt
 	assets := []evego.InventoryItem(response.Assets)
 	err = x.processAssets(assets)
 	return assets, err
+}
+
+func (x *xmlAPI) processBlueprints(blueprints []evego.BlueprintItem, assetsIn []evego.InventoryItem) error {
+	// Set up our hash for mapping itemID to item.
+	assets := make(map[int]*evego.InventoryItem)
+	for _, item := range assetsIn {
+		assets[item.ItemID] = &item
+	}
+	for i := range blueprints {
+		bp := &blueprints[i]
+		// Set flag for originalness
+		if bp.NumRuns == -1 {
+			bp.IsOriginal = true
+		}
+		// Demangle quantity
+		if bp.Quantity < 0 {
+			bp.Quantity = 1
+		}
+		// Identify location by walking the locationID attribute up to the point
+		// where we don't have an asset with that ID, meaning that the ID belongs
+		// to a station, outpost, or (?) solar system.
+		containerID := bp.LocationID
+		var foundTop bool
+		for !foundTop {
+			parent, found := assets[containerID]
+			if found {
+				// This item is inside a container.
+				containerID = parent.LocationID
+			} else {
+				// This item is not inside a container.
+				foundTop = true
+			}
+		}
+		bp.StationID = containerID
+	}
+	return nil
+}
+
+func (x *xmlAPI) Blueprints(key *evego.XMLKey, characterID int) ([]evego.BlueprintItem, error) {
+	params := url.Values{}
+	params.Set("keyID", strconv.Itoa(key.KeyID))
+	params.Set("characterID", strconv.Itoa(characterID))
+	params.Set("vcode", key.VerificationCode)
+	xmlBytes, err := x.get(characterBlueprints, params)
+	if err != nil {
+		return nil, err
+	}
+	var response blueprintsResponse
+	xml.Unmarshal(xmlBytes, &response)
+	blueprints := []evego.BlueprintItem(response.Blueprints)
+	// To process the blueprints, we also need the assets list so that we can
+	// identify containers' locations.
+	assets, err := x.Assets(key, characterID)
+	if err != nil {
+		return nil, err
+	}
+	err = x.processBlueprints(blueprints, assets)
+	return blueprints, err
 }
