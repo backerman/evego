@@ -93,8 +93,8 @@ func TestSQLRouting(t *testing.T) {
 				So(numJumps, ShouldEqual, 5)
 
 				Convey("The result is correctly stored in the cache.", func() {
-					So(cacheData.GetKey, ShouldEqual, "numjumps:30003830:30003333")
-					So(cacheData.PutKey, ShouldEqual, "numjumps:30003830:30003333")
+					So(cacheData.GetKeys, ShouldContainKey, "numjumps:30003830:30003333")
+					So(cacheData.PutKeys, ShouldContainKey, "numjumps:30003830:30003333")
 					So(cacheData.NumPuts, ShouldEqual, 1)
 					So(cacheData.NumGets, ShouldEqual, 1)
 				})
@@ -139,7 +139,7 @@ func TestSQLRouting(t *testing.T) {
 				So(numJumps, ShouldEqual, -1)
 
 				Convey("The result is cached.", func() {
-					So(cacheData.PutKey, ShouldEqual, "numjumps:30003830:30000380")
+					So(cacheData.PutKeys, ShouldContainKey, "numjumps:30003830:30000380")
 				})
 			})
 		})

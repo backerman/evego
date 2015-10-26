@@ -144,8 +144,8 @@ func TestAccountAssets(t *testing.T) {
 				So(actualURL, ShouldEqual, expectedURL)
 				// expiry time minus "current time" is 6h
 				expiration := cacheData.PutExpires
-				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
-				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.GetKeys, ShouldContainKey, ts.URL+expectedURL)
+				So(cacheData.PutKeys, ShouldContainKey, ts.URL+expectedURL)
 				now := time.Now()
 				So(expiration, ShouldHappenAfter, now)
 				So(expiration, ShouldHappenWithin, 361*time.Minute, now)

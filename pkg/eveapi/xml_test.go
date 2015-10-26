@@ -212,8 +212,8 @@ func TestCharacterSheet(t *testing.T) {
 					"/char/CharacterSheet.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
 					characterID, key.KeyID, key.VerificationCode)
 				So(actualURL, ShouldEqual, expectedURL)
-				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
-				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.GetKeys, ShouldContainKey, ts.URL+expectedURL)
+				So(cacheData.PutKeys, ShouldContainKey, ts.URL+expectedURL)
 				expiration := cacheData.PutExpires
 				// expiry time minus "current time" is 57 minutes
 				now := time.Now()
@@ -278,8 +278,8 @@ func TestAccountCharacters(t *testing.T) {
 				So(actualURL, ShouldEqual, expectedURL)
 				// expiry time minus "current time" is 38m16s
 				expiration := cacheData.PutExpires
-				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
-				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.GetKeys, ShouldContainKey, ts.URL+expectedURL)
+				So(cacheData.PutKeys, ShouldContainKey, ts.URL+expectedURL)
 				now := time.Now()
 				So(expiration, ShouldHappenAfter, now)
 				So(expiration, ShouldHappenWithin, 39*time.Minute, now)
@@ -347,8 +347,8 @@ func TestCharacterStandings(t *testing.T) {
 					characterID, key.KeyID, key.VerificationCode)
 				So(actualURL, ShouldEqual, expectedURL)
 				expiration := cacheData.PutExpires
-				So(cacheData.GetKey, ShouldEqual, ts.URL+expectedURL)
-				So(cacheData.PutKey, ShouldEqual, ts.URL+expectedURL)
+				So(cacheData.GetKeys, ShouldContainKey, ts.URL+expectedURL)
+				So(cacheData.PutKeys, ShouldContainKey, ts.URL+expectedURL)
 				// expiry time minus "current time" is 2h53m49s
 				now := time.Now()
 				So(expiration, ShouldHappenAfter, now)

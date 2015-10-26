@@ -26,7 +26,7 @@ import (
 
 // CacheData maintains information on calls by the test code to the cache.
 type CacheData struct {
-	GetKey, PutKey   string
+	GetKeys, PutKeys map[string]bool
 	NumGets, NumPuts int
 	PutExpires       time.Time
 	// When ShouldError is set to true, a call to Put will error out.
@@ -39,19 +39,21 @@ type testCache struct {
 
 // Cache returns a cache object used for testing.
 func Cache(data *CacheData) evego.Cache {
+	data.GetKeys = make(map[string]bool)
+	data.PutKeys = make(map[string]bool)
 	return &testCache{
 		data: data,
 	}
 }
 
 func (c *testCache) Get(key string) ([]byte, bool) {
-	c.data.GetKey = key
+	c.data.GetKeys[key] = true
 	c.data.NumGets++
 	return nil, false
 }
 
 func (c *testCache) Put(key string, val []byte, expires time.Time) error {
-	c.data.PutKey = key
+	c.data.PutKeys[key] = true
 	c.data.NumPuts++
 	c.data.PutExpires = expires
 	if c.data.ShouldError {

@@ -235,8 +235,8 @@ func TestMarketOrders(t *testing.T) {
 
 				// Verify caching.
 				cacheKey := fmt.Sprintf("evecentral:orders:AllOrders:%v:%v", item.ID, regionName)
-				So(myCacheData.GetKey, ShouldEqual, cacheKey)
-				So(myCacheData.PutKey, ShouldEqual, cacheKey)
+				So(myCacheData.GetKeys, ShouldContainKey, cacheKey)
+				So(myCacheData.PutKeys, ShouldContainKey, cacheKey)
 				So(myCacheData.NumGets, ShouldEqual, 1)
 				So(myCacheData.NumPuts, ShouldEqual, 1)
 			})
