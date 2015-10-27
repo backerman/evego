@@ -153,6 +153,11 @@ func TestOutpostName(t *testing.T) {
 				So(err, ShouldNotBeNil)
 			})
 		})
+
+		Convey("Outposts can be dumped.", func() {
+			outposts := x.DumpOutposts()
+			So(len(outposts), ShouldEqual, 4)
+		})
 	})
 }
 

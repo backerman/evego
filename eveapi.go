@@ -17,9 +17,7 @@ limitations under the License.
 
 package evego
 
-import (
-	"io"
-)
+import "io"
 
 // XMLKey is a key ID / verification code pair used to retrieve data from the
 // EVE XML API.
@@ -42,6 +40,9 @@ type XMLAPI interface {
 	// OutpostsForName returns the stations matching the provided name pattern.
 	// The percent character (%) may be used as a wildcard.
 	OutpostsForName(name string) ([]Station, error)
+
+	// DumpOutposts returns the current list of outposts.
+	DumpOutposts() []*Station
 
 	// AccountCharacters returns a list of characters that the provided key can
 	// access.

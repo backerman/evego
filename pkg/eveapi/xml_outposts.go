@@ -70,8 +70,13 @@ func (x *xmlAPI) checkOutpostCache() error {
 				SystemID:      o.SolarSystemID,
 				Corporation:   o.CorporationName,
 				CorporationID: o.CorporationID,
-				// Delay constellation/region lookup until queried.
 			}
+			system, err := x.db.SolarSystemForID(stn.SystemID)
+			if err != nil {
+				return err
+			}
+			stn.ConstellationID = system.ConstellationID
+			stn.RegionID = system.RegionID
 			newOutposts[o.ID] = &stn
 		}
 		outposts = newOutposts
@@ -88,14 +93,6 @@ func (x *xmlAPI) OutpostForID(id int) (*evego.Station, error) {
 	stn, exists := outposts[id]
 	if !exists {
 		return nil, fmt.Errorf("Station ID %d not found.", id)
-	}
-	if stn.ConstellationID == 0 {
-		system, err := x.db.SolarSystemForID(stn.SystemID)
-		if err != nil {
-			return nil, err
-		}
-		stn.ConstellationID = system.ConstellationID
-		stn.RegionID = system.RegionID
 	}
 	return stn, nil
 }
@@ -144,4 +141,15 @@ func (x *xmlAPI) OutpostsForName(name string) ([]evego.Station, error) {
 	}
 	sort.Sort(stationsList(stations))
 	return stations, nil
+}
+
+func (x *xmlAPI) DumpOutposts() []*evego.Station {
+	// Refresh if necessary.
+	x.checkOutpostCache()
+	// ... and dump 'em.
+	outpostsSlice := make([]*evego.Station, 0, len(outposts))
+	for _, outpost := range outposts {
+		outpostsSlice = append(outpostsSlice, outpost)
+	}
+	return outpostsSlice
 }

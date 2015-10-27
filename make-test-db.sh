@@ -127,7 +127,10 @@ SYSTEMS=$(cat<<EOF
 "X-M2LR",
 "FD-MLJ",
 "PF-346",
-"Orvolle"
+"Orvolle",
+-- Outposts
+"C-OK0R",
+"V-SEE6"
 )
 EOF
 )
