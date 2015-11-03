@@ -41,23 +41,23 @@ type InventoryItem struct {
 // BlueprintItem is a blueprint returned from a blueprint endpoint.
 type BlueprintItem struct {
 	// ItemID is a unique identifier for this object.
-	ItemID int `xml:"itemid,attr"`
+	ItemID int `xml:"itemID,attr"`
 	// LocationID is the solar system, station, or container ID where an object is located.
-	LocationID int `xml:"locationid,attr"`
+	LocationID int `xml:"locationID,attr"`
 	// StationID is the solar system, station, or outpost ID where an object is located.
 	StationID int `xml:"-"`
 	// TypeID is the item's type.
-	TypeID int `xml:"typeid,attr"`
+	TypeID int `xml:"typeID,attr"`
 	// TypeName is the item's type name.
-	TypeName string `xml:"typename,attr"`
+	TypeName string `xml:"typeName,attr"`
 	// Quantity is the number of items in this stack, or -1 if it's not stacked.
 	Quantity int `xml:"quantity,attr"`
 	// Flag indicates the item's position; see the InventoryFlag enum.
-	Flag InventoryFlag `xml:"flagid,attr"`
+	Flag InventoryFlag `xml:"flagID,attr"`
 	// TimeEfficiency is the blueprint's researched time efficiency level [0..20]
-	TimeEfficiency int `xml:"timeefficiency,attr"`
+	TimeEfficiency int `xml:"timeEfficiency,attr"`
 	// MaterialEfficiency is the blueprint's researched material efficiency level [0..10]
-	MaterialEfficiency int `xml:"materialefficiency,attr"`
+	MaterialEfficiency int `xml:"materialEfficiency,attr"`
 	// NumRuns is the number of runs remaining (-1 for original blueprints)
 	NumRuns int `xml:"runs,attr"`
 	// IsOriginal is true iff this blueprint is an original.
