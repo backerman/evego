@@ -385,7 +385,6 @@ func (db *sqlDb) BlueprintProductionInputs(
 			OutputProduct    string `db:"outputProduct"`
 			InputMaterialQty int    `db:"inputMaterialQty"`
 			OutputProductQty int    `db:"outputProductQty"`
-			Consume          bool   `db:"consume"`
 		}{}
 		err = rows.StructScan(&row)
 		if err != nil {

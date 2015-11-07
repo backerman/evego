@@ -134,7 +134,7 @@ var (
 	// Given a blueprint, what items do I need to manufacture/invent with it?
 	materialsForBlueprintProduction = `
 		SELECT ti."typeName" "inputItem", "activityName", tm."typeName" "inputMaterial",
-					 iam."quantity" "inputMaterialQty", "consume", tyo."typeName" "outputProduct",
+					 iam."quantity" "inputMaterialQty", tyo."typeName" "outputProduct",
 					 iap."quantity" "outputProductQty"
 		FROM   "industryActivityMaterials" iam
 		JOIN   "invTypes" ti USING("typeID")
