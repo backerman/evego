@@ -155,7 +155,7 @@ var (
 		JOIN   "invTypeMaterials" tm ON tm."materialTypeID" = t_mat."typeID"
 		JOIN   "invTypes" t_prod ON tm."typeID" = t_prod."typeID"
 		WHERE  t_prod."marketGroupID" IS NOT NULL
-		GROUP BY t_mat."typeID"
+		GROUP BY t_mat."typeID", t_mat."typeName"
 		ORDER BY t_mat."typeName"
 		`
 )
