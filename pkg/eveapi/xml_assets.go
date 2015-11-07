@@ -18,7 +18,9 @@ limitations under the License.
 package eveapi
 
 import (
+	"database/sql"
 	"encoding/xml"
+	"fmt"
 	"net/url"
 	"strconv"
 
@@ -50,6 +52,9 @@ func (x *xmlAPI) processAssets(assets []evego.InventoryItem) error {
 		asset := &assets[i]
 		thisAsset, err := x.db.ItemForID(asset.TypeID)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return fmt.Errorf("Unable to identify item with type ID %v: %+v", asset.TypeID, asset)
+			}
 			return err
 		}
 		startIndex := len(thisAsset.Name) - blueprintLen
