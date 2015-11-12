@@ -208,7 +208,7 @@ func printAssetsInt(sde evego.Database, assets []evego.InventoryItem, indentLeve
 			packaged = ""
 		}
 		fmt.Printf("%v x %v in %v, %v %v (%v)\n", asset.Quantity, thisItem.Name,
-			asset.LocationID, packaged, asset.BlueprintType, asset.Flag)
+			asset.StationID, packaged, asset.BlueprintType, asset.Flag)
 		if len(asset.Contents) > 0 {
 			printAssetsInt(sde, asset.Contents, indentLevel+2)
 		}

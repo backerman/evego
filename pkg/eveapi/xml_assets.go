@@ -47,7 +47,7 @@ type blueprintsResponse struct {
 	CachedUntil string         `xml:"cachedUntil"`
 }
 
-func (x *xmlAPI) processAssets(assets []evego.InventoryItem) error {
+func (x *xmlAPI) processAssets(assets []evego.InventoryItem, station int) error {
 	for i := range assets {
 		asset := &assets[i]
 		thisAsset, err := x.db.ItemForID(asset.TypeID)
@@ -73,12 +73,16 @@ func (x *xmlAPI) processAssets(assets []evego.InventoryItem) error {
 			// The default quantity is 1, and our default is 0, so fix.
 			asset.Quantity = 1
 		}
+		// Identify station where this is located.
+		if station != 0 {
+			asset.StationID = station
+		}
 		if asset.Contents == nil {
 			// No contents, but we want to make sure there's a slice here (rather than
 			// just a nil) for consistency.
 			asset.Contents = make([]evego.InventoryItem, 0, 0)
 		} else if len(asset.Contents) > 0 {
-			err = x.processAssets(asset.Contents)
+			err = x.processAssets(asset.Contents, asset.StationID)
 			if err != nil {
 				return err
 			}
@@ -100,7 +104,7 @@ func (x *xmlAPI) Assets(key *evego.XMLKey, characterID int) ([]evego.InventoryIt
 	var response assetsResponse
 	xml.Unmarshal(xmlBytes, &response)
 	assets := []evego.InventoryItem(response.Assets)
-	err = x.processAssets(assets)
+	err = x.processAssets(assets, 0)
 	return assets, err
 }
 
@@ -120,22 +124,14 @@ func (x *xmlAPI) processBlueprints(blueprints []evego.BlueprintItem, assetsIn []
 		if bp.Quantity < 0 {
 			bp.Quantity = 1
 		}
-		// Identify location by walking the locationID attribute up to the point
-		// where we don't have an asset with that ID, meaning that the ID belongs
-		// to a station, outpost, or (?) solar system.
-		containerID := bp.LocationID
-		var foundTop bool
-		for !foundTop {
-			parent, found := assets[containerID]
-			if found {
-				// This item is inside a container.
-				containerID = parent.LocationID
-			} else {
-				// This item is not inside a container.
-				foundTop = true
-			}
+		bpContainer, found := assets[bp.LocationID]
+		if found {
+			// The blueprint is in a container.
+			bp.StationID = bpContainer.StationID
+		} else {
+			// The blueprint is in a station hangar.
+			bp.StationID = bp.LocationID
 		}
-		bp.StationID = containerID
 	}
 	return nil
 }

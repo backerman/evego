@@ -22,8 +22,8 @@ package evego
 type InventoryItem struct {
 	// ItemID is a unique identifier for this object.
 	ItemID int `xml:"itemID,attr"`
-	// LocationID is the solar system or station where an object is located.
-	LocationID int `xml:"locationID,attr"`
+	// StationID is the solar system or station where an object is located.
+	StationID int `xml:"locationID,attr"`
 	// TypeID is the item's type.
 	TypeID int `xml:"typeID,attr"`
 	// Quantity is the number of items in this stack.

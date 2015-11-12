@@ -68,7 +68,7 @@ func TestAccountAssets(t *testing.T) {
 				expected := []evego.InventoryItem{
 					{
 						ItemID:        1016277603864,
-						LocationID:    60000175,
+						StationID:     60000175,
 						TypeID:        16273,
 						Quantity:      400,
 						Flag:          evego.InventoryFlag(4),
@@ -78,7 +78,7 @@ func TestAccountAssets(t *testing.T) {
 					},
 					{
 						ItemID:        1016278183813,
-						LocationID:    60000175,
+						StationID:     60000175,
 						TypeID:        16273,
 						Quantity:      400,
 						Flag:          evego.InventoryFlag(4),
@@ -88,7 +88,7 @@ func TestAccountAssets(t *testing.T) {
 					},
 					{
 						ItemID:        1018023320731,
-						LocationID:    60002650,
+						StationID:     60002650,
 						TypeID:        588,
 						Quantity:      1,
 						Flag:          evego.InventoryFlag(4),
@@ -97,6 +97,7 @@ func TestAccountAssets(t *testing.T) {
 						Contents: []evego.InventoryItem{
 							{
 								ItemID:        1018023320732,
+								StationID:     60002650,
 								TypeID:        3636,
 								Quantity:      1,
 								Flag:          evego.InventoryFlag(27),
@@ -106,6 +107,7 @@ func TestAccountAssets(t *testing.T) {
 							},
 							{
 								ItemID:        1018023320733,
+								StationID:     60002650,
 								TypeID:        3651,
 								Quantity:      1,
 								Flag:          evego.InventoryFlag(28),
@@ -115,6 +117,7 @@ func TestAccountAssets(t *testing.T) {
 							},
 							{
 								ItemID:        1018023320735,
+								StationID:     60002650,
 								TypeID:        34,
 								Quantity:      1,
 								Flag:          evego.InventoryFlag(5),
@@ -126,7 +129,7 @@ func TestAccountAssets(t *testing.T) {
 					},
 					{
 						ItemID:        1014948732937,
-						LocationID:    60009514,
+						StationID:     60009514,
 						TypeID:        33102,
 						Quantity:      1,
 						Flag:          evego.InventoryFlag(4),
@@ -136,7 +139,7 @@ func TestAccountAssets(t *testing.T) {
 					},
 					{
 						ItemID:        1019265170333,
-						LocationID:    61000829,
+						StationID:     61000829,
 						TypeID:        17366,
 						Quantity:      1,
 						Flag:          evego.InventoryFlag(4),
@@ -145,6 +148,7 @@ func TestAccountAssets(t *testing.T) {
 						Contents: []evego.InventoryItem{
 							{
 								ItemID:        1016396811813,
+								StationID:     61000829,
 								TypeID:        27309,
 								Quantity:      1,
 								Flag:          evego.InventoryFlag(64),
