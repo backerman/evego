@@ -65,7 +65,7 @@ ITEMS=$(cat<<EOF
 "Small Supplemental Barrier Emitter I",
 "Type-D Restrained Expanded Cargo",
 "Limited Kinetic Plating I",
-"Small I-ax Remote Armor Repairer",
+"Small I-ax Enduring Remote Armor Repairer",
 "Shielded Radar Backup Cluster I",
 "Medium Shield Extender II",
 "EMP M",
@@ -100,7 +100,7 @@ EOF
 # Items that we use as input to blueprints.
 ITEMS_BPINPUT=$(cat<<EOF
 (
-"Station Construction Parts"
+"Structure Laboratory"
 )
 EOF
 )

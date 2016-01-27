@@ -491,14 +491,23 @@ func TestBlueprints(t *testing.T) {
 		})
 
 		Convey("With a valid input material", func() {
-			typeName := "Station Construction Parts"
+			typeName := "Structure Laboratory"
 
 			Convey("We get correct blueprints.", func() {
 				expectedNames := []string{
+					// Old-skool outposts
 					"Amarr Factory Outpost Platform",
 					"Caldari Research Outpost Platform",
 					"Gallente Administrative Outpost Platform",
-					"Minmatar Service Outpost Platform",
+					// Citadels!
+					"Fortizar",
+					"Keepstar",
+					// Citadel components?
+					"Medium Laboratory",
+					"Large Administration Hub",
+					"Large Laboratory",
+					"X-Large Administration Hub",
+					"X-Large Laboratory",
 				}
 				var expected []evego.IndustryActivity
 				for _, platform := range expectedNames {

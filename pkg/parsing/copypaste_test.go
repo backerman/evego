@@ -64,7 +64,7 @@ func TestInventoryCopyPaste(t *testing.T) {
 				{"Small Supplemental Barrier Emitter I", 1},
 				{"Type-D Restrained Expanded Cargo", 1},
 				{"Limited Kinetic Plating I", 1},
-				{"Small I-ax Remote Armor Repairer", 1},
+				{"Small I-ax Enduring Remote Armor Repairer", 1},
 				{"Shielded Radar Backup Cluster I", 1},
 			})
 		})
