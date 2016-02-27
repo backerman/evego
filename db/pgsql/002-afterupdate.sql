@@ -43,4 +43,5 @@ CREATE INDEX ON solarsystem_route_map USING hash (pgrid);
 COMMIT;
 
 -- Vacuum now that we've indexed; can't run in a transaction block.
+VACUUM ANALYZE "mapSolarSystems";
 VACUUM ANALYZE solarsystem_route_map;
