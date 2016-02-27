@@ -1,4 +1,4 @@
--- Copyright © 2014–5 Brad Ackerman.
+-- Copyright © 2014–6 Brad Ackerman.
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -12,30 +12,13 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- Enable spatial functionality in database
-CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS pgrouting;
-
 BEGIN;
 
--- Create geometry column
--- No Z here because pgrouting doesn't support 3D yet.
-ALTER TABLE "mapSolarSystems" ADD COLUMN the_geom geometry;
+-- solarsystem_route_map interferes with redoing the topology, so we
+-- drop at the beginning and add back afterwards.
+DROP MATERIALIZED VIEW IF EXISTS solarsystem_route_map;
+
 UPDATE "mapSolarSystems" SET the_geom=ST_MakePoint(x,y);
-
--- Index the geometry column we just added.
-CREATE INDEX ON "mapSolarSystems" USING GIST (the_geom);
-
-ALTER TABLE "mapSolarSystemJumps"
-  ADD COLUMN id serial,
-  ADD COLUMN cost double precision default 1.0,
-  ADD COLUMN x1 double precision,
-  ADD COLUMN y1 double precision,
-  ADD COLUMN x2 double precision,
-  ADD COLUMN y2 double precision,
-  ADD COLUMN source int4,
-  ADD COLUMN target int4,
-  ADD COLUMN the_geom geometry;
 
 UPDATE ONLY "mapSolarSystemJumps" j
   SET x1 = fss.x, y1 = fss.y, x2 = tss.x, y2 = tss.y,
@@ -49,7 +32,15 @@ UPDATE ONLY "mapSolarSystemJumps" j
 -- units in meters and interstellar distances, so tolerance is a tad larger
 -- than pgrouting's usual applications.
 SELECT pgr_createTopology('mapSolarSystemJumps', 1e6);
+
+CREATE MATERIALIZED VIEW solarsystem_route_map AS
+  SELECT mss."solarSystemID" ccpid, v.id pgrid
+  FROM "mapSolarSystems" mss, "mapSolarSystemJumps_vertices_pgr" v
+  WHERE mss.the_geom && v.the_geom;
+CREATE INDEX ON solarsystem_route_map USING hash (ccpid);
+CREATE INDEX ON solarsystem_route_map USING hash (pgrid);
+
 COMMIT;
 
 -- Vacuum now that we've indexed; can't run in a transaction block.
-VACUUM ANALYZE "mapSolarSystems";
+VACUUM ANALYZE solarsystem_route_map;

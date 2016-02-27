@@ -1,4 +1,4 @@
--- Copyright © 2014–5 Brad Ackerman.
+-- Copyright © 2014–6 Brad Ackerman.
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -12,17 +12,26 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- Functions for wrapping pgRouting.
+-- Enable spatial functionality in database
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgrouting;
+
 BEGIN;
--- solarsystem_route_map converts solar system IDs from the CCP-assigned
--- values (globally-defined) to the PGRouting topology vertex IDs (random).
-DROP MATERIALIZED VIEW IF EXISTS solarsystem_route_map;
-CREATE MATERIALIZED VIEW solarsystem_route_map AS
-  SELECT mss."solarSystemID" ccpid, v.id pgrid
-  FROM "mapSolarSystems" mss, "mapSolarSystemJumps_vertices_pgr" v
-  WHERE mss.the_geom && v.the_geom;
-CREATE INDEX ON solarsystem_route_map USING hash (ccpid);
-CREATE INDEX ON solarsystem_route_map USING hash (pgrid);
+
+-- Create geometry column
+-- No Z here because pgrouting doesn't support 3D yet.
+ALTER TABLE "mapSolarSystems" ADD COLUMN the_geom geometry;
+
+ALTER TABLE "mapSolarSystemJumps"
+  ADD COLUMN id serial,
+  ADD COLUMN cost double precision default 1.0,
+  ADD COLUMN x1 double precision,
+  ADD COLUMN y1 double precision,
+  ADD COLUMN x2 double precision,
+  ADD COLUMN y2 double precision,
+  ADD COLUMN source int4,
+  ADD COLUMN target int4,
+  ADD COLUMN the_geom geometry;
 
 -- Find the route from two system IDs.
 CREATE OR REPLACE FUNCTION eve_findRoute(
@@ -73,6 +82,3 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
 COMMIT;
-
--- Vacuum now that we've indexed; can't run in a transaction block.
-VACUUM ANALYZE solarsystem_route_map;
