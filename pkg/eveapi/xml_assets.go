@@ -18,9 +18,7 @@ limitations under the License.
 package eveapi
 
 import (
-	"database/sql"
 	"encoding/xml"
-	"fmt"
 	"net/url"
 	"strconv"
 
@@ -48,21 +46,28 @@ type blueprintsResponse struct {
 }
 
 func (x *xmlAPI) processAssets(assets []evego.InventoryItem, station int) error {
-	cachedAssets := make(map[int]*evego.Item)
+	// Make list of our distinct item IDs.
+	itemIDMap := make(map[int]bool)
+	for _, asset := range assets {
+		itemIDMap[asset.TypeID] = true
+	}
+	itemIDs := make([]int, len(itemIDMap))
+	i := 0
+	for key := range itemIDMap {
+		itemIDs[i] = key
+		i++
+	}
+	items, err := x.db.ItemsForIDs(itemIDs)
+	if err != nil {
+		return err
+	}
+	itemMap := make(map[int]*evego.Item, len(items))
+	for _, item := range items {
+		itemMap[item.ID] = item
+	}
 	for i := range assets {
 		asset := &assets[i]
-		thisAsset, found := cachedAssets[asset.TypeID]
-		var err error
-		if !found {
-			thisAsset, err = x.db.ItemForID(asset.TypeID)
-			if err != nil {
-				if err == sql.ErrNoRows {
-					return fmt.Errorf("Unable to identify item with type ID %v: %+v", asset.TypeID, asset)
-				}
-				return err
-			}
-			cachedAssets[asset.TypeID] = thisAsset
-		}
+		thisAsset := itemMap[asset.TypeID]
 		startIndex := len(thisAsset.Name) - blueprintLen
 		var endOfName string
 		if startIndex > 0 {

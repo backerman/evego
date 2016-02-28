@@ -105,16 +105,39 @@ func (db *sqlDb) ItemForName(itemName string) (*evego.Item, error) {
 }
 
 func (db *sqlDb) ItemForID(itemID int) (*evego.Item, error) {
-	var err error
-	object := evego.Item{}
-	row := db.itemIDInfoStatement.QueryRowx(itemID)
-	err = row.StructScan(&object)
-	if err == sql.ErrNoRows {
+	// This is now a convenience function for ItemsForIDs.
+	itemArray, err := db.ItemsForIDs([]int{itemID})
+	if err != nil {
 		return nil, err
 	}
+	if len(itemArray) == 0 {
+		return nil, fmt.Errorf("Unable to get item for ID %v", itemID)
+	}
+	return itemArray[0], nil
+}
 
-	object.Type = db.itemType(&object)
-	return &object, err
+func (db *sqlDb) ItemsForIDs(itemIDs []int) ([]*evego.Item, error) {
+	query, args, err := sqlx.In(itemIDsInfo, itemIDs)
+	if err != nil {
+		return nil, err
+	}
+	query = db.db.Rebind(query)
+	rows, err := db.db.Queryx(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	// Put the items into an array and return.
+	items := make([]*evego.Item, 0, len(itemIDs))
+	for rows.Next() {
+		item := new(evego.Item)
+		err = rows.StructScan(item)
+		if err != nil {
+			return nil, err
+		}
+		item.Type = db.itemType(item)
+		items = append(items, item)
+	}
+	return items, nil
 }
 
 // itemComposition returns the composition of a named Eve item.

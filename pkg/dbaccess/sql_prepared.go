@@ -40,6 +40,14 @@ var (
   WHERE t."typeID" = ? AND t."groupID" = g."groupID"
   AND   g."categoryID" = c."categoryID"
   `
+
+	itemIDsInfo = `
+  SELECT t."typeID", t."typeName", t."portionSize", g."groupID", g."groupName", c."categoryName"
+  FROM "invTypes" t, "invCategories" c, "invGroups" g
+  WHERE t."typeID" IN (?) AND t."groupID" = g."groupID"
+  AND   g."categoryID" = c."categoryID"
+  `
+
 	catTree = `
   WITH RECURSIVE
   parents("marketGroupID", "parentGroupID") AS

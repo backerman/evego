@@ -29,6 +29,7 @@ type Database interface {
 
 	ItemForName(itemName string) (*Item, error)
 	ItemForID(itemID int) (*Item, error)
+	ItemsForIDs(itemIDs []int) ([]*Item, error)
 	ItemComposition(itemID int) ([]InventoryLine, error)
 	MarketGroupForItem(item *Item) (*MarketGroup, error)
 
