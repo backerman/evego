@@ -48,14 +48,20 @@ type blueprintsResponse struct {
 }
 
 func (x *xmlAPI) processAssets(assets []evego.InventoryItem, station int) error {
+	cachedAssets := make(map[int]*evego.Item)
 	for i := range assets {
 		asset := &assets[i]
-		thisAsset, err := x.db.ItemForID(asset.TypeID)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				return fmt.Errorf("Unable to identify item with type ID %v: %+v", asset.TypeID, asset)
+		thisAsset, found := cachedAssets[asset.TypeID]
+		var err error
+		if !found {
+			thisAsset, err = x.db.ItemForID(asset.TypeID)
+			if err != nil {
+				if err == sql.ErrNoRows {
+					return fmt.Errorf("Unable to identify item with type ID %v: %+v", asset.TypeID, asset)
+				}
+				return err
 			}
-			return err
+			cachedAssets[asset.TypeID] = thisAsset
 		}
 		startIndex := len(thisAsset.Name) - blueprintLen
 		var endOfName string
@@ -136,7 +142,7 @@ func (x *xmlAPI) processBlueprints(blueprints []evego.BlueprintItem, assetsIn []
 	return nil
 }
 
-func (x *xmlAPI) Blueprints(key *evego.XMLKey, characterID int) ([]evego.BlueprintItem, error) {
+func (x *xmlAPI) Blueprints(key *evego.XMLKey, characterID int, assets []evego.InventoryItem) ([]evego.BlueprintItem, error) {
 	params := url.Values{}
 	params.Set("keyID", strconv.Itoa(key.KeyID))
 	params.Set("characterID", strconv.Itoa(characterID))
@@ -150,10 +156,10 @@ func (x *xmlAPI) Blueprints(key *evego.XMLKey, characterID int) ([]evego.Bluepri
 	blueprints := []evego.BlueprintItem(response.Blueprints)
 	// To process the blueprints, we also need the assets list so that we can
 	// identify containers' locations.
-	assets, err := x.Assets(key, characterID)
-	if err != nil {
-		return nil, err
-	}
+	// assets, err := x.Assets(key, characterID)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	err = x.processBlueprints(blueprints, assets)
 	return blueprints, err
 }

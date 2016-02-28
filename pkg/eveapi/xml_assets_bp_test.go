@@ -131,21 +131,23 @@ func TestBlueprints(t *testing.T) {
 						IsOriginal:         false,
 					},
 				}
-				actual, err := x.Blueprints(key, charID)
+				assets, err := x.Assets(key, charID)
+				So(err, ShouldBeNil)
+				actual, err := x.Blueprints(key, charID, assets)
 				So(err, ShouldBeNil)
 
 				expectedURL := fmt.Sprintf(
 					"/char/Blueprints.xml.aspx?characterID=%d&keyID=%d&vcode=%s",
 					charID, key.KeyID, key.VerificationCode)
 				So(actualURL, ShouldEqual, expectedURL)
-				// expiry time minus "current time" is 6h
+				// expiry time minus "current time" is 11.5h
 				expiration := cacheData.PutExpires
 				So(cacheData.GetKeys, ShouldContainKey, ts.URL+expectedURL)
 				So(cacheData.PutKeys, ShouldContainKey, ts.URL+expectedURL)
 				now := time.Now()
 				So(expiration, ShouldHappenAfter, now)
-				So(expiration, ShouldHappenWithin, 361*time.Minute, now)
-				So(expiration, ShouldNotHappenWithin, 359*time.Minute, now)
+				So(expiration, ShouldHappenWithin, 691*time.Minute, now)
+				So(expiration, ShouldNotHappenWithin, 689*time.Minute, now)
 				So(actual, ShouldResemble, expected)
 			})
 		})
