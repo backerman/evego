@@ -39,7 +39,7 @@ use an earlier version, you will need to replace the materialized view in
 
 ## Upgrading the SDE version
 
-To update the local SDE copy, use the `sql/update_sde.py` script, e.g.:
+To update the local SDE copy, use the `update_sde.py` script, e.g.:
 
 ```
 update_sde.py /tmp/latest.dmp.bz2 myschema | psql -h somewhere mydatabase
