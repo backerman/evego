@@ -1,3 +1,5 @@
+## Loading the SDE
+
 The migrations in this directory assume that the database starts with a restore
 of the [Fuzzwork SDE dump][1]. If you don't have such a database already,
 download the `postgres-latest.dmp.bz2` file and run:
@@ -34,5 +36,13 @@ EOF
 This program requires PostgreSQL 9.3 or later; if for some reason you need to
 use an earlier version, you will need to replace the materialized view in
 `pkg/routing/pgsql_routing.sql` with a regular table.
+
+## Upgrading the SDE version
+
+To update the local SDE copy, use the `sql/update_sde.py` script, e.g.:
+
+```
+update_sde.py /tmp/latest.dmp.bz2 myschema | psql -h somewhere mydatabase
+```
 
 [1]: https://www.fuzzwork.co.uk/dump/
