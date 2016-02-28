@@ -51,16 +51,17 @@ var (
       JOIN "invMarketGroups" m USING("marketGroupID")
       WHERE i."typeID" = ?
       )
-      UNION ALL
-      SELECT mg."marketGroupID", mg."parentGroupID"
-      FROM "invMarketGroups" mg
-      INNER JOIN parents p ON mg."marketGroupID"=p."parentGroupID"
-      )
-      SELECT p."marketGroupID", m1."marketGroupName", m1."description", p."parentGroupID", m2."marketGroupName", m2."description"
-      FROM parents p
-      JOIN "invMarketGroups" m1 ON p."marketGroupID" = m1."marketGroupID"
-      JOIN "invMarketGroups" m2 ON p."parentGroupID" = m2."marketGroupID"
-      `
+    UNION ALL
+    SELECT mg."marketGroupID", mg."parentGroupID"
+    FROM "invMarketGroups" mg
+    INNER JOIN parents p ON mg."marketGroupID"=p."parentGroupID"
+  )
+  SELECT p."marketGroupID", m1."marketGroupName", m1."description",
+				 p."parentGroupID", m2."marketGroupName", m2."description"
+  FROM parents p
+  JOIN "invMarketGroups" m1 ON p."marketGroupID" = m1."marketGroupID"
+  JOIN "invMarketGroups" m2 ON p."parentGroupID" = m2."marketGroupID"
+  `
 
 	systemInfo = `
       SELECT   s."solarSystemName", s."solarSystemID", s."security",
