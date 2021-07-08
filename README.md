@@ -12,12 +12,14 @@ the user; it's just a back-end library.
 
 ## Current status
 
-[![forthebadge](http://forthebadge.com/badges/contains-cat-gifs.svg)](http://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/contains-cat-gifs.svg)](https://forthebadge.com)
 
-This library should be considered a prototype. The exported API is absolutely
+~~This library should be considered a prototype. The exported API is absolutely
 subject to change for the near future, and suggestions for changes are
 encouraged if something could be implemented better. (On a related note, if you
-use evego in your own code, please let me know.)
+use evego in your own code, please let me know.)~~
+
+This library is archived as I haven't touched it in years.
 
 ## Dependencies
 
